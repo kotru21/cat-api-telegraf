@@ -32,7 +32,7 @@ process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
 
 async function GetFact() {
-  const response = await fetch("PLACE-YOUR-API-KEY-HERE");
+  const response = await fetch("https://api.thecatapi.com/v1/images/search?has_breeds=1?api_key=PLACE-YOUR-API-KEY-HERE");
 
   const obj = await response.json();
   JSON.parse(JSON.stringify(obj));

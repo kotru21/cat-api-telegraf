@@ -17,7 +17,7 @@ bot.command("/menu", async (ctx) => {
 });
 bot.command("fact", async (ctx) => {
   GetFact().then((result) =>
-    GetLikes(result.id).then(
+    GetLikes(result.breeds[0].name).then(
       (
         LikesCount //console.log(LikesCount[0].count)
       ) =>
@@ -33,7 +33,7 @@ bot.command("fact", async (ctx) => {
                 [
                   { text: "Википедиya", url: `${result.breeds[0].wikipedia_url}` },
 
-                  Markup.button.callback(`👍 ${LikesCount[0].count}`, `data-${result.id}`),
+                  Markup.button.callback(`👍 ${LikesCount[0].count}`, `data-${result.breeds[0].name}`),
                 ],
               ],
             },

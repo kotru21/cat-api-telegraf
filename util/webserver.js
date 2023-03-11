@@ -1,11 +1,11 @@
-// import express from "express";
+import express from "express";
 
-// const app = express();
-// app.get("/", function(request, response) {
+const app = express();
+app.get("/", function(request, response) {
 
-// 	response.send("System is online.");
-// });
+	response.send("System is online.");
+});
 
-// app.listen(3000);
+app.listen(3000);
 
-// export default app;
+export default app;

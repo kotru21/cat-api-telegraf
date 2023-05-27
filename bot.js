@@ -1,11 +1,16 @@
 import { Telegraf } from "telegraf";
 import dotenv from "dotenv";
+import sqlite3 from "sqlite3";
 dotenv.config();
 //command imports
 import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";
 import MessageLike from "./util/MessageLike.js";
 import rateLimit from "telegraf-ratelimit";
+
+//setup database
+var db = new sqlite3.Database("./main.db");
+db.run("CREATE TABLE IF NOT EXISTS msg (id TEXT PRIMARY KEY , count INTEGER)");
 
 // Set limit to 1 message per 2 seconds
 const limitConfig = {

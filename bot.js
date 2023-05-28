@@ -10,7 +10,9 @@ import rateLimit from "telegraf-ratelimit";
 
 //setup database
 var db = new sqlite3.Database("./main.db");
-db.run("CREATE TABLE IF NOT EXISTS msg (id TEXT PRIMARY KEY , count INTEGER)");
+db.serialize(function () {
+  db.run("CREATE TABLE IF NOT EXISTS msg (id TEXT PRIMARY KEY , count INTEGER)");
+});
 
 // Set limit to 1 message per 2 seconds
 const limitConfig = {

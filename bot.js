@@ -6,7 +6,7 @@ dotenv.config();
 //command imports
 import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";
-import MessageLike from "./util/MessageLike.js";
+import messageLike from "./util/messageLike.js";
 import rateLimit from "telegraf-ratelimit";
 
 //setup database
@@ -25,7 +25,7 @@ const limitConfig = {
 const apiKey = process.env.API_KEY;
 const bot = new Telegraf(apiKey);
 bot.use(rateLimit(limitConfig));
-bot.use(Fact, Menu, MessageLike);
+bot.use(Fact, Menu, messageLike);
 bot.start((ctx) => ctx.reply("Крч, я написал это на Node за 1 ночь, да. Чекк /menu"));
 
 // bot.action("btn-2", (ctx) => {

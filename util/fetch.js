@@ -1,13 +1,13 @@
-async function GetFact() {
-  const response = await fetch(
+async function getFact() {
+  const randomCatRes = await fetch(
     "https://api.thecatapi.com/v1/images/search?has_breeds=1?api_key=PLACE_YOUR_API_KEY_HERE"
   );
 
-  const obj = await response.json();
-  JSON.parse(JSON.stringify(obj));
-  const response2 = await fetch("https://api.thecatapi.com/v1/images/" + obj[0].id);
-  const obj2 = await response2.json();
-  return obj2;
+  const randomCat = await randomCatRes.json();
+  JSON.parse(JSON.stringify(randomCat));
+  const randomCatDescriptionRes = await fetch("https://api.thecatapi.com/v1/images/" + randomCat[0].id);
+  const randomCatDescription = await randomCatDescriptionRes.json();
+  return randomCatDescription;
 }
 
-export default GetFact;
+export default getFact;

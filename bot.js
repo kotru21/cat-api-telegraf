@@ -2,6 +2,7 @@ import { Telegraf } from "telegraf";
 import dotenv from "dotenv";
 import sqlite3 from "sqlite3";
 dotenv.config();
+
 //command imports
 import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";

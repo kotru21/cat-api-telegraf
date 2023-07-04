@@ -1,25 +1,24 @@
 import { Telegraf } from "telegraf";
 import { WebSocketServer } from "ws";
-import dotenv from "dotenv";
 import sqlite3 from "sqlite3";
 import rateLimit from "telegraf-ratelimit";
+import dotenv from "dotenv";
+dotenv.config(); // Setup .env
 import web from "./util/webserver.js";
+web(); // Enable webserver (index.html)
 
-// bot command imports
+// Bot command imports
 import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";
 import messageLike from "./util/messageLike.js";
 
-web(); // Enable webserver (index.html)
-dotenv.config(); // Setup .env
-
-const websocketPort = 5000;
+const websocketPort = 5000; // Change the websocket server port in index.html if changing this.
 let messageCount = 0;
 
 let uptimeDateObject = new Date();
 const wss = new WebSocketServer({
   port: websocketPort,
-  path: "/websocket", // Specify the path for WebSocket requests
+  path: "/websocket", // Specify the path for WebSocket requests. Change the websocket server adress in index.html if changing this.
 });
 
 wss.on("connection", (ws) => {

@@ -23,7 +23,6 @@ const wss = new WebSocketServer({
 
 wss.on("connection", (ws) => {
   // Send startup date and amount of messages to client every second
-  setInterval(sendDataToClientEverySecond, 1000);
   const sendDataToClientEverySecond = () => {
     let data = {
       messageCount: messageCount,
@@ -32,6 +31,7 @@ wss.on("connection", (ws) => {
     let dataJson = JSON.stringify(data);
     ws.send(dataJson);
   };
+  setInterval(sendDataToClientEverySecond, 1000);
 });
 
 console.log(`Websocket server listening on port ${websocketPort}`);

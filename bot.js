@@ -34,7 +34,7 @@ wss.on("connection", (ws) => {
   };
 });
 
-console.log(`websocket server started on port ${websocketPort}`);
+console.log(`Websocket server listening on port ${websocketPort}`);
 
 // Setup database
 var db = new sqlite3.Database("./main.db");

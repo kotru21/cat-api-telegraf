@@ -55,7 +55,6 @@ const bot = new Telegraf(apiKey);
 bot.use(rateLimit(limitConfig));
 bot.use((ctx, next) => {
   messageCount++; // Update amount of bot sent messages after every bot's action
-  console.log(messageCount);
   next(); // Count the message and leave
 });
 

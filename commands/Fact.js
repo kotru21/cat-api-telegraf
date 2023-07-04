@@ -1,6 +1,6 @@
 import { Composer, Markup } from "telegraf";
 import getFact from "../util/Fetch.js";
-import GetLikes from "../util/GetLikes.js";
+import GetLikes from "../util/getLikes.js";
 
 export default Composer.command("fact", async (ctx) => {
   getFact().then((catObject) =>

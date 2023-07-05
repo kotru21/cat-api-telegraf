@@ -1,10 +1,10 @@
 import { Composer, Markup } from "telegraf";
 import getFact from "../util/Fetch.js";
-import GetLikes from "../util/getLikes.js";
+import getLikes from "../util/getLikes.js";
 
 export default Composer.command("fact", async (ctx) => {
   getFact().then((catObject) =>
-    GetLikes(catObject.id).then((likesCount) =>
+    getLikes(catObject.id).then((likesCount) =>
       ctx.replyWithPhoto(
         {
           url: catObject.url,

@@ -24,10 +24,9 @@ import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";
 import messageLike from "./util/messageLike.js";
 
-let messageCount = 0;
-
 // Setup database
 var db = new sqlite3.Database("./main.db");
+const bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
 db.serialize(function () {
   db.run("CREATE TABLE IF NOT EXISTS msg (id TEXT PRIMARY KEY , count INTEGER)");
 });
@@ -38,9 +37,10 @@ const limitConfig = {
   limit: 1,
   onLimitExceeded: (ctx, next) => ctx.reply("Не спамь"),
 };
-
-const bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
 bot.use(rateLimit(limitConfig));
+
+let messageCount = 0;
+
 bot.use((ctx, next) => {
   messageCount++; // Update amount of bot sent messages after every bot's action
   next(); // Count the message and leave

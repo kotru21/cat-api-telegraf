@@ -6,5 +6,5 @@ export default {
   CAT_API_TOKEN: process.env.CATAPI_KEY,
   expressServer: true, // Run web server and websocket server
   expressServerPort: 5200, // Port on what web server will work (f.e. localhost:port)
-  websocketServerPort: 1000, // Port on what websocket server will work (f.e. localhost:port/websocket)
+  websocketServerPort: 200, // Port on what websocket server will work (f.e. localhost:port/websocket)
 };

@@ -49,9 +49,7 @@ const limitConfig = {
   onLimitExceeded: (ctx, next) => ctx.reply("Не спамь"),
 };
 
-const apiKey = process.env.API_KEY;
-const bot = new Telegraf(apiKey);
-
+const bot = new Telegraf(process.env.API_KEY);
 bot.use(rateLimit(limitConfig));
 bot.use((ctx, next) => {
   messageCount++; // Update amount of bot sent messages after every bot's action

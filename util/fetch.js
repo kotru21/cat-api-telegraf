@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+dotenv.config(); // Setup .env
+
 async function getFact() {
   const randomCatRes = await fetch(
-    "https://api.thecatapi.com/v1/images/search?has_breeds=1?api_key=PLACE_YOUR_API_KEY_HERE"
+    `https://api.thecatapi.com/v1/images/search?has_breeds=1?api_key=${process.env.CATAPI_KEY}`
   );
 
   const randomCat = await randomCatRes.json();

@@ -1,40 +1,30 @@
 import { Telegraf } from "telegraf";
-import { WebSocketServer } from "ws";
 import sqlite3 from "sqlite3";
 import rateLimit from "telegraf-ratelimit";
-import dotenv from "dotenv";
-dotenv.config(); // Setup .env
-import web from "./util/webserver.js";
-web(); // Enable webserver (index.html)
+import config from "./config.js";
+
+if (config.expressServer) {
+  import("./util/webServer.js").then((module) => {
+    const webServer = module.default;
+    console.log(`Web Server is listening on ${config.expressServerPort}`);
+    webServer(config.expressServerPort);
+  });
+}
+
+if (config.expressServer) {
+  import("./util/websocket.js").then((module) => {
+    const websocket = module.default;
+    console.log(`Websocket Server is listening on ${config.websocketServerPort}`);
+    websocket(config.websocketServerPort);
+  });
+}
 
 // Bot command imports
 import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";
 import messageLike from "./util/messageLike.js";
 
-const websocketPort = 5000; // Change the websocket server port in index.html if changing this.
 let messageCount = 0;
-
-let uptimeDateObject = new Date();
-const wss = new WebSocketServer({
-  port: websocketPort,
-  path: "/websocket", // Specify the path for WebSocket requests. Change the websocket server adress in index.html if changing this.
-});
-
-wss.on("connection", (ws) => {
-  // Send startup date and amount of messages to client every second
-  const sendDataToClientEverySecond = () => {
-    let data = {
-      messageCount: messageCount,
-      uptimeDateObject: uptimeDateObject,
-    };
-    let dataJson = JSON.stringify(data);
-    ws.send(dataJson);
-  };
-  setInterval(sendDataToClientEverySecond, 1000);
-});
-
-console.log(`Websocket server listening on port ${websocketPort}`);
 
 // Setup database
 var db = new sqlite3.Database("./main.db");
@@ -49,7 +39,7 @@ const limitConfig = {
   onLimitExceeded: (ctx, next) => ctx.reply("Не спамь"),
 };
 
-const bot = new Telegraf(process.env.API_KEY);
+const bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
 bot.use(rateLimit(limitConfig));
 bot.use((ctx, next) => {
   messageCount++; // Update amount of bot sent messages after every bot's action
@@ -64,3 +54,7 @@ bot.launch();
 // Enable graceful stop
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
+
+export function getMessageCount() {
+  return messageCount;
+}

@@ -20,8 +20,11 @@ export default function webServer(port) {
       }
 
       // Replace the placeholder with the desired value
-      const modifiedContent = htmlContent.replace("{{websocketPort}}", config.websocketServerPort);
-
+      let modifiedContent = htmlContent.replace(
+        "{{websocketPort}}",
+        config.websocketServerPort
+      );
+      modifiedContent = modifiedContent.replace("{{apiPort}}", config.apiPort);
       // Send the modified HTML file
       res.send(modifiedContent);
     });

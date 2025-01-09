@@ -1,3 +1,4 @@
+// websocket.js
 import { getMessageCount } from "../bot.js";
 import { WebSocketServer } from "ws";
 
@@ -5,7 +6,7 @@ export default function websocket(websocketPort) {
   let uptimeDateObject = new Date();
   const wss = new WebSocketServer({
     port: websocketPort,
-    path: "/websocket", // Specify the path for WebSocket requests. Change the websocket server address in index.html if changing this.
+    path: "/websocket",
   });
 
   // Broadcast function to send data to all connected clients
@@ -48,5 +49,5 @@ export default function websocket(websocketPort) {
   // Simulate real-time updates (replace this with actual event listeners)
   setInterval(() => {
     broadcastData(); // Call whenever message count changes
-  }, 1000); // Adjust interval if needed
+  }, 1000);
 }

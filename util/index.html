@@ -121,6 +121,23 @@
           </div>
         </div>
       </div>
+      <div class="container mt-5">
+        <h2>Таблица лидеров</h2>
+        <table class="table table-dark table-striped" id="leaderboard">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="3">Загрузка данных...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <footer class="text-center text-lg-start" style="color: white">
         <!-- Copyright -->
         <div class="text-center p-3">
@@ -130,7 +147,38 @@
         <!-- Copyright -->
       </footer>
     </div>
+    <script type="module">
+      const tableBody = document.querySelector("#leaderboard tbody");
 
+      const fetchLeaderboard = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:{{apiPort}}/api/leaderboard"
+          );
+          if (!response.ok) throw new Error("Failed to fetch leaderboard");
+          const leaderboard = await response.json();
+
+          tableBody.innerHTML = "";
+          leaderboard.forEach((row, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${index + 1}</td>
+              <td>${row.id}</td>
+              <td>${row.count}</td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        } catch (err) {
+          console.error(err);
+          tableBody.innerHTML =
+            '<tr><td colspan="3">Ошибка загрузки...</td></tr>';
+        }
+      };
+
+      // Periodically update leaderboard
+      setInterval(fetchLeaderboard, 5000);
+      fetchLeaderboard();
+    </script>
     <script type="module">
       const messageOutputDiv = document.getElementById("messageOutput"); // Element, to display amount of messages in it
       const timeOutputDiv = document.getElementById("timeOutput"); // Element, to display amount of time from startup in it

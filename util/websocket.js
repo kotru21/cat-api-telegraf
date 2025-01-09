@@ -2,24 +2,51 @@ import { getMessageCount } from "../bot.js";
 import { WebSocketServer } from "ws";
 
 export default function websocket(websocketPort) {
-  let messageCount = getMessageCount();
-
   let uptimeDateObject = new Date();
   const wss = new WebSocketServer({
     port: websocketPort,
-    path: "/websocket", // Specify the path for WebSocket requests. Change the websocket server adress in index.html if changing this.
+    path: "/websocket", // Specify the path for WebSocket requests. Change the websocket server address in index.html if changing this.
   });
 
-  wss.on("connection", (ws) => {
-    // Send startup date and amount of messages to client every second
-    const sendDataToClientEverySecond = () => {
-      let data = {
-        messageCount: messageCount,
-        uptimeDateObject: uptimeDateObject,
-      };
-      let dataJson = JSON.stringify(data);
-      ws.send(dataJson);
+  // Broadcast function to send data to all connected clients
+  const broadcastData = () => {
+    let messageCount = getMessageCount(); // Get the latest message count
+    let data = {
+      messageCount: messageCount,
+      uptimeDateObject: uptimeDateObject,
     };
-    setInterval(sendDataToClientEverySecond, 1000);
+    let dataJson = JSON.stringify(data);
+
+    // Send data to all connected clients
+    wss.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(dataJson);
+      }
+    });
+  };
+
+  wss.on("connection", (ws) => {
+    console.log("Client connected");
+
+    // Send initial data to the client
+    let initialData = {
+      messageCount: getMessageCount(),
+      uptimeDateObject: uptimeDateObject,
+    };
+    ws.send(JSON.stringify(initialData));
+
+    // Broadcast updated data whenever necessary
+    const interval = setInterval(broadcastData, 1000);
+
+    // Cleanup on client disconnect
+    ws.on("close", () => {
+      console.log("Client disconnected");
+      clearInterval(interval);
+    });
   });
+
+  // Simulate real-time updates (replace this with actual event listeners)
+  setInterval(() => {
+    broadcastData(); // Call whenever message count changes
+  }, 1000); // Adjust interval if needed
 }

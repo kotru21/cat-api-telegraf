@@ -33,7 +33,7 @@ var db = new sqlite3.Database("./main.db");
 const bot = new Telegraf(config.TELEGRAM_BOT_TOKEN);
 db.serialize(function () {
   db.run(
-    "CREATE TABLE IF NOT EXISTS msg (id TEXT PRIMARY KEY , count INTEGER)"
+    "CREATE TABLE IF NOT EXISTS msg (id TEXT PRIMARY KEY , name TEXT,  count INTEGER)"
   );
 });
 

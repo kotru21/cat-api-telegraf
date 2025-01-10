@@ -90,6 +90,23 @@ class Database {
       );
     });
   }
+  async getCatById(catId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        `SELECT id, breed_name, image_url, description, wikipedia_url, count
+         FROM msg 
+         WHERE id = ?`,
+        [catId],
+        (err, row) => {
+          if (err) {
+            console.error("Ошибка при получении данных кота:", err);
+            reject(err);
+          }
+          resolve(row);
+        }
+      );
+    });
+  }
 }
 
 export default new Database();

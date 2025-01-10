@@ -6,7 +6,7 @@ import messageLike from "./util/messageLike.js";
 import config from "./config.js";
 import webServer from "./util/webServer.js";
 import websocket from "./util/webSocket.js";
-import API from "./util/server.js";
+import API from "./util/API.js";
 
 const initServers = () => {
   if (config.WebServer) {

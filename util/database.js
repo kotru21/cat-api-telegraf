@@ -15,51 +15,35 @@ class Database {
   init() {
     this.db.serialize(() => {
       this.db.run(`
-          CREATE TABLE IF NOT EXISTS msg (
-            id TEXT PRIMARY KEY,
-            count INTEGER DEFAULT 0,
-            breed_name TEXT,
-            image_url TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          )`);
+        CREATE TABLE IF NOT EXISTS msg (
+          id TEXT PRIMARY KEY,
+          count INTEGER DEFAULT 0,
+          breed_name TEXT,
+          image_url TEXT,
+          description TEXT,
+          wikipedia_url TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
       console.log("База данных инициализирована");
     });
   }
 
-  async addLikes(catId) {
-    try {
-      await this.ensureCatExists(catId);
-      return new Promise((resolve, reject) => {
-        this.db.run(
-          `UPDATE msg 
-           SET count = count + 1
-           WHERE id = ?`,
-          [catId],
-          (err) => {
-            if (err) {
-              console.error("Ошибка при добавлении лайка:", err);
-              reject(err);
-            } else {
-              resolve();
-            }
-          }
-        );
-      });
-    } catch (error) {
-      console.error("Ошибка при добавлении лайка:", error);
-      throw error;
-    }
-  }
-
-  async ensureCatExists(catId) {
+  async saveCatDetails(catData) {
     return new Promise((resolve, reject) => {
       this.db.run(
-        `INSERT OR IGNORE INTO msg (id, count) 
-         VALUES (?, 1)`,
-        [catId],
+        `INSERT OR REPLACE INTO msg (
+          id, breed_name, image_url, description, wikipedia_url, count
+        ) VALUES (?, ?, ?, ?, ?, COALESCE((SELECT count FROM msg WHERE id = ?), 0))`,
+        [
+          catData.id,
+          catData.breed_name,
+          catData.image_url,
+          catData.description,
+          catData.wikipedia_url,
+          catData.id,
+        ],
         (err) => {
           if (err) {
-            console.error("Ошибка при создании записи:", err);
             reject(err);
           } else {
             resolve();
@@ -69,87 +53,22 @@ class Database {
     });
   }
 
-  async getLikes(catId) {
-    try {
-      await this.ensureCatExists(catId);
-      return new Promise((resolve, reject) => {
-        this.db.all(
-          `SELECT count FROM msg WHERE id = ?`,
-          [catId],
-          (err, rows) => {
-            if (err) {
-              console.error("Ошибка при получении лайков:", err);
-              reject(err);
-            } else {
-              resolve(rows);
-            }
-          }
-        );
-      });
-    } catch (error) {
-      console.error("Ошибка при получении лайков:", error);
-      throw error;
-    }
-  }
-
-  async getLeaderboard(limit = 10) {
+  // Упрощенные методы без проверок
+  async addLikes(catId) {
     return new Promise((resolve, reject) => {
-      this.db.all(
-        `SELECT id, count, breed_name 
-         FROM msg 
-         WHERE count > 0
-         ORDER BY count DESC 
-         LIMIT ?`,
-        [limit],
-        (err, rows) => {
-          if (err) {
-            console.error("Ошибка при получении таблицы лидеров:", err);
-            reject(err);
-          } else {
-            const rowsWithUrls = rows.map((row) => ({
-              ...row,
-              image_url: this.generateImageUrl(row.id),
-            }));
-            resolve(rowsWithUrls);
-          }
-        }
-      );
-    });
-  }
-
-  async getCatInfo(catId) {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-        `SELECT id, count, breed_name, created_at 
-         FROM msg 
-         WHERE id = ?`,
+      this.db.run(
+        `UPDATE msg SET count = count + 1 WHERE id = ?`,
         [catId],
-        (err, row) => {
-          if (err) {
-            console.error("Ошибка при получении информации о коте:", err);
-            reject(err);
-          } else {
-            if (row) {
-              row.image_url = this.generateImageUrl(row.id);
-            }
-            resolve(row);
-          }
-        }
+        (err) => (err ? reject(err) : resolve())
       );
     });
   }
 
-  async close() {
+  async getLikes(catId) {
     return new Promise((resolve, reject) => {
-      this.db.close((err) => {
-        if (err) {
-          console.error("Ошибка при закрытии базы данных:", err);
-          reject(err);
-        } else {
-          console.log("База данных успешно закрыта");
-          resolve();
-        }
-      });
+      this.db.all(`SELECT count FROM msg WHERE id = ?`, [catId], (err, rows) =>
+        err ? reject(err) : resolve(rows)
+      );
     });
   }
 }

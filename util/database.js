@@ -71,6 +71,25 @@ class Database {
       );
     });
   }
+  async getLeaderboard(limit = 10) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT id, count, breed_name, image_url
+         FROM msg 
+         WHERE count > 0
+         ORDER BY count DESC 
+         LIMIT ?`,
+        [limit],
+        (err, rows) => {
+          if (err) {
+            console.error("Ошибка при получении таблицы лидеров:", err);
+            reject(err);
+          }
+          resolve(rows);
+        }
+      );
+    });
+  }
 }
 
 export default new Database();

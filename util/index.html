@@ -125,6 +125,8 @@
           <thead>
             <tr>
               <th>#</th>
+              <th>Картинка</th>
+              <th>Название породы</th>
               <th>ID</th>
               <th>Количество лайков</th>
             </tr>
@@ -161,6 +163,8 @@
             const tr = document.createElement("tr");
             tr.innerHTML = `
               <td>${index + 1}</td>
+              <td><img src="${row.image_url}" /></td>
+              <td>${row.breed_name}</td>
               <td>${row.id}</td>
               <td>${row.count}</td>
             `;
@@ -214,6 +218,9 @@
     </script>
   </body>
   <style>
+    td > img {
+      max-width: 100px;
+    }
     * {
       font-family: Arial, sans-serif;
     }

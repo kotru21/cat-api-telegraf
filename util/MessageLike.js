@@ -5,25 +5,22 @@ import { Composer, Markup } from "telegraf";
 export default Composer.action(/^data-(.*?)$/, async (ctx) => {
   try {
     const catId = ctx.match[1];
+    const message = ctx.update.callback_query.message;
+    const imageUrl = message.photo[0].file_id;
+    const breedName = message.caption.split("\n")[0].replace("_", "");
 
-    // add like
-    await AddLikes(catId);
+    await AddLikes(catId, imageUrl, breedName);
+    const [likes] = await GetLikes(catId);
 
-    // Get updated likes count
-    const likes = await GetLikes(catId);
-    const likesCount = likes[0].count;
-
-    // Update the message with the new likes count
     await ctx.editMessageReplyMarkup({
       inline_keyboard: [
-        [Markup.button.callback(`👍 ${likesCount}`, `data-${catId}`)],
+        [Markup.button.callback(`👍 ${likes.count}`, `data-${catId}`)],
       ],
     });
 
-    // Send a notification to the user
-    await ctx.answerCbQuery(`Лайкнуто! 👍`);
+    await ctx.answerCbQuery("Лайк засчитан!");
   } catch (error) {
-    console.error("Ошибка при обработке лайка:", error);
-    await ctx.answerCbQuery("Произошла ошибка при обработке лайка");
+    console.error("Ошибка:", error);
+    await ctx.answerCbQuery("Произошла ошибка");
   }
 });

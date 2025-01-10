@@ -15,18 +15,18 @@ const createKeyboard = (wikipediaUrl, likesCount, catId) => {
 
 export default Composer.command("fact", async (ctx) => {
   try {
-    const catObject = await getFact();
-    const [likes] = await getLikes(catObject.id);
+    const catData = await getFact();
+    const [likes] = await getLikes(catData.id);
 
     await ctx.replyWithPhoto(
-      { url: catObject.url },
+      { url: catData.url },
       {
         parse_mode: "Markdown",
-        caption: `_${catObject.breeds[0].name}_.\n${catObject.breeds[0].description}`,
+        caption: `_${catData.breed_name}_.\n${catData.description}`,
         reply_markup: createKeyboard(
-          catObject.breeds[0].wikipedia_url,
-          likes.count,
-          catObject.id
+          catData.wikipedia_url,
+          likes?.count || 0,
+          catData.id
         ),
       }
     );

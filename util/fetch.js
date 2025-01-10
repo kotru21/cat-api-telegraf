@@ -1,4 +1,4 @@
-import db from "./database.js";
+import db from "./Database.js";
 
 async function getFact(retryCount = 0) {
   try {

@@ -1,4 +1,4 @@
-import db from "./database.js";
+import db from "./Database.js";
 
 async function GetLikes(catId) {
   return db.getLikes(catId);

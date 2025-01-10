@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cat Details</title>
+    <style>
+      body {
+        background: black;
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .cat-details {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+      }
+      .cat-image {
+        max-width: 100%;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+      .stats {
+        margin: 20px 0;
+      }
+      .back-link {
+        color: white;
+        text-decoration: none;
+        padding: 10px;
+        background: #068fff;
+        border-radius: 5px;
+        display: inline-block;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="cat-details">
+        <h1 id="breed-name">Loading...</h1>
+        <img id="cat-image" class="cat-image" src="" alt="Cat image" />
+        <div class="stats">
+          <p><strong>Likes:</strong> <span id="likes-count">0</span></p>
+          <p><strong>Description:</strong> <span id="description"></span></p>
+          <p>
+            <a id="wiki-link" href="" target="_blank">Read more on Wikipedia</a>
+          </p>
+        </div>
+        <a href="/" class="back-link">Back</a>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const catId = new URLSearchParams(window.location.search).get("id");
+        if (catId) {
+          fetch(`/api/cat/${catId}`)
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("breed-name").textContent =
+                data.breed_name;
+              document.getElementById("cat-image").src = data.image_url;
+              document.getElementById("description").textContent =
+                data.description;
+              document.getElementById("likes-count").textContent = data.count;
+              document.getElementById("wiki-link").href = data.wikipedia_url;
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              document.getElementById("breed-name").textContent =
+                "Error loading cat details";
+            });
+        } else {
+          document.getElementById("breed-name").textContent =
+            "No cat ID provided";
+        }
+      });
+    </script>
+  </body>
+</html>

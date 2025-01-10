@@ -164,7 +164,9 @@
             tr.innerHTML = `
               <td>${index + 1}</td>
               <td><img src="${row.image_url}" /></td>
-              <td>${row.breed_name}</td>
+              <td><a href="${"/catDetails?id=" + row.id}">${
+              row.breed_name
+            }</a></td>
               <td>${row.id}</td>
               <td>${row.count}</td>
             `;

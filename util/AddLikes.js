@@ -1,15 +1,7 @@
-import sqlite3 from "sqlite3";
-var db = new sqlite3.Database("./main.db");
+import db from "./database.js";
 
-async function AddLikes(catObject) {
-  return new Promise((resolve, reject) => {
-    db.all(`UPDATE msg SET count = count + 1 WHERE id='${catObject}';`, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
+async function AddLikes(catId) {
+  return db.addLikes(catId);
 }
+
 export default AddLikes;

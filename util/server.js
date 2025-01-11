@@ -13,7 +13,7 @@ export default function webServer(port) {
   const server = createServer(app);
   const wss = new WebSocketServer({
     server: server,
-    path: "/ws", // Добавляем explicit путь
+    path: "/wss", // Добавляем explicit путь
   });
   const __dirname = path.resolve();
   let uptimeDateObject = new Date();

@@ -5,7 +5,7 @@ import Menu from "./commands/Menu.js";
 import messageLike from "./util/MessageLike.js";
 import config from "./config.js";
 import Server from "./util/server.js";
-import websocket from "./util/webSocket.js";
+import websocket from "./util/websocket.js";
 
 const initServers = () => {
   if (config.WebServer) {

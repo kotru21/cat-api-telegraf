@@ -1,6 +1,6 @@
 # Cat bot, made with telegraf.js. Using Cat API.
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/kotru21/cat-api-telegraf) <br/>
-[![Run on Replit](https://replit.com/badge/github//kotru21/cat-api-telegraf)](https://replit.com//kotru21/cat-api-telegraf)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/kotru21/cat-api-telegraf) 
+[![Run on Replit](https://replit.com/badge/github//kotru21/cat-api-telegraf)](https://replit.com//kotru21/cat-api-telegraf) <br/>
 # Deploying on Heroku
 Fill in Config Vars: </br>
 API_KEY and CAT_API_TOKEN </br>

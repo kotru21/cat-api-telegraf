@@ -1,5 +1,5 @@
-import AddLikes from "../util/addLikes.js";
-import GetLikes from "../util/getLikes.js";
+import AddLikes from "./addlikes.js";
+import GetLikes from "./getlikes.js";
 import { Composer, Markup } from "telegraf";
 
 export default Composer.action(/^data-(.*?)$/, async (ctx) => {

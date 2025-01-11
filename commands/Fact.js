@@ -1,6 +1,6 @@
 import { Composer, Markup } from "telegraf";
 import getFact from "../util/fetch.js";
-import getLikes from "../util/getLikes.js";
+import getLikes from "../util/getlikes.js";
 
 const createKeyboard = (wikipediaUrl, likesCount, catId) => {
   return Markup.inlineKeyboard([

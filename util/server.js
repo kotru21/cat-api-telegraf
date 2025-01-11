@@ -80,7 +80,10 @@ export default function webServer(port) {
     fs.readFile(filePath, "utf8", (err, html) => {
       if (err) return res.status(500).send("Internal Server Error");
       const modified = html
-        .replace("{{websocketUrl}}", `wss://${req.headers.host}/ws`)
+        .replace(
+          /wss:\/\/.*?{{websocketPort}}\/websocket/g,
+          `wss://${req.headers.host}/ws`
+        )
         .replace("{{apiPort}}", port);
       res.send(modified);
     });

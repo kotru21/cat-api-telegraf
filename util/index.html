@@ -301,9 +301,7 @@
     <script type="module">
       const messageOutputDiv = document.getElementById("messageOutput"); // Element, to display amount of messages in it
       const timeOutputDiv = document.getElementById("timeOutput"); // Element, to display amount of time from startup in it
-      const ws = new WebSocket(
-        `wss://${window.location.origin}{{websocketPort}}/websocket`
-      ); // websocket server adress
+      const ws = new WebSocket("{{websocketUrl}}");
 
       ws.onopen = () => {
         console.log("Connected to server");

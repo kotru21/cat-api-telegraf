@@ -1,5 +1,11 @@
 # Cat bot, made with telegraf.js. Using Cat API.
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy?template=https://github.com/kotru21/cat-api-telegraf) <br/>
+# Deploying on Heroku
+Fill in Config Vars: </br>
+API_KEY and CAT_API_TOKEN </br>
+API_KEY is your telegram API key. </br>
+<a href="https://devcenter.heroku.com/articles/config-vars"> more about config vars on Heroku </a> </br>
+
 to make everything work, run
 `npm install` <br>
 then, create the .env file and fill in your telegram bot token:

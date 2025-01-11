@@ -3,9 +3,13 @@ import path from "path";
 import config from "../config.js";
 import fs from "fs";
 import cors from "cors";
+import { createServer } from "http";
+import { WebSocketServer } from "ws";
 import db from "./database.js";
 
 export default function webServer(port) {
+  const server = createServer(app);
+  const wss = new WebSocketServer({ server });
   const __dirname = path.resolve();
   const app = express();
 
@@ -64,5 +68,8 @@ export default function webServer(port) {
 
   app.listen(port, () => {
     console.log(`Web server and API running on port ${port}`);
+  });
+  server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
   });
 }

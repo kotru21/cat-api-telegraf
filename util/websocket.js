@@ -1,12 +1,11 @@
 import { getMessageCount } from "./messageCounter.js";
 import { WebSocketServer } from "ws";
+import { createServer } from "http";
 
 export default function websocket(websocketPort) {
   let uptimeDateObject = new Date();
-  const wss = new WebSocketServer({
-    port: websocketPort,
-    path: "/websocket",
-  });
+  const server = createServer();
+  const wss = new WebSocketServer({ server });
 
   const broadcastData = () => {
     let data = {
@@ -40,4 +39,5 @@ export default function websocket(websocketPort) {
   });
 
   setInterval(broadcastData, 1000);
+  server.listen(port);
 }

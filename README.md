@@ -6,6 +6,8 @@ Fill in Config Vars: </br>
 API_KEY and CAT_API_TOKEN </br>
 API_KEY is your telegram API key. </br>
 <a href="https://devcenter.heroku.com/articles/config-vars"> more about config vars on Heroku </a> </br>
+# Deploying on Replit
+For replit, fill in the env variables using the UI. <br/>
 
 # Deploying on local machine
 to make everything work, run

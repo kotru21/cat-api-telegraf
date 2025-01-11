@@ -1,4 +1,4 @@
-import db from "./Database.js";
+import db from "./database.js";
 
 async function AddLikes(catId, imageUrl, breedName) {
   return db.addLikes(catId, imageUrl, breedName);

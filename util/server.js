@@ -3,7 +3,7 @@ import path from "path";
 import config from "../config.js";
 import fs from "fs";
 import cors from "cors";
-import db from "./Database.js";
+import db from "./database.js";
 
 export default function webServer(port) {
   const __dirname = path.resolve();

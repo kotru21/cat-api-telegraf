@@ -1,0 +1,7 @@
+{
+  "name": "Cat bot",
+  "description": "Telegram bot with Web panel, based on Cat API",
+  "repository": "https://github.com/kotru21/cat-api-telegraf",
+  "logo": "https://node-js-sample-1234567890ab.herokuapp.com/node.png",
+  "keywords": ["node", "express", "telegram"]
+}

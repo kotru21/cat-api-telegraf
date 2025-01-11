@@ -11,7 +11,10 @@ import { getMessageCount } from "./messageCounter.js";
 export default function webServer(port) {
   const app = express();
   const server = createServer(app);
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({
+    server: server,
+    path: "/ws", // Добавляем explicit путь
+  });
   const __dirname = path.resolve();
   let uptimeDateObject = new Date();
 
@@ -77,7 +80,11 @@ export default function webServer(port) {
     fs.readFile(filePath, "utf8", (err, html) => {
       if (err) return res.status(500).send("Internal Server Error");
       const modified = html
-        .replace("{{websocketPort}}", port)
+        .replace("{{websocketPort}}", "")
+        .replace(
+          "wss://" + window.location.origin + "{{websocketPort}}/websocket",
+          "wss://" + window.location.host + "/ws"
+        )
         .replace("{{apiPort}}", port);
       res.send(modified);
     });

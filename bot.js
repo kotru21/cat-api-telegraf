@@ -2,7 +2,7 @@ import { Telegraf } from "telegraf";
 import { incrementMessageCount } from "./util/messageCounter.js";
 import Fact from "./commands/Fact.js";
 import Menu from "./commands/Menu.js";
-import messageLike from "./util/messageLike.js";
+import messageLike from "./util/MessageLike.js";
 import config from "./config.js";
 import Server from "./util/server.js";
 import websocket from "./util/webSocket.js";

@@ -266,7 +266,7 @@
       const fetchLeaderboard = async () => {
         try {
           const response = await fetch(
-            "http://localhost:{{apiPort}}/api/leaderboard"
+            `${window.location.origin}/api/leaderboard`
           );
           if (!response.ok) throw new Error("Failed to fetch leaderboard");
           const leaderboard = await response.json();

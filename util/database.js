@@ -22,6 +22,12 @@ class Database {
           image_url TEXT,
           description TEXT,
           wikipedia_url TEXT,
+          breed_id TEXT,
+          temperament TEXT,
+          origin TEXT,
+          life_span TEXT,
+          weight_imperial TEXT,
+          weight_metric TEXT,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
       console.log("База данных инициализирована");
@@ -29,21 +35,39 @@ class Database {
   }
 
   async saveCatDetails(catData) {
+    // Проверяем наличие данных о породе
+    if (!catData?.breeds?.[0]) {
+      console.error("Нет данных о породе кота:", catData);
+      return Promise.reject(new Error("Нет данных о породе кота"));
+    }
+
+    const breed = catData.breeds[0];
+
     return new Promise((resolve, reject) => {
       this.db.run(
         `INSERT OR REPLACE INTO msg (
-          id, breed_name, image_url, description, wikipedia_url, count
-        ) VALUES (?, ?, ?, ?, ?, COALESCE((SELECT count FROM msg WHERE id = ?), 0))`,
+          id, breed_name, image_url, description, wikipedia_url, count,
+          breed_id, temperament, origin, life_span, 
+          weight_imperial, weight_metric
+        ) VALUES (?, ?, ?, ?, ?, COALESCE((SELECT count FROM msg WHERE id = ?), 0),
+          ?, ?, ?, ?, ?, ?)`,
         [
           catData.id,
-          catData.breed_name,
-          catData.image_url,
-          catData.description,
-          catData.wikipedia_url,
+          breed.name,
+          catData.url,
+          breed.description,
+          breed.wikipedia_url,
           catData.id,
+          breed.id,
+          breed.temperament,
+          breed.origin,
+          breed.life_span,
+          breed.weight?.imperial,
+          breed.weight?.metric,
         ],
         (err) => {
           if (err) {
+            console.error("Ошибка сохранения данных:", err);
             reject(err);
           } else {
             resolve();
@@ -93,7 +117,8 @@ class Database {
   async getCatById(catId) {
     return new Promise((resolve, reject) => {
       this.db.get(
-        `SELECT id, breed_name, image_url, description, wikipedia_url, count
+        `SELECT id, breed_name, image_url, description, wikipedia_url, count,
+                temperament, origin, life_span, weight_imperial, weight_metric
          FROM msg 
          WHERE id = ?`,
         [catId],

@@ -19,7 +19,7 @@
         border-radius: 10px;
       }
       .cat-image {
-        max-width: 100%;
+        max-width: 500px;
         border-radius: 10px;
         margin: 20px 0;
       }
@@ -45,6 +45,10 @@
         <div class="stats">
           <p><strong>Likes:</strong> <span id="likes-count">0</span></p>
           <p><strong>Description:</strong> <span id="description"></span></p>
+          <p><strong>Origin:</strong> <span id="origin"></span></p>
+          <p><strong>Temperament:</strong> <span id="temperament"></span></p>
+          <p><strong>Life Span:</strong> <span id="life-span"></span></p>
+          <p><strong>Weight:</strong> <span id="weight"></span></p>
           <p>
             <a id="wiki-link" href="" target="_blank">Read more on Wikipedia</a>
           </p>
@@ -67,6 +71,13 @@
                 data.description;
               document.getElementById("likes-count").textContent = data.count;
               document.getElementById("wiki-link").href = data.wikipedia_url;
+              document.getElementById("origin").textContent = data.origin;
+              document.getElementById("temperament").textContent =
+                data.temperament;
+              document.getElementById("life-span").textContent = data.life_span;
+              document.getElementById(
+                "weight"
+              ).textContent = `${data.weight_imperial} lbs (${data.weight_metric} kg)`;
             })
             .catch((error) => {
               console.error("Error:", error);

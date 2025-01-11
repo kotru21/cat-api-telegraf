@@ -66,9 +66,6 @@ export default function webServer(port) {
     res.sendFile(path.join(__dirname, "util/catDetails.html"));
   });
 
-  app.listen(port, () => {
-    console.log(`Web server and API running on port ${port}`);
-  });
   server.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

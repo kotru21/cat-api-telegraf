@@ -10,7 +10,7 @@ import websocket from "./util/websocket.js";
 const initServers = () => {
   if (config.WebServer) {
     Server(config.expressServerPort);
-    websocket(config.websocketServerPort);
+    websocket(config.websocketServerPort); // Передаем порт из конфига
     console.log(`Server running on port ${config.expressServerPort}`);
     console.log(
       `WebSocket server running on port ${config.websocketServerPort}`

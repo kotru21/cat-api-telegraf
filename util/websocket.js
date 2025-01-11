@@ -39,5 +39,5 @@ export default function websocket(websocketPort) {
   });
 
   setInterval(broadcastData, 1000);
-  server.listen(port);
+  server.listen(websocketPort); // Используем переданный порт
 }

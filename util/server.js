@@ -8,10 +8,10 @@ import { WebSocketServer } from "ws";
 import db from "./database.js";
 
 export default function webServer(port) {
+  const app = express(); // Перемещено в начало
   const server = createServer(app);
   const wss = new WebSocketServer({ server });
   const __dirname = path.resolve();
-  const app = express();
 
   // Middleware
   app.use(cors());

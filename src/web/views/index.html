@@ -1,12 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
   <head>
-    <title>Catbot</title>
-
+    <title>CatBot</title>
+    <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .stat-card {
+        background-color: rgba(31, 41, 55, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+      }
+
+      /* Стили для скелетонов */
       @keyframes pulse {
         0% {
           opacity: 0.6;
@@ -18,192 +64,271 @@
           opacity: 0.6;
         }
       }
-      .animate-shimmer {
-        background-color: #374151;
+
+      .skeleton {
+        background-color: rgba(55, 65, 81, 0.7);
+        border-radius: 0.5rem;
         animation: pulse 1.5s infinite;
       }
+
       .skeleton-text {
-        height: 0.75rem;
-        width: 100%;
+        height: 1.25rem;
+        width: 80%;
         border-radius: 0.25rem;
+        margin: 0.5rem 0;
       }
-      .loader-content {
-        display: block;
-      }
-      .loaded-content {
-        display: none;
-      }
-      /* Изменения стилей здесь */
+
       .skeleton-content {
         display: block;
       }
+
       .real-content {
         display: none;
       }
+
+      /* Анимации */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+
+      /* Адаптивный хедер */
+      .header {
+        backdrop-filter: blur(8px);
+        background-color: rgba(17, 24, 39, 0.8);
+      }
+
+      /* Стили для таблицы */
+      .leaderboard-table {
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: separate;
+        border-radius: 0.75rem;
+        overflow: hidden;
+      }
+
+      .leaderboard-table th {
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        background-color: rgba(31, 41, 55, 0.9);
+        color: var(--text-gray);
+      }
+
+      .leaderboard-table tbody tr {
+        background-color: rgba(31, 41, 55, 0.6);
+        transition: background-color 0.2s ease;
+      }
+
+      .leaderboard-table tbody tr:hover {
+        background-color: rgba(31, 41, 55, 0.9);
+      }
+
+      .leaderboard-table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+      }
+
+      .leaderboard-table img {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      .leaderboard-table img:hover {
+        transform: scale(1.05);
+      }
+
+      /* Стили для hero секции */
+      .hero-section {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-section::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          circle at 90% 10%,
+          rgba(79, 70, 229, 0.15) 0%,
+          transparent 50%
+        );
+        pointer-events: none;
+      }
+
+      .hero-cat-badge {
+        transition: all 0.3s ease;
+      }
+
+      .hero-cat-badge:hover {
+        transform: translateY(-5px) rotate(5deg);
+      }
     </style>
   </head>
-  <body class="bg-black text-white">
+  <body>
+    <!-- Навигационная панель -->
     <nav
-      class="py-5 lg:fixed w-full bg-none backdrop-blur-2xl transition-all duration-500 z-50">
+      class="py-4 fixed w-full bg-none header z-50 transition-all duration-300">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="w-full flex flex-col lg:flex-row">
-          <div class="flex justify-between lg:flex-row">
-            <button
-              data-collapse-toggle="navbar"
-              type="button"
-              class="inline-flex items-center p-2 ml-3 text-sm text-gray-300 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-              aria-controls="navbar-default"
-              aria-expanded="false">
-              <span class="sr-only">Open main menu</span>
-              <svg
-                class="w-6 h-6"
-                aria-hidden="true"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fill-rule="evenodd"
-                  d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                  clip-rule="evenodd"></path>
-              </svg>
-            </button>
+        <div class="flex justify-between items-center">
+          <a href="/" class="text-xl font-bold text-white flex items-center">
+            <i class="fas fa-cat mr-2 text-indigo-500"></i>
+            <span>CatBot</span>
+          </a>
+          <div class="hidden md:flex items-center space-x-4">
+            <a
+              href="/"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-home mr-1"></i> Главная
+            </a>
+            <a
+              href="#leaderboard"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-trophy mr-1"></i> Топ котов
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
+              <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+            </a>
           </div>
-          <div class="hidden w-full lg:flex lg:pl-11 max-lg:py-4" id="navbar">
-            <ul
-              class="flex lg:items-center flex-col max-lg:gap-4 mt-4 lg:mt-0 lg:flex-row max-lg:mb-4">
-              <li>
-                <a
-                  href="#"
-                  class="text-gray-300 text-base lg:text-base font-medium hover:text-indigo-700 transition-all duration-500 mb-2 block lg:mr-6 md:mb-0 lg:text-left"
-                  >Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#leaderboard"
-                  class="text-gray-300 text-base lg:text-base font-medium hover:text-indigo-700 transition-all duration-500 mb-2 block lg:mr-6 md:mb-0 lg:text-left"
-                  >Cats Top</a
-                >
-              </li>
-            </ul>
-            <div
-              class="flex lg:items-center justify-start flex-col lg:flex-row max-lg:gap-4 lg:flex-1 lg:justify-end">
-              <a href="https://github.com/kotru21">
-                <button
-                  class="bg-indigo-50 text-indigo-600 rounded-full cursor-pointer font-semibold text-center shadow-xs transition-all duration-500 py-3 px-6 text-sm hover:bg-indigo-100">
-                  My GitHub
-                </button>
-              </a>
-              <button
-                class="bg-indigo-600 text-white rounded-full cursor-pointer font-semibold text-center shadow-xs transition-all duration-500 py-3 px-6 text-sm lg:ml-5 hover:bg-indigo-700">
-                Bot's GitHub
-              </button>
-            </div>
-          </div>
+          <!-- Мобильная кнопка меню -->
+          <button class="md:hidden text-gray-300 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
         </div>
       </div>
     </nav>
-    <section class="lg:pt-24 pt-0 lg:pl-8 h-full">
-      <div
-        class="rounded-2xl py-10 overflow-hidden m-5 lg:m-0 2xl:py-16 xl:py-8 lg:rounded-tl-2xl lg:rounded-bl-2xl">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div
-            class="grid grid-cols-1 gap-14 items-center lg:grid-cols-12 lg:gap32">
-            <div class="w-full xl:col-span-5 lg:col-span-6 2xl:-mx-5 xl:-mx-0">
-              <div
-                class="flex items-center text-sm font-medium text-gray-300 justify-center lg:justify-start">
-                <span
-                  class="bg-indigo-600 py-1 px-3 rounded-2xl text-xs font-medium text-white mr-3"
-                  >#1</span
-                >
-                Bot based ob my own opinion
-              </div>
-              <h1
-                class="py-8 text-center text-white font-bold font-manrope text-5xl lg:text-left leading-[70px]">
-                Cat Bot for
-                <span class="text-indigo-600">Telegram</span>
-              </h1>
-              <p class="text-gray-300 text-lg text-center lg:text-left">
-                Literally the best bot in the world. It can send you random cat!
-                And it's all you need in your life. Just try it!
-              </p>
-              <a href="https://t.me/catbotjss_bot">
-                <div
-                  class="relative p-1.5 my-10 flex items-center gap-y-4 h-auto md:h-16 flex-col md:flex-row gap-x-4">
-                  <button
-                    class="bg-indigo-600 rounded-full py-3 px-7 text-base font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-500 md:w-fit w-full">
-                    /fact
-                  </button>
-                  <button
-                    class="border-indigo-600 border-2 rounded-full py-3 px-7 text-base font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-500 md:w-fit w-full">
-                    /about
-                  </button>
-                  <button
-                    class="border-indigo-600 border-2 rounded-full py-3 px-7 text-base font-semibold text-white hover:bg-indigo-700 cursor-pointer transition-all duration-500 md:w-fit w-full">
-                    /me
-                  </button>
-                </div>
-              </a>
-              <div class="flex items-center flex-col lg:flex-row">
-                <div class="flex items-center">
-                  <img
-                    src="https://cdn2.thecatapi.com/images/u0xeq3HjW.jpg"
-                    alt="Rounded image "
-                    class="border-2 border-solid border-indigo-50 rounded-full relative z-50 object-cover w-10" />
-                  <img
-                    src="https://cdn2.thecatapi.com/images/Zi4jfH3c6.jpg"
-                    alt="Rounded image"
-                    class="border-2 border-solid border-indigo-50 rounded-full relative z-30 -ml-3 object-cover w-10" />
-                  <img
-                    src="https://cdn2.thecatapi.com/images/yPmEpKmnR.jpg"
-                    alt="Rounded image"
-                    class="border-2 border-solid border-indigo-50 rounded-full relative z-20 -ml-3 object-cover w-10" />
-                </div>
-                <span class="mt-3 text-base text-gray-600 font-medium lg:ml-3"
-                  >Cats have joined</span
-                >
-              </div>
+
+    <!-- Hero секция -->
+    <section class="hero-section pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="space-y-8">
+            <div
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
+              <span class="flex h-2 w-2 rounded-full bg-indigo-500 mr-2"></span>
+              Telegram бот с котиками
             </div>
-            <div class="w-full xl:col-span-7 lg:col-span-6 block">
-              <div class="w-full sm:w-auto lg:w-[60.8125rem] xl:ml-16">
+
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
+              Узнайте интересные факты о
+              <span class="text-indigo-500">кошках</span>
+            </h1>
+
+            <p class="text-lg text-gray-400 max-w-2xl">
+              Это самый лучший бот в мире. Он может отправлять вам случайных
+              котиков и факты о породах. Узнайте больше о своих любимцах!
+            </p>
+
+            <div class="flex flex-wrap gap-4">
+              <a
+                href="https://t.me/catbotjss_bot"
+                class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
+                <i class="fab fa-telegram-plane mr-2"></i> Открыть в Telegram
+              </a>
+              <a
+                href="#leaderboard"
+                class="inline-flex items-center px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700 font-medium">
+                <i class="fas fa-trophy mr-2"></i> Популярные коты
+              </a>
+            </div>
+
+            <div class="flex items-center">
+              <div class="flex -space-x-2">
+                <img
+                  src="https://cdn2.thecatapi.com/images/u0xeq3HjW.jpg"
+                  alt="Cat"
+                  class="hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover" />
+                <img
+                  src="https://cdn2.thecatapi.com/images/Zi4jfH3c6.jpg"
+                  alt="Cat"
+                  class="hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover" />
+                <img
+                  src="https://cdn2.thecatapi.com/images/yPmEpKmnR.jpg"
+                  alt="Cat"
+                  class="hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover" />
+              </div>
+              <span class="ml-3 text-sm text-gray-400"
+                >Присоединяйтесь к сообществу котолюбителей</span
+              >
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Карточки со статистикой -->
+            <div class="stat-card">
+              <h2 class="text-xl font-semibold mb-1 flex items-center">
+                <i class="fas fa-clock text-indigo-400 mr-2"></i> Время с
+                момента перезапуска
+              </h2>
+
+              <!-- Скелетон лоадер -->
+              <div id="timeLoader" class="skeleton-content">
+                <div class="skeleton skeleton-text w-3/4"></div>
+                <div class="skeleton skeleton-text w-1/2"></div>
+              </div>
+
+              <!-- Реальный контент -->
+              <p
+                id="timeOutput"
+                class="text-2xl font-bold text-white real-content">
+                Обновление...
+              </p>
+            </div>
+
+            <div class="stat-card">
+              <h2 class="text-xl font-semibold mb-1 flex items-center">
+                <i class="fas fa-comment text-indigo-400 mr-2"></i> Количество
+                отправленных сообщений
+              </h2>
+
+              <!-- Скелетон лоадер -->
+              <div id="messageLoader" class="skeleton-content">
+                <div class="skeleton skeleton-text w-1/4"></div>
+              </div>
+
+              <!-- Реальный контент -->
+              <p
+                id="messageOutput"
+                class="text-3xl font-bold text-white real-content">
+                Обновление...
+              </p>
+            </div>
+
+            <div class="stat-card">
+              <h2 class="text-xl font-semibold mb-3 flex items-center">
+                <i class="fas fa-terminal text-indigo-400 mr-2"></i> Команды
+                бота
+              </h2>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div
-                  class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                  <a href="#">
-                    <h5
-                      class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                      Time from latest reload
-                    </h5>
-                  </a>
-                  <!-- Скелетон-лоадер для времени -->
-                  <div id="timeLoader" class="skeleton-content">
-                    <div class="animate-shimmer skeleton-text mb-2"></div>
-                    <div class="animate-shimmer skeleton-text w-4/5 mt-3"></div>
-                  </div>
-                  <!-- Реальный контент -->
-                  <p
-                    class="mb-3 font-normal text-gray-700 dark:text-gray-400 real-content"
-                    id="timeOutput">
-                    Updating...
-                  </p>
+                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/fact</code>
                 </div>
                 <div
-                  class="max-w-sm p-6 mt-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                  <a href="#">
-                    <h5
-                      class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                      Amount of messages sent
-                    </h5>
-                  </a>
-                  <!-- Скелетон-лоадер для сообщений -->
-                  <div id="messageLoader" class="skeleton-content">
-                    <div class="animate-shimmer skeleton-text h-4"></div>
-                  </div>
-                  <!-- Реальный контент -->
-                  <p
-                    class="mb-3 font-normal text-gray-700 dark:text-gray-400 real-content"
-                    id="messageOutput">
-                    Updating...
-                  </p>
+                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/menu</code>
+                </div>
+                <div
+                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/mylikes</code>
                 </div>
               </div>
             </div>
@@ -212,121 +337,119 @@
       </div>
     </section>
 
-    <div class="container mx-auto px-4 py-16">
-      <div
-        class="lg:mx-24 p-6 dark:bg-gray-800 border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <h5
-          class="mb-6 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-          id="leaderboard">
-          Leaderboard
-        </h5>
-        <div class="relative flex items-center justify-center">
-          <table
-            class="w-full text-sm text-center rtl:text-right"
-            id="leaderboard">
-            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700">
-              <thead>
-                <tr>
-                  <th class="cell-number">#</th>
-                  <th class="cell-image">Картинка</th>
-                  <th class="cell-breed">Название породы</th>
-                  <th class="cell-id">ID</th>
-                  <th class="cell-likes">Количество лайков</th>
-                </tr>
-              </thead>
-            </thead>
+    <!-- Секция лидерборда -->
+    <section id="leaderboard" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">Популярные породы кошек</h2>
+          <p class="text-gray-400 max-w-2xl mx-auto">
+            Рейтинг самых популярных пород кошек на основе количества лайков от
+            пользователей.
+          </p>
+        </div>
 
+        <div
+          class="overflow-hidden rounded-xl shadow-2xl border border-gray-800">
+          <table class="leaderboard-table" id="leaderboard-table">
+            <thead>
+              <tr>
+                <th class="text-left">#</th>
+                <th>Изображение</th>
+                <th class="text-left">Порода</th>
+                <th>Лайки</th>
+              </tr>
+            </thead>
             <tbody>
+              <!-- Шаблон для скелетон строк -->
               <template id="skeleton-row">
-                <tr class="border-b dark:border-gray-700">
-                  <td class="py-3">
-                    <div class="animate-shimmer h-4 w-4 mx-auto rounded"></div>
-                  </td>
-                  <td class="py-3 flex justify-center">
+                <tr>
+                  <td>
                     <div
-                      class="animate-shimmer h-24 w-24 rounded"
-                      style="margin: 0 auto"></div>
+                      class="skeleton skeleton-text w-6 h-6 rounded-full mx-auto"></div>
                   </td>
-                  <td class="py-3">
-                    <div class="animate-shimmer h-4 w-32 mx-auto rounded"></div>
+                  <td class="text-center">
+                    <div
+                      class="skeleton mx-auto"
+                      style="
+                        width: 96px;
+                        height: 96px;
+                        border-radius: 0.5rem;
+                      "></div>
                   </td>
-                  <td class="py-3">
-                    <div class="animate-shimmer h-4 w-16 mx-auto rounded"></div>
+                  <td>
+                    <div
+                      class="skeleton skeleton-text w-full md:w-40 mx-auto"></div>
                   </td>
-                  <td class="py-3">
-                    <div class="animate-shimmer h-4 w-16 mx-auto rounded"></div>
+                  <!-- ID столбец скелетона удален -->
+                  <td>
+                    <div class="skeleton skeleton-text w-12 mx-auto"></div>
                   </td>
                 </tr>
               </template>
+              <!-- Данные будут добавлены через JavaScript -->
             </tbody>
           </table>
         </div>
       </div>
-      <footer class="text-center text-lg-start" style="color: white">
-        <!-- Copyright -->
-        <div class="text-center p-3">
-          © 2025 Copyright:
-          <a href="https://kotikov.is-a.dev/">Arsenij Kotikov</a>
+    </section>
+
+    <!-- Footer -->
+    <footer
+      class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-900 border-t border-gray-800">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="flex items-center mb-4 md:mb-0">
+            <i class="fas fa-cat text-2xl text-indigo-500 mr-2"></i>
+            <span class="text-xl font-bold">CatBot</span>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <a
+              href="https://github.com/kotru21/cat-api-telegraf"
+              target="_blank"
+              class="text-gray-400 hover:text-white transition-colors">
+              <i class="fab fa-github text-xl"></i>
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              target="_blank"
+              class="text-gray-400 hover:text-white transition-colors">
+              <i class="fab fa-telegram text-xl"></i>
+            </a>
+          </div>
         </div>
-        <!-- Copyright -->
-      </footer>
-    </div>
+
+        <div
+          class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
+          © 2025 Copyright:
+          <a
+            href="https://kotikov.is-a.dev/"
+            class="text-indigo-400 hover:text-indigo-300"
+            >Arsenij Kotikov</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <!-- Скрипты -->
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Селекторы
-        const navbar = document.getElementById("navbar");
-        const burgerBtn = document.querySelector(
-          '[data-collapse-toggle="navbar"]'
-        );
-        const dropdownToggles = document.querySelectorAll(".dropdown-toggle");
-        const megamenu = document.getElementById("megamenu");
-        const dropdownFeature = document.getElementById("dropdown-feature");
-
-        // Управление мобильным меню
-        burgerBtn.addEventListener("click", () => {
-          navbar.classList.toggle("hidden");
-        });
-
-        // Обработка выпадающих меню
-        dropdownToggles.forEach((toggle) => {
-          toggle.addEventListener("click", (e) => {
-            const target = document.getElementById(
-              e.currentTarget.dataset.target
-            );
-
-            // Закрыть другие меню
-            if (target === megamenu) {
-              dropdownFeature.classList.add("hidden");
-            } else if (target === dropdownFeature) {
-              megamenu.classList.add("hidden");
-            }
-
-            // Переключить текущее меню
-            target.classList.toggle("hidden");
-
-            // Повернуть стрелку
-            e.currentTarget
-              .querySelector(".dropdown-active-rotate-180")
-              .classList.toggle("rotate-180");
-          });
-        });
-
-        // Закрытие меню при клике вне
-        document.addEventListener("click", (e) => {
-          if (!e.target.closest(".dropdown")) {
-            megamenu.classList.add("hidden");
-            dropdownFeature.classList.add("hidden");
-
-            // Сбросить все стрелки
-            document
-              .querySelectorAll(".dropdown-active-rotate-180")
-              .forEach((arrow) => arrow.classList.remove("rotate-180"));
-          }
-        });
+      // Анимация хедера при скролле
+      window.addEventListener("scroll", function () {
+        const nav = document.querySelector("nav");
+        if (window.scrollY > 10) {
+          nav.classList.add("shadow-md");
+          nav.classList.add("bg-gray-900");
+          nav.classList.remove("bg-none");
+        } else {
+          nav.classList.remove("shadow-md");
+          nav.classList.remove("bg-gray-900");
+          nav.classList.add("bg-none");
+        }
       });
     </script>
+
     <script type="module">
-      const tableBody = document.querySelector("#leaderboard tbody");
+      const tableBody = document.querySelector("#leaderboard-table tbody");
       const skeletonTemplate = document.querySelector("#skeleton-row");
 
       // Функция для показа скелетон-лоадеров
@@ -355,34 +478,50 @@
 
             if (leaderboard.length === 0) {
               tableBody.innerHTML =
-                '<tr><td colspan="5" class="text-center py-4">Нет данных для отображения</td></tr>';
+                '<tr><td colspan="4" class="text-center py-8 text-gray-400">Нет данных для отображения</td></tr>';
               return;
             }
 
             leaderboard.forEach((row, index) => {
               const tr = document.createElement("tr");
-              tr.className = "border-b dark:border-gray-700";
+              tr.className = "";
               tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td class="flex justify-center">
-                  <img src="${row.image_url}" 
-                       class="w-24 h-24 object-cover rounded" 
-                       alt="cat"
+                <td class="text-left">
+                  <div class="w-8 h-8 rounded-full bg-indigo-900 flex items-center justify-center font-bold ${
+                    index < 3 ? "bg-indigo-600" : ""
+                  }">
+                    ${index + 1}
+                  </div>
+                </td>
+                <td class="text-center">
+                  <img src="${
+                    row.image_url
+                  }" class="w-24 h-24 object-cover rounded-lg mx-auto" alt="${
+                row.breed_name
+              }"
                        onerror="this.src='https://via.placeholder.com/96?text=No+Image'" />
                 </td>
-                <td><a href="${"/catDetails?id=" + row.id}" class="underline">${
+                <td class="text-left"><a href="${
+                  "/catDetails?id=" + row.id
+                }" class="text-indigo-400 hover:text-indigo-300 transition-colors">${
                 row.breed_name
               }</a></td>
-                <td>${row.id}</td>
-                <td>${row.count}</td>
+                <!-- Строка с ID удалена -->
+                <td>
+                  <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
+                    <i class="fas fa-heart text-red-500 mr-1.5"></i> ${
+                      row.count
+                    }
+                  </div>
+                </td>
               `;
               tableBody.appendChild(tr);
             });
-          }, 500); // Небольшая задержка для плавности
+          }, 500);
         } catch (err) {
           console.error(err);
           tableBody.innerHTML =
-            '<tr><td colspan="5" class="text-center py-4">Ошибка загрузки. Пожалуйста, попробуйте позже.</td></tr>';
+            '<tr><td colspan="4" class="text-center py-8 text-gray-400">Ошибка загрузки. Пожалуйста, попробуйте позже.</td></tr>';
         }
       };
 
@@ -391,6 +530,7 @@
       setInterval(fetchLeaderboard, 5000);
     </script>
 
+    <!-- Скрипт для WebSocket -->
     <script type="module">
       const messageOutputDiv = document.getElementById("messageOutput");
       const timeOutputDiv = document.getElementById("timeOutput");

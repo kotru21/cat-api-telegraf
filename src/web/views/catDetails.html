@@ -40,23 +40,92 @@
       a {
         color: #068fff;
       }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 0.6;
+        }
+      }
+      .skeleton {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        animation: pulse 1.5s infinite;
+      }
+      .skeleton-title {
+        height: 36px;
+        width: 200px;
+        margin-bottom: 20px;
+      }
+      .skeleton-image {
+        height: 300px;
+        width: 100%;
+        max-width: 500px;
+        margin: 20px 0;
+        border-radius: 10px;
+      }
+      .skeleton-text {
+        height: 20px;
+        width: 80%;
+        margin: 8px 0;
+      }
+      .skeleton-short {
+        width: 40%;
+      }
+
+      /* Стили загрузки */
+      #cat-content {
+        display: none;
+      }
+      #skeleton-content {
+        display: block;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="cat-details">
-        <h1 id="breed-name">Loading...</h1>
-        <img id="cat-image" class="cat-image" src="" alt="Cat image" />
-        <div class="stats">
-          <p><strong>Likes:</strong> <span id="likes-count">0</span></p>
-          <p><strong>Description:</strong> <span id="description"></span></p>
-          <p><strong>Origin:</strong> <span id="origin"></span></p>
-          <p><strong>Temperament:</strong> <span id="temperament"></span></p>
-          <p><strong>Life Span:</strong> <span id="life-span"></span></p>
-          <p><strong>Weight:</strong> <span id="weight"></span></p>
-          <p>
-            <a id="wiki-link" href="" target="_blank">Read more on Wikipedia</a>
-          </p>
+        <!-- Скелетон контент -->
+        <div id="skeleton-content">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-image"></div>
+          <div class="stats">
+            <div class="skeleton skeleton-text skeleton-short"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text skeleton-short"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text skeleton-short"></div>
+            <div class="skeleton skeleton-text skeleton-short"></div>
+          </div>
+        </div>
+
+        <!-- Реальный контент -->
+        <div id="cat-content">
+          <h1 id="breed-name">Loading...</h1>
+          <img
+            id="cat-image"
+            class="cat-image"
+            src=""
+            alt="Cat image"
+            onerror="this.src='https://via.placeholder.com/500x300?text=Image+Failed+to+Load'" />
+          <div class="stats">
+            <p><strong>Likes:</strong> <span id="likes-count">0</span></p>
+            <p><strong>Description:</strong> <span id="description"></span></p>
+            <p><strong>Origin:</strong> <span id="origin"></span></p>
+            <p><strong>Temperament:</strong> <span id="temperament"></span></p>
+            <p><strong>Life Span:</strong> <span id="life-span"></span></p>
+            <p><strong>Weight:</strong> <span id="weight"></span></p>
+            <p>
+              <a id="wiki-link" href="" target="_blank"
+                >Read more on Wikipedia</a
+              >
+            </p>
+          </div>
         </div>
         <a href="/" class="back-link">Back</a>
       </div>
@@ -65,11 +134,19 @@
     <script>
       // cat api
       document.addEventListener("DOMContentLoaded", function () {
+        const skeletonContent = document.getElementById("skeleton-content");
+        const catContent = document.getElementById("cat-content");
         const catId = new URLSearchParams(window.location.search).get("id");
+
+        // Гарантируем показ скелетона на минимальное время
+        const minLoadTime = 800;
+        const startTime = Date.now();
+
         if (catId) {
           fetch(`/api/cat/${catId}`)
             .then((response) => response.json())
             .then((data) => {
+              // Заполняем данные
               document.getElementById("breed-name").textContent =
                 data.breed_name;
               document.getElementById("cat-image").src = data.image_url;
@@ -84,15 +161,28 @@
               document.getElementById(
                 "weight"
               ).textContent = `${data.weight_imperial} lbs (${data.weight_metric} kg)`;
+
+              // Плавное переключение после минимального времени загрузки
+              const elapsedTime = Date.now() - startTime;
+              const remainingTime = Math.max(0, minLoadTime - elapsedTime);
+
+              setTimeout(() => {
+                skeletonContent.style.display = "none";
+                catContent.style.display = "block";
+              }, remainingTime);
             })
             .catch((error) => {
               console.error("Error:", error);
               document.getElementById("breed-name").textContent =
                 "Error loading cat details";
+              skeletonContent.style.display = "none";
+              catContent.style.display = "block";
             });
         } else {
           document.getElementById("breed-name").textContent =
             "No cat ID provided";
+          skeletonContent.style.display = "none";
+          catContent.style.display = "block";
         }
       });
     </script>

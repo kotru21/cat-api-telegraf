@@ -6,6 +6,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes pulse {
+        0% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 0.6;
+        }
+      }
+      .animate-shimmer {
+        background-color: #374151;
+        animation: pulse 1.5s infinite;
+      }
+      .skeleton-text {
+        height: 0.75rem;
+        width: 100%;
+        border-radius: 0.25rem;
+      }
+      .loader-content {
+        display: block;
+      }
+      .loaded-content {
+        display: none;
+      }
+      /* Изменения стилей здесь */
+      .skeleton-content {
+        display: block;
+      }
+      .real-content {
+        display: none;
+      }
+    </style>
   </head>
   <body class="bg-black text-white">
     <nav
@@ -139,8 +174,14 @@
                       Time from latest reload
                     </h5>
                   </a>
+                  <!-- Скелетон-лоадер для времени -->
+                  <div id="timeLoader" class="skeleton-content">
+                    <div class="animate-shimmer skeleton-text mb-2"></div>
+                    <div class="animate-shimmer skeleton-text w-4/5 mt-3"></div>
+                  </div>
+                  <!-- Реальный контент -->
                   <p
-                    class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+                    class="mb-3 font-normal text-gray-700 dark:text-gray-400 real-content"
                     id="timeOutput">
                     Updating...
                   </p>
@@ -153,8 +194,13 @@
                       Amount of messages sent
                     </h5>
                   </a>
+                  <!-- Скелетон-лоадер для сообщений -->
+                  <div id="messageLoader" class="skeleton-content">
+                    <div class="animate-shimmer skeleton-text h-4"></div>
+                  </div>
+                  <!-- Реальный контент -->
                   <p
-                    class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+                    class="mb-3 font-normal text-gray-700 dark:text-gray-400 real-content"
                     id="messageOutput">
                     Updating...
                   </p>
@@ -196,9 +242,10 @@
                   <td class="py-3">
                     <div class="animate-shimmer h-4 w-4 mx-auto rounded"></div>
                   </td>
-                  <td class="py-3">
+                  <td class="py-3 flex justify-center">
                     <div
-                      class="animate-shimmer h-24 w-24 mx-auto rounded"></div>
+                      class="animate-shimmer h-24 w-24 rounded"
+                      style="margin: 0 auto"></div>
                   </td>
                   <td class="py-3">
                     <div class="animate-shimmer h-4 w-32 mx-auto rounded"></div>
@@ -280,6 +327,19 @@
     </script>
     <script type="module">
       const tableBody = document.querySelector("#leaderboard tbody");
+      const skeletonTemplate = document.querySelector("#skeleton-row");
+
+      // Функция для показа скелетон-лоадеров
+      function showSkeletons(count = 5) {
+        tableBody.innerHTML = "";
+        for (let i = 0; i < count; i++) {
+          const clone = document.importNode(skeletonTemplate.content, true);
+          tableBody.appendChild(clone);
+        }
+      }
+
+      // Показываем скелетоны сразу
+      showSkeletons();
 
       const fetchLeaderboard = async () => {
         try {
@@ -289,49 +349,94 @@
           if (!response.ok) throw new Error("Failed to fetch leaderboard");
           const leaderboard = await response.json();
 
-          tableBody.innerHTML = "";
-          leaderboard.forEach((row, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${index + 1}</td>
-              <td class="flex justify-center"><img src="${
-                row.image_url
-              }" class="w-24 " alt="cat"/></td>
-              <td><a href="${"/catDetails?id=" + row.id}" class="underline">${
-              row.breed_name
-            }</a></td>
-              <td>${row.id}</td>
-              <td>${row.count}</td>
-            `;
-            tableBody.appendChild(tr);
-          });
+          // Добавим небольшую задержку для лучшего пользовательского опыта
+          setTimeout(() => {
+            tableBody.innerHTML = "";
+
+            if (leaderboard.length === 0) {
+              tableBody.innerHTML =
+                '<tr><td colspan="5" class="text-center py-4">Нет данных для отображения</td></tr>';
+              return;
+            }
+
+            leaderboard.forEach((row, index) => {
+              const tr = document.createElement("tr");
+              tr.className = "border-b dark:border-gray-700";
+              tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td class="flex justify-center">
+                  <img src="${row.image_url}" 
+                       class="w-24 h-24 object-cover rounded" 
+                       alt="cat"
+                       onerror="this.src='https://via.placeholder.com/96?text=No+Image'" />
+                </td>
+                <td><a href="${"/catDetails?id=" + row.id}" class="underline">${
+                row.breed_name
+              }</a></td>
+                <td>${row.id}</td>
+                <td>${row.count}</td>
+              `;
+              tableBody.appendChild(tr);
+            });
+          }, 500); // Небольшая задержка для плавности
         } catch (err) {
           console.error(err);
           tableBody.innerHTML =
-            '<tr><td colspan="3">Ошибка загрузки...</td></tr>';
+            '<tr><td colspan="5" class="text-center py-4">Ошибка загрузки. Пожалуйста, попробуйте позже.</td></tr>';
         }
       };
 
-      // Periodically update leaderboard
-      setInterval(fetchLeaderboard, 5000);
+      // Периодическое обновление лидерборда
       fetchLeaderboard();
+      setInterval(fetchLeaderboard, 5000);
     </script>
+
     <script type="module">
       const messageOutputDiv = document.getElementById("messageOutput");
       const timeOutputDiv = document.getElementById("timeOutput");
+      const messageLoader = document.getElementById("messageLoader");
+      const timeLoader = document.getElementById("timeLoader");
+
       const ws = new WebSocket(
         `ws://${window.location.hostname}:{{apiPort}}/wss`
       );
 
+      // Гарантируем, что лоадеры видны при загрузке страницы
+      messageLoader.classList.add("skeleton-content");
+      timeLoader.classList.add("skeleton-content");
+      messageOutputDiv.classList.add("real-content");
+      timeOutputDiv.classList.add("real-content");
+
+      // Ожидаем минимум 1.5 секунды для отображения скелетонов
+      let dataReceived = false;
+      setTimeout(() => {
+        if (dataReceived) {
+          showContent();
+        }
+      }, 1500);
+
+      function showContent() {
+        // Скрываем лоадеры и показываем контент
+        messageLoader.classList.remove("skeleton-content");
+        timeLoader.classList.remove("skeleton-content");
+        messageLoader.style.display = "none";
+        timeLoader.style.display = "none";
+
+        messageOutputDiv.classList.remove("real-content");
+        timeOutputDiv.classList.remove("real-content");
+        messageOutputDiv.style.display = "block";
+        timeOutputDiv.style.display = "block";
+      }
+
       ws.onopen = () => {
         console.log("Connected to server");
-        messageOutputDiv.textContent = "Подключено к серверу...";
-        timeOutputDiv.textContent = "Получение данных...";
       };
 
       ws.onmessage = (event) => {
+        dataReceived = true;
         const { messageCount, uptimeDateObject } = JSON.parse(event.data);
         const startDate = new Date(uptimeDateObject);
+
         messageOutputDiv.textContent = messageCount;
 
         const formatTimeDifference = (startDate) => {
@@ -348,18 +453,23 @@
           timeOutputDiv.textContent = formatTimeDifference(startDate);
         };
 
-        updateCounter(); // Вызов обновления счётчика
-        setInterval(updateCounter, 1000); // Обновление каждую секунду
+        updateCounter();
+        setInterval(updateCounter, 1000);
+
+        // Показываем контент с задержкой для лучшего UX
+        setTimeout(showContent, 500);
       };
 
       ws.onclose = () => {
         console.log("Disconnected from server");
+        showContent();
         messageOutputDiv.textContent = "Соединение с сервером потеряно";
         timeOutputDiv.textContent = "Соединение с сервером потеряно";
       };
 
       ws.onerror = (error) => {
         console.error("WebSocket error:", error);
+        showContent();
         messageOutputDiv.textContent = "Ошибка подключения к серверу";
         timeOutputDiv.textContent = "Ошибка подключения к серверу";
       };

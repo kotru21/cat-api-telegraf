@@ -18,9 +18,11 @@ then, create the .env file and fill in your telegram bot token:
 to increase cat API ratelimits, fill in your CatAPI token:
 `CATAPI_KEY=YourCatApiTokenHere`
  # Web part of the bot
-<img src="https://github.com/user-attachments/assets/8f4b27ff-b499-4a99-ab2e-8cef76b7a8ef" width=650 align="top"/>
+![image](https://github.com/user-attachments/assets/bbbd82ba-6aed-4e83-ac43-0c56ace8453f)
 
-<img src="https://github.com/user-attachments/assets/2a9729d4-f941-47f8-a263-14a74b651f05" width=350 />
+
+![image](https://github.com/user-attachments/assets/93c6f150-244c-4e64-a335-4b503621c0d0)
+
 
  # Telegram part of the bot
  

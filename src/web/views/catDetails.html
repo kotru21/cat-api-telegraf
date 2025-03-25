@@ -163,7 +163,7 @@
     </style>
   </head>
   <body>
-    <!-- Навигационная панель -->
+    <!-- навигационная панель -->
     <nav
       class="py-4 fixed w-full bg-none header z-50 transition-all duration-300">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -172,7 +172,8 @@
             <i class="fas fa-cat mr-2 text-indigo-500"></i>
             <span>CatBot</span>
           </a>
-          <div class="flex items-center space-x-4">
+          <!-- Десктопное меню -->
+          <div class="hidden md:flex items-center space-x-4">
             <a
               href="/"
               class="text-gray-300 hover:text-white transition-colors">
@@ -186,6 +187,34 @@
             <a
               href="https://t.me/catbotjss_bot"
               class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
+              <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+            </a>
+          </div>
+          <!-- Мобильная кнопка меню -->
+          <button
+            id="menuButton"
+            class="md:hidden text-gray-300 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Мобильное меню (скрыто по умолчанию) -->
+        <div id="mobileMenu" class="md:hidden hidden">
+          <div
+            class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg">
+            <a
+              href="/"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-home mr-1"></i> Главная
+            </a>
+            <a
+              href="/#leaderboard"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-trophy mr-1"></i> Топ котов
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700">
               <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
             </a>
           </div>
@@ -317,6 +346,58 @@
           nav.classList.remove("bg-gray-900");
           nav.classList.add("bg-none");
         }
+      });
+
+      // Мобильное меню
+      document.addEventListener("DOMContentLoaded", function () {
+        const menuButton = document.getElementById("menuButton");
+        const mobileMenu = document.getElementById("mobileMenu");
+
+        if (!menuButton || !mobileMenu) {
+          console.error("Элементы меню не найдены");
+          return;
+        }
+
+        // Добавляем флаг для отслеживания состояния меню
+        let menuOpen = false;
+
+        // Обработчик для переключения меню
+        menuButton.addEventListener("click", function (event) {
+          // Останавливаем распространение события
+          event.stopPropagation();
+
+          menuOpen = !menuOpen;
+
+          if (menuOpen) {
+            mobileMenu.classList.remove("hidden");
+            menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
+          } else {
+            mobileMenu.classList.add("hidden");
+            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+          }
+        });
+
+        // Закрытие меню при клике по пунктам меню
+        mobileMenu.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", function () {
+            mobileMenu.classList.add("hidden");
+            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            menuOpen = false;
+          });
+        });
+
+        // Закрытие меню при клике вне меню
+        document.addEventListener("click", function (event) {
+          if (
+            !menuButton.contains(event.target) &&
+            !mobileMenu.contains(event.target) &&
+            menuOpen
+          ) {
+            mobileMenu.classList.add("hidden");
+            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            menuOpen = false;
+          }
+        });
       });
 
       // Загрузка данных о коте

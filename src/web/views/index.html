@@ -317,12 +317,16 @@
       fetchLeaderboard();
     </script>
     <script type="module">
-      const messageOutputDiv = document.getElementById("messageOutput"); // Element, to display amount of messages in it
-      const timeOutputDiv = document.getElementById("timeOutput"); // Element, to display amount of time from startup in it
-      const ws = new WebSocket(`wss://${window.location.hostname}/wss`);
+      const messageOutputDiv = document.getElementById("messageOutput");
+      const timeOutputDiv = document.getElementById("timeOutput");
+      const ws = new WebSocket(
+        `ws://${window.location.hostname}:{{apiPort}}/wss`
+      );
 
       ws.onopen = () => {
         console.log("Connected to server");
+        messageOutputDiv.textContent = "Подключено к серверу...";
+        timeOutputDiv.textContent = "Получение данных...";
       };
 
       ws.onmessage = (event) => {
@@ -345,10 +349,19 @@
         };
 
         updateCounter(); // Вызов обновления счётчика
+        setInterval(updateCounter, 1000); // Обновление каждую секунду
       };
 
       ws.onclose = () => {
         console.log("Disconnected from server");
+        messageOutputDiv.textContent = "Соединение с сервером потеряно";
+        timeOutputDiv.textContent = "Соединение с сервером потеряно";
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        messageOutputDiv.textContent = "Ошибка подключения к серверу";
+        timeOutputDiv.textContent = "Ошибка подключения к серверу";
       };
     </script>
   </body>

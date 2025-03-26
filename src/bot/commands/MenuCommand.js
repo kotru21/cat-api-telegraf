@@ -1,6 +1,7 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import config from "../../config/index.js";
+import catService from "../../services/CatService.js";
 
 export class MenuCommand extends BaseCommand {
   constructor() {

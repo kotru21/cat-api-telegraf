@@ -1,9 +1,6 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import config from "../../config/index.js";
-import factCommand from "./FactCommand.js";
-import myLikesCommand from "./MyLikesCommand.js";
-import topCommand from "./TopCommand.js";
 
 export class MenuCommand extends BaseCommand {
   constructor() {
@@ -267,8 +264,5 @@ export class MenuCommand extends BaseCommand {
     }
   }
 }
-
-// Добавляем импорт сервиса котов
-import catService from "../../services/CatService.js";
 
 export default new MenuCommand();

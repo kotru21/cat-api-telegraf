@@ -1,5 +1,7 @@
 import { Telegraf } from "telegraf";
+import RateLimitMiddleware from "telegraf-ratelimit";
 import express from "express";
+import helmet from "helmet";
 import { createServer } from "http";
 import cors from "cors";
 import path from "path";
@@ -26,6 +28,17 @@ async function initDatabase() {
 function initBot() {
   const bot = new Telegraf(config.BOT_TOKEN);
 
+  // Настройка рейт-лимитов для защиты от спама командами
+  const limitConfig = {
+    window: 3000, // 3 секунды
+    limit: 3, // максимум 3 сообщения за период
+    onLimitExceeded: (ctx) =>
+      ctx.reply("Пожалуйста, не отправляйте команды так часто 🙏"),
+  };
+
+  // Применение рейт-лимитов до обработки команд
+  bot.use(new RateLimitMiddleware(limitConfig));
+
   // Middleware для подсчета сообщений
   bot.use((ctx, next) => {
     incrementMessageCount();
@@ -33,16 +46,6 @@ function initBot() {
   });
 
   // Регистрация команд
-  const commands = [
-    factCommand.getCommandInfo(),
-    menuCommand.getCommandInfo(),
-    myLikesCommand.getCommandInfo(),
-    topCommand.getCommandInfo(), // Добавлена новая команда
-  ];
-
-  bot.telegram.setMyCommands(commands);
-
-  // Подключение обработчиков
   bot.use(
     factCommand.middleware(),
     menuCommand.middleware(),
@@ -66,6 +69,33 @@ function initWebServer(port) {
   const __dirname = path.resolve();
 
   // Настройка middleware
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'", // Добавляем 'unsafe-inline' для разрешения встроенных скриптов
+            "https://cdn.tailwindcss.com",
+            "https://cdnjs.cloudflare.com",
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://cdnjs.cloudflare.com",
+          ],
+          imgSrc: ["'self'", "data:", "https:", "http:"],
+          connectSrc: ["'self'", "ws:", "wss:"],
+          fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Для возможности загрузки изображений с других доменов
+    })
+  );
+
   app.use(cors());
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));

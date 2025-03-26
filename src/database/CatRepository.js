@@ -48,6 +48,15 @@ export class CatRepository {
   }
 
   async getCatById(catId) {
+    // Валидация входного параметра
+    if (
+      !catId ||
+      typeof catId !== "string" ||
+      !/^[a-zA-Z0-9_-]+$/.test(catId)
+    ) {
+      throw new Error("Invalid cat ID format");
+    }
+
     const db = await this.dbPromise;
     return new Promise((resolve, reject) => {
       db.get(

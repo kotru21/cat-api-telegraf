@@ -1,24 +1,56 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import catService from "../services/CatService.js";
 
 export function setupApiRoutes(app) {
+  // Базовый лимитер для всех API-запросов
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 минут
+    max: 100, // ограничение каждого IP до 100 запросов в окне
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: { error: "Слишком много запросов, пожалуйста, попробуйте позже" },
+  });
+
+  // Более строгие ограничения для некоторых эндпоинтов
+  const leaderboardLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 минут
+    max: 30, // ограничение до 30 запросов в окне
+    message: {
+      error:
+        "Слишком много запросов к лидерборду, пожалуйста, попробуйте позже",
+    },
+  });
+
   const router = express.Router();
 
+  // Применяем базовый лимитер ко всем маршрутам API
+  router.use(apiLimiter);
+
+  // Существующие маршруты с дополнительными лимитами где необходимо
   router.get("/cat/:id", async (req, res) => {
     try {
-      const catData = await catService.getCatById(req.params.id);
+      // Валидация параметра id для предотвращения SQL-инъекций
+      const id = req.params.id;
+      if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+        return res.status(400).json({ error: "Invalid ID format" });
+      }
+
+      const catData = await catService.getCatById(id);
       if (!catData) return res.status(404).json({ error: "Cat not found" });
       res.json(catData);
     } catch (err) {
+      console.error("Error fetching cat:", err);
       res.status(500).json({ error: "Failed to fetch cat data" });
     }
   });
 
-  router.get("/leaderboard", async (req, res) => {
+  router.get("/leaderboard", leaderboardLimiter, async (req, res) => {
     try {
       const rows = await catService.getLeaderboard();
       res.json(rows);
     } catch (err) {
+      console.error("Error fetching leaderboard:", err);
       res.status(500).json({ error: "Failed to fetch leaderboard" });
     }
   });

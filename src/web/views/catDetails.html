@@ -265,12 +265,11 @@
             </div>
           </div>
 
-          <!-- Обновим информацию о породе, добавив кликабельные характеристики -->
           <div class="md:col-span-1">
             <div class="space-y-4">
               <div
                 class="stat-card hover:bg-gray-700 cursor-pointer"
-                onclick="searchByFeature('origin', this.querySelector('p').textContent)">
+                data-feature="origin">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Происхождение
                 </h3>
@@ -282,7 +281,7 @@
 
               <div
                 class="stat-card hover:bg-gray-700 cursor-pointer"
-                onclick="searchByFeature('temperament', this.querySelector('p').textContent)">
+                data-feature="temperament">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Темперамент
                 </h3>
@@ -294,7 +293,7 @@
 
               <div
                 class="stat-card hover:bg-gray-700 cursor-pointer"
-                onclick="searchByFeature('life_span', this.querySelector('p').textContent)">
+                data-feature="life_span">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Продолжительность жизни (лет)
                 </h3>
@@ -306,7 +305,7 @@
 
               <div
                 class="stat-card hover:bg-gray-700 cursor-pointer"
-                onclick="searchByFeature('weight_metric', this.querySelector('p').textContent)">
+                data-feature="weight_metric">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Вес
                 </h3>
@@ -567,6 +566,21 @@
         console.log(`Перенаправление на: ${url}`);
         window.location.href = url;
       }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".stat-card").forEach((card) => {
+          if (!card.id || card.id !== "wiki-link") {
+            card.addEventListener("click", function () {
+              const featureType = this.dataset.feature || "";
+              const valueElement = this.querySelector("p");
+
+              if (valueElement && featureType) {
+                searchByFeature(featureType, valueElement.textContent);
+              }
+            });
+          }
+        });
+      });
     </script>
   </body>
 </html>

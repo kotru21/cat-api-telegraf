@@ -11,6 +11,7 @@ import config from "./config/index.js";
 import { incrementMessageCount } from "./utils/messageCounter.js";
 import { WebSocketService } from "./web/WebSocketServer.js";
 import { setupApiRoutes } from "./web/ApiRoutes.js";
+import { likesEvents } from "./database/LikesRepository.js";
 
 // Импорт команд бота
 import factCommand from "./bot/commands/FactCommand.js";
@@ -102,6 +103,15 @@ function initWebServer(port) {
 
   // Настройка WebSocket
   const wsService = new WebSocketService(server);
+
+  //  прослушивание событий изменения рейтинга
+  likesEvents.on("leaderboardChanged", async () => {
+    // Принудительно обновление хеша лидерборда и уведомление клиентов
+    const changed = await wsService.updateLeaderboardHash();
+    if (changed) {
+      wsService.broadcastData({ leaderboardChanged: true });
+    }
+  });
 
   // Настройка API маршрутов
   setupApiRoutes(app);

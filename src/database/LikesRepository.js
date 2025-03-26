@@ -1,5 +1,10 @@
 import database from "./Database.js";
 
+// Добавим систему событий для оповещения об изменениях
+import { EventEmitter } from "events";
+
+export const likesEvents = new EventEmitter();
+
 export class LikesRepository {
   constructor() {
     this.dbPromise = database.get();
@@ -64,6 +69,10 @@ export class LikesRepository {
                 }
 
                 db.run("COMMIT");
+
+                // Генерируем событие обновления рейтинга
+                likesEvents.emit("leaderboardChanged");
+
                 resolve(true); // Лайк успешно добавлен
               }
             );

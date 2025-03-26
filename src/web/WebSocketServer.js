@@ -1,5 +1,6 @@
 import { WebSocketServer } from "ws";
 import { getMessageCount } from "../utils/messageCounter.js";
+import catService from "../services/CatService.js";
 
 export class WebSocketService {
   constructor(server, path = "/wss") {
@@ -20,8 +21,46 @@ export class WebSocketService {
 
     this.clientIPs = new Map(); // Для отслеживания подключений по IP
     this.uptimeDateObject = new Date();
+    this.leaderboardHash = ""; // Хеш для отслеживания изменений рейтинга
     this.setupConnectionHandler();
     this.startBroadcasting();
+    this.startLeaderboardTracking();
+  }
+
+  // Метод для отслеживания изменений рейтинга
+  async startLeaderboardTracking() {
+    // Инициализация начального значение хеша
+    await this.updateLeaderboardHash();
+
+    // Проверка изменения каждые 10 секунд
+    setInterval(async () => {
+      const changed = await this.updateLeaderboardHash();
+      if (changed) {
+        // Если рейтинг изменился, то уведомление всех клиентов
+        this.broadcastData({ leaderboardChanged: true });
+      }
+    }, 10000);
+  }
+
+  // Обновляет хеш рейтинга и возвращает true, если он изменился
+  async updateLeaderboardHash() {
+    try {
+      const leaderboard = await catService.getLeaderboard();
+      // простой хеш на основе данных рейтинга
+      const newHash = JSON.stringify(
+        leaderboard.map((item) => `${item.id}-${item.count}`)
+      );
+
+      if (newHash !== this.leaderboardHash) {
+        this.leaderboardHash = newHash;
+        console.log("Leaderboard data changed, notifying clients");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error updating leaderboard hash:", error);
+      return false;
+    }
   }
 
   setupConnectionHandler() {
@@ -43,7 +82,14 @@ export class WebSocketService {
         this.clientIPs.set(ip, count);
       }
 
-      ws.send(JSON.stringify(this.getStateData()));
+      // Отправляем текущее состояние при подключении
+      // и сразу запрашиваем начальную загрузку рейтинга
+      ws.send(
+        JSON.stringify({
+          ...this.getStateData(),
+          leaderboardChanged: true,
+        })
+      );
 
       // Ограничение на частоту сообщений
       let messageCount = 0;
@@ -91,14 +137,21 @@ export class WebSocketService {
     };
   }
 
-  sendDataToClient(client) {
+  sendDataToClient(client, additionalData = {}) {
     if (client.readyState === client.OPEN) {
-      client.send(JSON.stringify(this.getStateData()));
+      client.send(
+        JSON.stringify({
+          ...this.getStateData(),
+          ...additionalData,
+        })
+      );
     }
   }
 
-  broadcastData() {
-    this.wss.clients.forEach((client) => this.sendDataToClient(client));
+  broadcastData(additionalData = {}) {
+    this.wss.clients.forEach((client) =>
+      this.sendDataToClient(client, additionalData)
+    );
   }
 
   startBroadcasting() {

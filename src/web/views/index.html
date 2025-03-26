@@ -528,6 +528,7 @@
       // Показываем скелетоны сразу
       showSkeletons();
 
+      // Функция загрузки данных лидерборда
       const fetchLeaderboard = async () => {
         try {
           const response = await fetch(
@@ -610,9 +611,34 @@
         }
       };
 
-      // Периодическое обновление лидерборда
       fetchLeaderboard();
-      setInterval(fetchLeaderboard, 5000);
+
+      // Настройка WebSocket для обновления по требованию
+      document.addEventListener("DOMContentLoaded", function () {
+        const ws = new WebSocket(
+          `ws://${window.location.hostname}:{{apiPort}}/wss`
+        );
+
+        ws.onopen = () => {
+          console.log("WebSocket connected for leaderboard updates");
+        };
+
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+
+          // Обновляем лидерборд только когда получаем сигнал об изменении
+          if (data.leaderboardChanged) {
+            console.log("Leaderboard changed, updating data...");
+            fetchLeaderboard();
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error("WebSocket error:", error);
+          // В случае ошибки WebSocket переключаемся на периодический опрос
+          setInterval(fetchLeaderboard, 30000); // раз в 30 секунд
+        };
+      });
     </script>
 
     <!-- Скрипт для WebSocket -->

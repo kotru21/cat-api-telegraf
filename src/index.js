@@ -131,8 +131,8 @@ function initWebServer(port) {
     const filePath = path.join(__dirname, "src/web/views/index.html");
     fs.readFile(filePath, "utf8", (err, html) => {
       if (err) return res.status(500).send("Internal Server Error");
-      const modified = html.replace("{{apiPort}}", port);
-      res.send(modified);
+
+      res.send(html);
     });
   });
 
@@ -148,9 +148,16 @@ function initWebServer(port) {
   // Запуск сервера
   server
     .listen(port, () => {
-      const hostname = "localhost";
-      const httpUrl = `http://${hostname}:${port}`;
-      const wsUrl = `ws://${hostname}:${port}/wss`;
+      const websiteUrl = config.WEBSITE_URL;
+      const baseUrl = websiteUrl.endsWith("/")
+        ? websiteUrl.slice(0, -1)
+        : websiteUrl;
+      const fullUrl =
+        port === 80 || port === 443 ? baseUrl : `${baseUrl}:${port}`;
+
+      const httpUrl = fullUrl;
+      const wsUrl =
+        fullUrl.replace("http:", "ws:").replace("https:", "wss:") + "/wss";
 
       console.log(`Сервер запущен на порту ${port}`);
       console.log(`Веб-интерфейс доступен по адресу: ${httpUrl}`);

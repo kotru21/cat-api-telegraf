@@ -615,9 +615,10 @@
 
       // Настройка WebSocket для обновления по требованию
       document.addEventListener("DOMContentLoaded", function () {
-        const ws = new WebSocket(
-          `ws://${window.location.hostname}:{{apiPort}}/wss`
-        );
+        const wsProtocol =
+          window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = `${wsProtocol}//${window.location.hostname}/wss`;
+        const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
           console.log("WebSocket connected for leaderboard updates");
@@ -648,9 +649,9 @@
       const messageLoader = document.getElementById("messageLoader");
       const timeLoader = document.getElementById("timeLoader");
 
-      const ws = new WebSocket(
-        `ws://${window.location.hostname}:{{apiPort}}/wss`
-      );
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${wsProtocol}//${window.location.host}/wss`;
+      const ws = new WebSocket(wsUrl);
 
       // Гарантируем, что лоадеры видны при загрузке страницы
       messageLoader.classList.add("skeleton-content");

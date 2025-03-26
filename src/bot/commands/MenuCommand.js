@@ -1,5 +1,6 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
+import config from "../../config/index.js";
 
 export class MenuCommand extends BaseCommand {
   constructor() {
@@ -32,7 +33,7 @@ export class MenuCommand extends BaseCommand {
           "❤️ */mylikes* - просмотреть котов, которым вы поставили лайки\n" +
           "🏆 */top* - показать топ самых популярных пород котов\n" +
           "📋 */menu* - вернуться в это меню\n\n" +
-          "Вы также можете посетить наш [веб-сайт](https://t.me/catbotjss_bot) для просмотра рейтинга котов!",
+          `Вы также можете посетить наш [веб-сайт](${config.FULL_WEBSITE_URL}) для просмотра рейтинга котов!`,
         {
           parse_mode: "Markdown",
           disable_web_page_preview: true,

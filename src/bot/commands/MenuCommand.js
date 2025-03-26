@@ -25,20 +25,111 @@ export class MenuCommand extends BaseCommand {
       );
     });
 
-    // Обработчики текстовых команд меню
+    // Обработчики текстовых команд меню - прямые обработчики
     this.composer.hears("🐾 Случайный кот", async (ctx) => {
       await ctx.reply("Получаю случайного кота...");
-      return factCommand.composer.command("fact")(ctx);
+      // Имитируем обработку команды /fact
+      try {
+        const catData = await catService.getRandomCat();
+        const breed = catData.breeds[0];
+        const [likes] = await catService.getLikesForCat(catData.id);
+
+        await ctx.replyWithPhoto(
+          { url: catData.url },
+          {
+            parse_mode: "Markdown",
+            caption: `_${breed.name}_\n${breed.description}`,
+            ...Markup.inlineKeyboard([
+              [
+                Markup.button.url("Википедия", breed.wikipedia_url),
+                Markup.button.callback(
+                  `👍 ${likes?.count || 0}`,
+                  `data-${catData.id}`
+                ),
+              ],
+            ]),
+          }
+        );
+      } catch (error) {
+        console.error("Ошибка при получении факта:", error);
+        await ctx.reply(
+          "Извините, произошла ошибка при получении информации о породе кошки"
+        );
+      }
     });
 
     this.composer.hears("❤️ Мои лайки", async (ctx) => {
       await ctx.reply("Загружаю ваши лайки...");
-      return myLikesCommand.composer.command("mylikes")(ctx);
+      // Прямой вызов кода обработки команды
+      try {
+        const userId = ctx.from.id.toString();
+        const userLikes = await catService.getUserLikes(userId);
+
+        if (!userLikes || userLikes.length === 0) {
+          await ctx.reply("Вы еще не поставили ни одного лайка 😿");
+          return;
+        }
+
+        // Отображаем первую запись с фото и кнопками навигации
+        await this.sendLikeInfo(ctx, userLikes, 0);
+      } catch (error) {
+        console.error("Ошибка при получении лайков:", error);
+        await ctx.reply(
+          "Извините, произошла ошибка при получении списка ваших лайков"
+        );
+      }
     });
 
     this.composer.hears("🏆 Топ популярных", async (ctx) => {
       await ctx.reply("Загружаю рейтинг...");
-      return topCommand.composer.command("top")(ctx);
+      // Прямой вызов кода обработки команды
+      try {
+        const topCats = await catService.getLeaderboard(10);
+
+        if (!topCats || topCats.length === 0) {
+          await ctx.reply("Пока нет популярных пород в рейтинге 😿");
+          return;
+        }
+
+        let message = "🏆 *Топ популярных пород котов*\n\n";
+
+        topCats.forEach((cat, index) => {
+          const medal =
+            index === 0
+              ? "🥇"
+              : index === 1
+              ? "🥈"
+              : index === 2
+              ? "🥉"
+              : `${index + 1}.`;
+          message += `${medal} *${cat.breed_name}* - ${cat.count} ❤️\n`;
+        });
+
+        message += "\nНажмите кнопку ниже, чтобы узнать подробности о породе.";
+
+        const keyboard = Markup.inlineKeyboard([
+          [
+            Markup.button.callback(
+              "📊 Детали о породе",
+              `like_details:${topCats[0].id}`
+            ),
+          ],
+        ]);
+
+        await ctx.replyWithPhoto(
+          { url: topCats[0].image_url },
+          {
+            caption: message,
+            parse_mode: "Markdown",
+            ...keyboard,
+          }
+        );
+      } catch (error) {
+        console.error("Ошибка при получении топа:", error);
+        await ctx.reply(
+          "Извините, произошла ошибка при получении рейтинга популярных пород"
+        );
+      }
     });
 
     this.composer.hears("ℹ️ Помощь", (ctx) => {
@@ -55,7 +146,129 @@ export class MenuCommand extends BaseCommand {
         }
       );
     });
+
+    // Обработчики кнопок навигации по лайкам
+    this.composer.action(/^like_nav:(prev|next):(\d+)$/, async (ctx) => {
+      try {
+        const userId = ctx.from.id.toString();
+        const userLikes = await catService.getUserLikes(userId);
+
+        if (!userLikes || userLikes.length === 0) {
+          await ctx.answerCbQuery("Список лайков пуст");
+          return;
+        }
+
+        const action = ctx.match[1]; // prev или next
+        let currentIndex = parseInt(ctx.match[2]);
+
+        if (action === "next") {
+          currentIndex = (currentIndex + 1) % userLikes.length;
+        } else {
+          currentIndex =
+            (currentIndex - 1 + userLikes.length) % userLikes.length;
+        }
+
+        await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
+        await ctx.answerCbQuery();
+      } catch (error) {
+        console.error("Ошибка при навигации по лайкам:", error);
+        await ctx.answerCbQuery("Произошла ошибка");
+      }
+    });
+
+    this.composer.action(/^like_details:(.+)$/, async (ctx) => {
+      try {
+        const catId = ctx.match[1];
+        const catDetails = await catService.getCatById(catId);
+
+        if (!catDetails) {
+          await ctx.answerCbQuery("Информация о коте не найдена");
+          return;
+        }
+
+        // сообщение с подробной информацией
+        const detailsMessage =
+          `*${catDetails.breed_name}*\n\n` +
+          `*Описание:* ${catDetails.description}\n\n` +
+          `*Происхождение:* ${catDetails.origin}\n` +
+          `*Темперамент:* ${catDetails.temperament}\n` +
+          `*Продолжительность жизни:* ${catDetails.life_span}\n` +
+          `*Вес:* ${catDetails.weight_imperial} фунтов (${catDetails.weight_metric} кг)\n` +
+          `*Количество лайков:* ${catDetails.count}\n\n` +
+          `[Подробнее на Википедии](${catDetails.wikipedia_url})`;
+
+        await ctx.replyWithPhoto(
+          { url: catDetails.image_url },
+          {
+            caption: detailsMessage,
+            parse_mode: "Markdown",
+            ...Markup.inlineKeyboard([
+              [Markup.button.callback("👍 Лайк", `data-${catDetails.id}`)],
+            ]),
+          }
+        );
+
+        await ctx.answerCbQuery("Подробная информация о коте");
+      } catch (error) {
+        console.error("Ошибка при получении подробностей о коте:", error);
+        await ctx.answerCbQuery("Произошла ошибка при получении информации");
+      }
+    });
+  }
+
+  // Вспомогательный метод для MyLikesCommand
+  async sendLikeInfo(ctx, userLikes, index, isEdit = false) {
+    const likeInfo = userLikes[index];
+    const total = userLikes.length;
+    const keyboard = Markup.inlineKeyboard([
+      [
+        Markup.button.callback("◀️ Предыдущий", `like_nav:prev:${index}`),
+        Markup.button.callback("Следующий ▶️", `like_nav:next:${index}`),
+      ],
+      [
+        Markup.button.callback(
+          "📝 Подробнее",
+          `like_details:${likeInfo.cat_id}`
+        ),
+      ],
+    ]);
+
+    const caption = `*${likeInfo.breed_name}*\n\n👍 Лайк ${
+      index + 1
+    } из ${total}`;
+
+    if (isEdit && ctx.callbackQuery && ctx.callbackQuery.message) {
+      try {
+        await ctx.editMessageMedia(
+          {
+            type: "photo",
+            media: likeInfo.image_url,
+            caption: caption,
+            parse_mode: "Markdown",
+          },
+          { reply_markup: keyboard.reply_markup }
+        );
+      } catch (error) {
+        // Если не удалось отредактировать (например, фото такое же), просто обновляем подпись
+        await ctx.editMessageCaption(caption, {
+          parse_mode: "Markdown",
+          reply_markup: keyboard.reply_markup,
+        });
+      }
+    } else {
+      await ctx.replyWithPhoto(
+        { url: likeInfo.image_url },
+        {
+          caption: caption,
+          parse_mode: "Markdown",
+          ...keyboard,
+        }
+      );
+    }
   }
 }
+
+// Добавляем импорт сервиса котов
+import catService from "../../services/CatService.js";
 
 export default new MenuCommand();

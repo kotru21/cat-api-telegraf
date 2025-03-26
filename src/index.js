@@ -55,6 +55,16 @@ function initBot() {
     likeAction.middleware()
   );
 
+  bot.use((ctx, next) => {
+    ctx.command = {
+      fact: () => factCommand.composer.handler(ctx),
+      mylikes: () => myLikesCommand.composer.handler(ctx),
+      top: () => topCommand.composer.handler(ctx),
+      menu: () => menuCommand.composer.handler(ctx),
+    };
+    return next();
+  });
+
   // Обработчик команды /start
   bot.start((ctx) =>
     ctx.reply("Привет! Я бот с фактами о кошках. Используй /menu для навигации")

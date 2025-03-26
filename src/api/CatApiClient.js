@@ -1,6 +1,7 @@
+import config from "./config/index.js";
 export class CatApiClient {
   constructor(apiKey) {
-    this.apiKey = apiKey;
+    this.apiKey = config.CAT_API_TOKEN;
     this.baseUrl = "https://api.thecatapi.com/v1";
   }
 

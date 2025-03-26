@@ -11,7 +11,11 @@ export class MenuCommand extends BaseCommand {
     this.composer.command(this.name, async (ctx) => {
       return await ctx.reply(
         "Выберите команду из меню ниже:",
-        Markup.keyboard([["/fact"], ["/mylikes"]]).resize()
+        Markup.keyboard([
+          ["/fact"],
+          ["/mylikes"],
+          ["/top"], // Добавлена новая кнопка
+        ]).resize()
       );
     });
   }

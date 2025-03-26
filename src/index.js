@@ -14,6 +14,7 @@ import { setupApiRoutes } from "./web/ApiRoutes.js";
 import factCommand from "./bot/commands/FactCommand.js";
 import menuCommand from "./bot/commands/MenuCommand.js";
 import myLikesCommand from "./bot/commands/MyLikesCommand.js";
+import topCommand from "./bot/commands/TopCommand.js"; // Новый импорт
 import likeAction from "./bot/actions/LikeAction.js";
 
 // Инициализация базы данных
@@ -36,6 +37,7 @@ function initBot() {
     factCommand.getCommandInfo(),
     menuCommand.getCommandInfo(),
     myLikesCommand.getCommandInfo(),
+    topCommand.getCommandInfo(), // Добавлена новая команда
   ];
 
   bot.telegram.setMyCommands(commands);
@@ -45,6 +47,7 @@ function initBot() {
     factCommand.middleware(),
     menuCommand.middleware(),
     myLikesCommand.middleware(),
+    topCommand.middleware(),
     likeAction.middleware()
   );
 

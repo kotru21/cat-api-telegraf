@@ -188,6 +188,26 @@ export class CatRepository {
       });
     });
   }
+
+  async getRandomImages(count = 3) {
+    const db = await this.dbPromise;
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT image_url FROM msg 
+         WHERE image_url IS NOT NULL 
+         ORDER BY RANDOM() 
+         LIMIT ?`,
+        [count],
+        (err, rows) => {
+          if (err) {
+            console.error("Ошибка при получении случайных изображений:", err);
+            reject(err);
+          }
+          resolve(rows || []);
+        }
+      );
+    });
+  }
 }
 
 export default new CatRepository();

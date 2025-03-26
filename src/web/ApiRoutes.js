@@ -40,5 +40,16 @@ export function setupApiRoutes(app) {
     }
   });
 
+  router.get("/random-images", async (req, res) => {
+    try {
+      const count = parseInt(req.query.count) || 3;
+      const images = await catService.getRandomImages(count);
+      res.json(images);
+    } catch (err) {
+      console.error("Error fetching random images:", err);
+      res.status(500).json({ error: "Failed to fetch random images" });
+    }
+  });
+
   app.use("/api", router);
 }

@@ -87,6 +87,10 @@ export class CatService {
 
     return catRepository.getCatsByFeature(feature, value);
   }
+
+  async getRandomImages(count = 3) {
+    return catRepository.getRandomImages(count);
+  }
 }
 
 export default new CatService();

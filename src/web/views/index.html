@@ -256,20 +256,16 @@
               </a>
             </div>
 
+            <!-- Заменяем этот блок кода -->
             <div class="flex items-center">
-              <div class="flex -space-x-2">
-                <img
-                  src="https://cdn2.thecatapi.com/images/u0xeq3HjW.jpg"
-                  alt="Cat"
-                  class="hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover" />
-                <img
-                  src="https://cdn2.thecatapi.com/images/Zi4jfH3c6.jpg"
-                  alt="Cat"
-                  class="hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover" />
-                <img
-                  src="https://cdn2.thecatapi.com/images/yPmEpKmnR.jpg"
-                  alt="Cat"
-                  class="hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover" />
+              <div class="flex -space-x-2" id="hero-cats-container">
+                <!-- Здесь будут динамически добавленные изображения -->
+                <div
+                  class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+                <div
+                  class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+                <div
+                  class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
               </div>
               <span class="ml-3 text-sm text-gray-400"
                 >Присоединяйтесь к сообществу котолюбителей</span
@@ -702,6 +698,45 @@
         messageOutputDiv.textContent = "Ошибка подключения к серверу";
         timeOutputDiv.textContent = "Ошибка подключения к серверу";
       };
+    </script>
+
+    <script type="module">
+      // Загрузка случайных изображений для героя
+      const loadRandomHeroCats = async () => {
+        try {
+          const response = await fetch(
+            `${window.location.origin}/api/random-images?count=3`
+          );
+          if (!response.ok) throw new Error("Failed to fetch random images");
+          const images = await response.json();
+
+          const container = document.getElementById("hero-cats-container");
+
+          // Очищаем контейнер
+          container.innerHTML = "";
+
+          // Добавляем случайные изображения
+          images.forEach((img) => {
+            const imgElement = document.createElement("img");
+            imgElement.src = img.image_url;
+            imgElement.alt = "Cat";
+            imgElement.className =
+              "hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover";
+            imgElement.onerror = () => {
+              imgElement.src = "https://via.placeholder.com/40?text=Cat";
+            };
+            container.appendChild(imgElement);
+          });
+        } catch (err) {
+          console.error("Ошибка загрузки изображений:", err);
+        }
+      };
+
+      // Загружаем изображения при загрузке страницы
+      document.addEventListener("DOMContentLoaded", loadRandomHeroCats);
+
+      // Обновляем изображения каждые 30 секунд
+      setInterval(loadRandomHeroCats, 30000);
     </script>
   </body>
 </html>

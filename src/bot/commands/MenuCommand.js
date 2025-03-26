@@ -1,6 +1,9 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import config from "../../config/index.js";
+import factCommand from "./FactCommand.js";
+import myLikesCommand from "./MyLikesCommand.js";
+import topCommand from "./TopCommand.js";
 
 export class MenuCommand extends BaseCommand {
   constructor() {
@@ -23,9 +26,21 @@ export class MenuCommand extends BaseCommand {
     });
 
     // Обработчики текстовых команд меню
-    this.composer.hears("🐾 Случайный кот", (ctx) => ctx.command.fact());
-    this.composer.hears("❤️ Мои лайки", (ctx) => ctx.command.mylikes());
-    this.composer.hears("🏆 Топ популярных", (ctx) => ctx.command.top());
+    this.composer.hears("🐾 Случайный кот", async (ctx) => {
+      await ctx.reply("Получаю случайного кота...");
+      return factCommand.composer.command("fact")(ctx);
+    });
+
+    this.composer.hears("❤️ Мои лайки", async (ctx) => {
+      await ctx.reply("Загружаю ваши лайки...");
+      return myLikesCommand.composer.command("mylikes")(ctx);
+    });
+
+    this.composer.hears("🏆 Топ популярных", async (ctx) => {
+      await ctx.reply("Загружаю рейтинг...");
+      return topCommand.composer.command("top")(ctx);
+    });
+
     this.composer.hears("ℹ️ Помощь", (ctx) => {
       return ctx.reply(
         "*Справка по командам бота*\n\n" +

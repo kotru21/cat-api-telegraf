@@ -48,14 +48,39 @@ function initBot() {
 
   bot.use((ctx, next) => {
     ctx.command = {
-      fact: () => factCommand.composer.handler(ctx),
-      mylikes: () => myLikesCommand.composer.handler(ctx),
-      top: () => topCommand.composer.handler(ctx),
-      menu: () => menuCommand.composer.handler(ctx),
+      fact: () =>
+        ctx.reply("Получаю случайного кота...").then(() => {
+          // Имитируем команду /fact
+          const newCtx = { ...ctx };
+          newCtx.message = { ...ctx.message, text: "/fact" };
+          return factCommand.composer.middleware()(newCtx, () => {});
+        }),
+      mylikes: () =>
+        ctx.reply("Загружаю ваши лайки...").then(() => {
+          // Имитируем команду /mylikes
+          const newCtx = { ...ctx };
+          newCtx.message = { ...ctx.message, text: "/mylikes" };
+          return myLikesCommand.composer.middleware()(newCtx, () => {});
+        }),
+      top: () =>
+        ctx.reply("Загружаю рейтинг...").then(() => {
+          // Имитируем команду /top
+          const newCtx = { ...ctx };
+          newCtx.message = { ...ctx.message, text: "/top" };
+          return topCommand.composer.middleware()(newCtx, () => {});
+        }),
+      menu: () =>
+        ctx.reply("Открываю меню...").then(() => {
+          // Имитируем команду /menu
+          const newCtx = { ...ctx };
+          newCtx.message = { ...ctx.message, text: "/menu" };
+          return menuCommand.composer.middleware()(newCtx, () => {});
+        }),
     };
     return next();
   });
 
+  // Регистрация middleware команд
   bot.use(
     factCommand.middleware(),
     menuCommand.middleware(),

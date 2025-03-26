@@ -46,15 +46,6 @@ function initBot() {
     return next();
   });
 
-  // Регистрация команд
-  bot.use(
-    factCommand.middleware(),
-    menuCommand.middleware(),
-    myLikesCommand.middleware(),
-    topCommand.middleware(),
-    likeAction.middleware()
-  );
-
   bot.use((ctx, next) => {
     ctx.command = {
       fact: () => factCommand.composer.handler(ctx),
@@ -64,6 +55,14 @@ function initBot() {
     };
     return next();
   });
+
+  bot.use(
+    factCommand.middleware(),
+    menuCommand.middleware(),
+    myLikesCommand.middleware(),
+    topCommand.middleware(),
+    likeAction.middleware()
+  );
 
   // Обработчик команды /start
   bot.start((ctx) =>

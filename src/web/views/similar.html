@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title>Похожие породы котов</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      /* Удаляем кастомную анимацию pulse */
+
+      /* Адаптивный хедер */
+      .header {
+        backdrop-filter: blur(8px);
+        background-color: rgba(17, 24, 39, 0.8);
+      }
+
+      /* Карточки котов */
+      .cat-card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(75, 85, 99, 0.3);
+      }
+
+      .cat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+      }
+
+      .cat-image {
+        aspect-ratio: 3/2;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .cat-card:hover .cat-image {
+        transform: scale(1.05);
+      }
+
+      .cat-likes {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background-color: rgba(79, 70, 229, 0.2);
+        color: var(--text-light);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Навигационная панель -->
+    <nav
+      class="py-4 fixed w-full bg-none header z-50 transition-all duration-300">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center">
+          <a href="/" class="text-xl font-bold text-white flex items-center">
+            <i class="fas fa-cat mr-2 text-indigo-500"></i>
+            <span>CatBot</span>
+          </a>
+          <!-- Десктопное меню -->
+          <div class="hidden md:flex items-center space-x-4">
+            <a
+              href="/"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-home mr-1"></i> Главная
+            </a>
+            <a
+              href="/#leaderboard"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-trophy mr-1"></i> Топ котов
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
+              <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+            </a>
+          </div>
+          <!-- Мобильная кнопка меню -->
+          <button
+            id="menuButton"
+            class="md:hidden text-gray-300 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Мобильное меню (скрыто по умолчанию) -->
+        <div id="mobileMenu" class="md:hidden hidden">
+          <div
+            class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg">
+            <a
+              href="/"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-home mr-1"></i> Главная
+            </a>
+            <a
+              href="/#leaderboard"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-trophy mr-1"></i> Топ котов
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+              <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container mx-auto px-4 pt-28 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <!-- Заголовок страницы с информацией о поиске -->
+        <div class="text-center mb-12" id="search-header">
+          <h1 class="text-3xl font-bold mb-4">Поиск похожих пород...</h1>
+          <p class="text-gray-400">Загрузка результатов</p>
+        </div>
+
+        <!-- Обновляем скелетон лоадеры для карточек -->
+        <div
+          id="skeleton-content"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Повторяемая скелетон карточка (6 раз) -->
+          <!-- Карточка 1 -->
+          <div
+            class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+            <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+            <div class="p-5 space-y-3">
+              <div class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+              <div class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              <div class="flex justify-between items-center pt-2">
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-8 w-8 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Карточка 2 -->
+          <div
+            class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+            <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+            <div class="p-5 space-y-3">
+              <div class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+              <div class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              <div class="flex justify-between items-center pt-2">
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-8 w-8 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Карточка 3 -->
+          <div
+            class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+            <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+            <div class="p-5 space-y-3">
+              <div class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+              <div class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              <div class="flex justify-between items-center pt-2">
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-8 w-8 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Карточка 4 -->
+          <div
+            class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+            <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+            <div class="p-5 space-y-3">
+              <div class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+              <div class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              <div class="flex justify-between items-center pt-2">
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-8 w-8 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Карточка 5 -->
+          <div
+            class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+            <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+            <div class="p-5 space-y-3">
+              <div class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+              <div class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              <div class="flex justify-between items-center pt-2">
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-8 w-8 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Карточка 6 -->
+          <div
+            class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+            <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+            <div class="p-5 space-y-3">
+              <div class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+              <div class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              <div class="flex justify-between items-center pt-2">
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-8 w-8 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Реальный контент, будет заполнен через JavaScript -->
+        <div
+          id="results-content"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          style="display: none">
+          <!-- место для добавлени карточек с котами -->
+        </div>
+
+        <!-- Сообщение о пустых результатах -->
+        <div id="no-results" class="text-center py-12" style="display: none">
+          <i class="fas fa-search text-4xl text-gray-600 mb-4"></i>
+          <h2 class="text-2xl font-semibold mb-2">Ничего не найдено</h2>
+          <p class="text-gray-400 mb-6">
+            К сожалению, мы не нашли котов с похожими характеристиками
+          </p>
+          <a
+            href="/"
+            class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+            <i class="fas fa-home mr-2"></i> На главную
+          </a>
+        </div>
+
+        <!-- Кнопка возврата -->
+        <div class="mt-10 text-center">
+          <a
+            href="javascript:history.back()"
+            class="inline-flex items-center px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700">
+            <i class="fas fa-arrow-left mr-2"></i> Назад
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Анимация хедера при скролле
+      window.addEventListener("scroll", function () {
+        const nav = document.querySelector("nav");
+        if (window.scrollY > 10) {
+          nav.classList.add("shadow-md");
+          nav.classList.add("bg-gray-900");
+          nav.classList.remove("bg-none");
+        } else {
+          nav.classList.remove("shadow-md");
+          nav.classList.remove("bg-gray-900");
+          nav.classList.add("bg-none");
+        }
+      });
+
+      // Мобильное меню
+      document.addEventListener("DOMContentLoaded", function () {
+        const menuButton = document.getElementById("menuButton");
+        const mobileMenu = document.getElementById("mobileMenu");
+
+        if (!menuButton || !mobileMenu) {
+          console.error("Элементы меню не найдены");
+          return;
+        }
+
+        let menuOpen = false;
+
+        menuButton.addEventListener("click", function (event) {
+          event.stopPropagation();
+
+          menuOpen = !menuOpen;
+
+          if (menuOpen) {
+            mobileMenu.classList.remove("hidden");
+            menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
+          } else {
+            mobileMenu.classList.add("hidden");
+            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+          }
+        });
+
+        mobileMenu.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", function () {
+            mobileMenu.classList.add("hidden");
+            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            menuOpen = false;
+          });
+        });
+
+        document.addEventListener("click", function (event) {
+          if (
+            !menuButton.contains(event.target) &&
+            !mobileMenu.contains(event.target) &&
+            menuOpen
+          ) {
+            mobileMenu.classList.add("hidden");
+            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            menuOpen = false;
+          }
+        });
+
+        // Получение параметров из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const feature = urlParams.get("feature");
+        const value = urlParams.get("value");
+
+        if (!feature || !value) {
+          showNoResults("Не указаны параметры поиска");
+          return;
+        }
+
+        // Обновляем заголовок страницы в зависимости от типа поиска
+        const featureNames = {
+          origin: "происхождению",
+          temperament: "темпераменту",
+          life_span: "продолжительности жизни",
+          weight_metric: "весу",
+        };
+
+        const featureName = featureNames[feature] || feature;
+
+        document.querySelector(
+          "#search-header h1"
+        ).textContent = `Поиск по ${featureName}: ${value}`;
+        document.querySelector("#search-header p").textContent =
+          "Загрузка результатов...";
+        document.title = `Поиск по ${featureName}: ${value} | CatBot`;
+
+        // Загрузка данных
+        setTimeout(() => {
+          fetch(
+            `/api/similar?feature=${encodeURIComponent(
+              feature
+            )}&value=${encodeURIComponent(value)}`
+          )
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              if (Array.isArray(data) && data.length > 0) {
+                displayResults(data);
+              } else {
+                showNoResults();
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching similar cats:", error);
+              showNoResults("Произошла ошибка при загрузке данных");
+            });
+        }, 800); // Задержка для демонстрации скелетон-лоадеров
+      });
+
+      // Функция предзагрузки изображений для карточек котов
+      function preloadImages(cats) {
+        const preloadPromises = cats.map((cat) => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = cat.image_url;
+          });
+        });
+
+        // Добавляем таймаут в 3 секунды на случай, если какие-то изображения не загрузятся
+        return Promise.race([
+          Promise.all(preloadPromises),
+          new Promise((resolve) => setTimeout(() => resolve("timeout"), 3000)),
+        ]);
+      }
+
+      // Обновленная функция отображения результатов
+      function displayResults(cats) {
+        const resultsContent = document.getElementById("results-content");
+        const skeletonContent = document.getElementById("skeleton-content");
+        const searchHeader = document.getElementById("search-header");
+
+        // Обновляем заголовок
+        searchHeader.querySelector(
+          "p"
+        ).textContent = `Найдено: ${cats.length} пород`;
+
+        // Предзагружаем изображения перед отображением карточек
+        preloadImages(cats).then(() => {
+          // Очищаем контейнер результатов
+          resultsContent.innerHTML = "";
+
+          // Добавляем карточки с котами
+          cats.forEach((cat) => {
+            const card = document.createElement("div");
+            card.className = "cat-card overflow-hidden shadow-lg";
+            card.innerHTML = `
+              <div class="overflow-hidden">
+                <img src="${cat.image_url}" alt="${
+              cat.breed_name
+            }" class="cat-image w-full" 
+                  onerror="this.src='https://via.placeholder.com/400x267?text=No+Image'">
+              </div>
+              <div class="p-5">
+                <h3 class="text-xl font-bold mb-2">${cat.breed_name}</h3>
+                <p class="text-gray-400 text-sm mb-4 line-clamp-2">${
+                  cat.description || "Нет описания"
+                }</p>
+                <div class="flex justify-between items-center">
+                  <span class="cat-likes">
+                    <i class="fas fa-heart text-red-500 mr-2"></i> ${
+                      cat.count || 0
+                    }
+                  </span>
+                  <a href="/catDetails?id=${
+                    cat.id
+                  }" class="text-indigo-400 hover:text-indigo-300">
+                    <i class="fas fa-info-circle mr-1"></i> Подробнее
+                  </a>
+                </div>
+              </div>
+            `;
+            resultsContent.appendChild(card);
+          });
+
+          // Показываем результаты и скрываем скелетон
+          // с небольшой задержкой для плавности
+          setTimeout(() => {
+            skeletonContent.style.display = "none";
+            resultsContent.style.display = "grid";
+          }, 300);
+        });
+      }
+
+      // Функция отображения сообщения "Ничего не найдено"
+      function showNoResults(
+        message = "К сожалению, мы не нашли котов с похожими характеристиками"
+      ) {
+        const resultsContent = document.getElementById("results-content");
+        const skeletonContent = document.getElementById("skeleton-content");
+        const noResults = document.getElementById("no-results");
+        const searchHeader = document.getElementById("search-header");
+
+        // обновление сообщ
+        noResults.querySelector("p").textContent = message;
+
+        // Скрываем скелетон и результаты, показываем сообщение
+        skeletonContent.style.display = "none";
+        resultsContent.style.display = "none";
+        noResults.style.display = "block";
+        searchHeader.style.display = "none";
+      }
+    </script>
+  </body>
+</html>

@@ -53,24 +53,6 @@
       }
 
       /* Стили для скелетонов */
-      @keyframes pulse {
-        0% {
-          opacity: 0.6;
-        }
-        50% {
-          opacity: 0.4;
-        }
-        100% {
-          opacity: 0.6;
-        }
-      }
-
-      .skeleton {
-        background-color: rgba(55, 65, 81, 0.7);
-        border-radius: 0.5rem;
-        animation: pulse 1.5s infinite;
-      }
-
       .skeleton-text {
         height: 1.25rem;
         width: 80%;
@@ -305,8 +287,10 @@
 
               <!-- Скелетон лоадер -->
               <div id="timeLoader" class="skeleton-content">
-                <div class="skeleton skeleton-text w-3/4"></div>
-                <div class="skeleton skeleton-text w-1/2"></div>
+                <div
+                  class="bg-gray-700 animate-pulse rounded-md h-6 w-3/4 mb-2"></div>
+                <div
+                  class="bg-gray-700 animate-pulse rounded-md h-6 w-1/2"></div>
               </div>
 
               <!-- Реальный контент -->
@@ -325,7 +309,8 @@
 
               <!-- Скелетон лоадер -->
               <div id="messageLoader" class="skeleton-content">
-                <div class="skeleton skeleton-text w-1/4"></div>
+                <div
+                  class="bg-gray-700 animate-pulse rounded-md h-6 w-1/4"></div>
               </div>
 
               <!-- Реальный контент -->
@@ -390,11 +375,11 @@
                 <tr>
                   <td>
                     <div
-                      class="skeleton skeleton-text w-6 h-6 rounded-full mx-auto"></div>
+                      class="bg-gray-700 animate-pulse w-6 h-6 rounded-full mx-auto"></div>
                   </td>
                   <td class="text-center">
                     <div
-                      class="skeleton mx-auto"
+                      class="bg-gray-700 animate-pulse mx-auto"
                       style="
                         width: 96px;
                         height: 96px;
@@ -403,11 +388,11 @@
                   </td>
                   <td>
                     <div
-                      class="skeleton skeleton-text w-full md:w-40 mx-auto"></div>
+                      class="bg-gray-700 animate-pulse h-5 w-full md:w-40 mx-auto rounded-md"></div>
                   </td>
-                  <!-- ID столбец скелетона удален -->
                   <td>
-                    <div class="skeleton skeleton-text w-12 mx-auto"></div>
+                    <div
+                      class="bg-gray-700 animate-pulse h-5 w-12 mx-auto rounded-md"></div>
                   </td>
                 </tr>
               </template>
@@ -551,20 +536,42 @@
           if (!response.ok) throw new Error("Failed to fetch leaderboard");
           const leaderboard = await response.json();
 
-          // Добавим небольшую задержку для лучшего пользовательского опыта
-          setTimeout(() => {
-            tableBody.innerHTML = "";
+          if (leaderboard.length === 0) {
+            tableBody.innerHTML =
+              '<tr><td colspan="4" class="text-center py-8 text-gray-400">Нет данных для отображения</td></tr>';
+            return;
+          }
 
-            if (leaderboard.length === 0) {
-              tableBody.innerHTML =
-                '<tr><td colspan="4" class="text-center py-8 text-gray-400">Нет данных для отображения</td></tr>';
-              return;
-            }
+          // Предзагрузка всех изображений перед обновлением таблицы
+          const preloadPromises = leaderboard.map((row) => {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.onload = () => resolve(true);
+              img.onerror = () => resolve(false);
+              img.src = row.image_url;
+            });
+          });
 
-            leaderboard.forEach((row, index) => {
-              const tr = document.createElement("tr");
-              tr.className = "";
-              tr.innerHTML = `
+          // Добавляем минимальную задержку для плавности
+          const minLoadTime = new Promise((resolve) =>
+            setTimeout(resolve, 500)
+          );
+
+          // Ждем, пока все изображения загрузятся ИЛИ пройдет 3 секунды (таймаут)
+          Promise.race([
+            Promise.all(preloadPromises),
+            new Promise((resolve) =>
+              setTimeout(() => resolve("timeout"), 3000)
+            ),
+          ])
+            .then(() => minLoadTime)
+            .then(() => {
+              tableBody.innerHTML = "";
+
+              leaderboard.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                tr.className = "";
+                tr.innerHTML = `
                 <td class="text-left">
                   <div class="w-8 h-8 rounded-full bg-indigo-900 flex items-center justify-center font-bold ${
                     index < 3 ? "bg-indigo-600" : ""
@@ -576,16 +583,15 @@
                   <img src="${
                     row.image_url
                   }" class="w-24 h-24 object-cover rounded-lg mx-auto" alt="${
-                row.breed_name
-              }"
+                  row.breed_name
+                }"
                        onerror="this.src='https://via.placeholder.com/96?text=No+Image'" />
                 </td>
                 <td class="text-left"><a href="${
                   "/catDetails?id=" + row.id
                 }" class="text-indigo-400 hover:text-indigo-300 transition-colors">${
-                row.breed_name
-              }</a></td>
-                <!-- Строка с ID удалена -->
+                  row.breed_name
+                }</a></td>
                 <td>
                   <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
                     <i class="fas fa-heart text-red-500 mr-1.5"></i> ${
@@ -594,9 +600,9 @@
                   </div>
                 </td>
               `;
-              tableBody.appendChild(tr);
+                tableBody.appendChild(tr);
+              });
             });
-          }, 500);
         } catch (err) {
           console.error(err);
           tableBody.innerHTML =

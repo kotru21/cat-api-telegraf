@@ -23,5 +23,22 @@ export function setupApiRoutes(app) {
     }
   });
 
+  // маршрут для поиска котов по характеристикам (при клике на характеристику из catdetails)
+  router.get("/similar", async (req, res) => {
+    try {
+      const { feature, value } = req.query;
+
+      if (!feature || !value) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      const cats = await catService.getCatsByFeature(feature, value);
+      res.json(cats);
+    } catch (err) {
+      console.error("Error fetching similar cats:", err);
+      res.status(500).json({ error: "Failed to fetch similar cats" });
+    }
+  });
+
   app.use("/api", router);
 }

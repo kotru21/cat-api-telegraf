@@ -87,6 +87,11 @@ function initWebServer(port) {
     res.sendFile(path.join(__dirname, "src/web/views/catDetails.html"));
   });
 
+  // маршрут для страницы поиска похожих котов
+  app.get("/similar", (req, res) => {
+    res.sendFile(path.join(__dirname, "src/web/views/similar.html"));
+  });
+
   // Запуск сервера
   server
     .listen(port, () => {

@@ -66,6 +66,27 @@ export class CatService {
   async getUserLikes(userId) {
     return likesRepository.getUserLikes(userId);
   }
+
+  async getCatsByFeature(feature, value) {
+    if (!feature || !value) {
+      throw new Error("Feature and value are required");
+    }
+
+    // проверка, что feature - допустимое поле
+    const allowedFeatures = [
+      "origin",
+      "temperament",
+      "life_span",
+      "weight_imperial",
+      "weight_metric",
+    ];
+
+    if (!allowedFeatures.includes(feature)) {
+      throw new Error(`Invalid feature: ${feature}`);
+    }
+
+    return catRepository.getCatsByFeature(feature, value);
+  }
 }
 
 export default new CatService();

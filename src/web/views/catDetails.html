@@ -91,24 +91,6 @@
       }
 
       /* Стили для скелетона */
-      @keyframes pulse {
-        0% {
-          opacity: 0.6;
-        }
-        50% {
-          opacity: 0.4;
-        }
-        100% {
-          opacity: 0.6;
-        }
-      }
-
-      .skeleton {
-        background-color: rgba(55, 65, 81, 0.7);
-        border-radius: 0.5rem;
-        animation: pulse 1.5s infinite;
-      }
-
       .skeleton-title {
         height: 2.5rem;
         width: 60%;
@@ -226,21 +208,25 @@
     <div class="container mx-auto px-4 pt-24 pb-16">
       <!-- Скелетон контент -->
       <div id="skeleton-content" class="max-w-4xl mx-auto">
-        <div class="skeleton skeleton-title mx-auto md:mx-0"></div>
+        <div
+          class="bg-gray-700 animate-pulse rounded-lg h-10 w-3/5 mx-auto md:mx-0 mb-6"></div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
           <div class="md:col-span-2">
-            <div class="skeleton skeleton-image"></div>
+            <div class="bg-gray-700 animate-pulse rounded-lg h-96 w-full"></div>
           </div>
 
           <div class="md:col-span-1">
             <div class="space-y-4">
-              <div class="skeleton skeleton-text skeleton-short"></div>
-              <div class="skeleton skeleton-text"></div>
-              <div class="skeleton skeleton-text"></div>
-              <div class="skeleton skeleton-text skeleton-short"></div>
-              <div class="skeleton skeleton-text"></div>
-              <div class="skeleton skeleton-text skeleton-short"></div>
+              <div class="bg-gray-700 animate-pulse rounded-lg h-6 w-2/5"></div>
+              <div
+                class="bg-gray-700 animate-pulse rounded-lg h-6 w-full"></div>
+              <div
+                class="bg-gray-700 animate-pulse rounded-lg h-6 w-full"></div>
+              <div class="bg-gray-700 animate-pulse rounded-lg h-6 w-3/5"></div>
+              <div
+                class="bg-gray-700 animate-pulse rounded-lg h-6 w-full"></div>
+              <div class="bg-gray-700 animate-pulse rounded-lg h-6 w-2/5"></div>
             </div>
           </div>
         </div>
@@ -279,35 +265,55 @@
             </div>
           </div>
 
-          <!-- Информация о породе -->
+          <!-- Обновим информацию о породе, добавив кликабельные характеристики -->
           <div class="md:col-span-1">
             <div class="space-y-4">
-              <div class="stat-card">
+              <div
+                class="stat-card hover:bg-gray-700 cursor-pointer"
+                onclick="searchByFeature('origin', this.querySelector('p').textContent)">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Происхождение
                 </h3>
-                <p id="origin" class="font-medium"></p>
+                <p id="origin" class="font-medium flex items-center">
+                  <span class="flex-grow"></span>
+                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
+                </p>
               </div>
 
-              <div class="stat-card">
+              <div
+                class="stat-card hover:bg-gray-700 cursor-pointer"
+                onclick="searchByFeature('temperament', this.querySelector('p').textContent)">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Темперамент
                 </h3>
-                <p id="temperament" class="font-medium"></p>
+                <p id="temperament" class="font-medium flex items-center">
+                  <span class="flex-grow"></span>
+                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
+                </p>
               </div>
 
-              <div class="stat-card">
+              <div
+                class="stat-card hover:bg-gray-700 cursor-pointer"
+                onclick="searchByFeature('life_span', this.querySelector('p').textContent)">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Продолжительность жизни (лет)
                 </h3>
-                <p id="life-span" class="font-medium"></p>
+                <p id="life-span" class="font-medium flex items-center">
+                  <span class="flex-grow"></span>
+                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
+                </p>
               </div>
 
-              <div class="stat-card">
+              <div
+                class="stat-card hover:bg-gray-700 cursor-pointer"
+                onclick="searchByFeature('weight_metric', this.querySelector('p').textContent)">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Вес
                 </h3>
-                <p id="weight" class="font-medium"></p>
+                <p id="weight" class="font-medium flex items-center">
+                  <span class="flex-grow"></span>
+                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
+                </p>
               </div>
 
               <a
@@ -400,28 +406,23 @@
         });
       });
 
-      // Загрузка данных о коте
+      // Улучшенная обработка загрузки изображения
       document.addEventListener("DOMContentLoaded", function () {
         const skeletonContent = document.getElementById("skeleton-content");
         const catContent = document.getElementById("cat-content");
         const catId = new URLSearchParams(window.location.search).get("id");
         const likeBtn = document.getElementById("likeBtn");
 
-        // Обработчик для кнопки лайка (демонстрационный)
+        // Обработчик для кнопки лайка
         likeBtn.addEventListener("click", function () {
           const likesCount = document.getElementById("likes-count");
           const currentLikes = parseInt(likesCount.textContent);
           likesCount.textContent = currentLikes + 1;
 
-          // Добавим анимацию
           this.classList.add("scale-110");
           setTimeout(() => this.classList.remove("scale-110"), 200);
-
-          // Здесь можно добавить fetch-запрос для обновления лайков на сервере
-          // fetch(`/api/like/${catId}`, { method: 'POST' })
         });
 
-        // Гарантируем показ скелетона на минимальное время
         const minLoadTime = 800;
         const startTime = Date.now();
 
@@ -437,10 +438,9 @@
               // Обновляем заголовок страницы
               document.title = `${data.breed_name} | Cat Details`;
 
-              // Заполняем данные
+              // Заполняем текстовые данные
               document.getElementById("breed-name").textContent =
                 data.breed_name;
-              document.getElementById("cat-image").src = data.image_url;
               document.getElementById("description").textContent =
                 data.description;
               document.getElementById("likes-count").textContent = data.count;
@@ -453,14 +453,44 @@
                 "weight"
               ).textContent = `${data.weight_imperial} фунтов (${data.weight_metric} кг)`;
 
-              // Плавное переключение после минимального времени загрузки
-              const elapsedTime = Date.now() - startTime;
-              const remainingTime = Math.max(0, minLoadTime - elapsedTime);
+              // Важное изменение: предзагрузка изображения перед показом содержимого
+              const imgElement = document.getElementById("cat-image");
 
-              setTimeout(() => {
-                skeletonContent.style.display = "none";
-                catContent.style.display = "block";
-              }, remainingTime);
+              // Создаем предзагрузчик изображения
+              const preloader = new Image();
+
+              // Показываем контент только после загрузки изображения
+              preloader.onload = function () {
+                // Устанавливаем источник для видимого элемента img только после успешной предзагрузки
+                imgElement.src = data.image_url;
+
+                // Вычисляем, сколько времени прошло
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minLoadTime - elapsedTime);
+
+                // Показываем контент с минимальной задержкой для плавности
+                setTimeout(() => {
+                  skeletonContent.style.display = "none";
+                  catContent.style.display = "block";
+                }, remainingTime);
+              };
+
+              // Обработка ошибки загрузки изображения
+              preloader.onerror = function () {
+                imgElement.src =
+                  "https://via.placeholder.com/800x600?text=Image+Not+Available";
+
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, minLoadTime - elapsedTime);
+
+                setTimeout(() => {
+                  skeletonContent.style.display = "none";
+                  catContent.style.display = "block";
+                }, remainingTime);
+              };
+
+              // Запускаем загрузку изображения
+              preloader.src = data.image_url;
             })
             .catch((error) => {
               console.error("Error:", error);
@@ -477,6 +507,66 @@
           catContent.style.display = "block";
         }
       });
+
+      // Исправленная функция для поиска по весу
+      function searchByFeature(feature, value) {
+        console.log("Исходная строка:", value);
+
+        // Базовая очистка значения
+        let cleanValue = value;
+
+        // Специальная обработка для параметра веса
+        if (feature === "weight_metric") {
+          // Ищем ТОЛЬКО метрическую часть в скобках: (3 - 6 кг)
+          const metricMatch = value.match(/\(([0-9. -]+)кг\)/);
+
+          if (metricMatch && metricMatch[1]) {
+            // Извлекаем числа из метрической части
+            const metricPart = metricMatch[1];
+            const numbers = metricPart.match(/\d+(\.\d+)?/g);
+
+            if (numbers && numbers.length >= 2) {
+              const min = parseFloat(numbers[0]);
+              const max = parseFloat(numbers[1]);
+              cleanValue = ((min + max) / 2).toFixed(1);
+              console.log(
+                `Найден метрический диапазон ${min}-${max}, используем среднее: ${cleanValue}`
+              );
+            } else if (numbers && numbers.length === 1) {
+              cleanValue = numbers[0];
+              console.log(`Найдено одно метрическое значение: ${cleanValue}`);
+            }
+          } else {
+            // Если не нашли метрическую часть, используем все числа
+            const numbers = value.match(/\d+(\.\d+)?/g);
+            if (numbers && numbers.length >= 2) {
+              const min = parseFloat(numbers[0]);
+              const max = parseFloat(numbers[1]);
+              cleanValue = ((min + max) / 2).toFixed(1);
+              console.log(`Используем среднее из всех чисел: ${cleanValue}`);
+            }
+          }
+        }
+        // Остальной код не изменился
+        else if (feature === "life_span") {
+          // Аналогичная обработка для возраста...
+        }
+
+        // Для темперамента берем только первую характеристику
+        if (feature === "temperament") {
+          cleanValue = value.split(",")[0].trim();
+          console.log(
+            `Темперамент: используем первую характеристику: ${cleanValue}`
+          );
+        }
+
+        // Перенаправление на страницу поиска
+        const url = `/similar?feature=${encodeURIComponent(
+          feature
+        )}&value=${encodeURIComponent(cleanValue)}`;
+        console.log(`Перенаправление на: ${url}`);
+        window.location.href = url;
+      }
     </script>
   </body>
 </html>

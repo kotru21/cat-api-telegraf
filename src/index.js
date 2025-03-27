@@ -79,10 +79,12 @@ function initWebServer(port) {
           defaultSrc: ["'self'"],
           scriptSrc: [
             "'self'",
-            "'unsafe-inline'", // Добавляем 'unsafe-inline' для разрешения встроенных скриптов
+            "'unsafe-inline'", // 'unsafe-inline' для разрешения встроенных скриптов
             "https://cdn.tailwindcss.com",
             "https://cdnjs.cloudflare.com",
+            "https://telegram.org",
           ],
+          scriptSrcAttr: ["'unsafe-inline'"], // Для обработчиков событий в атрибутах
           styleSrc: [
             "'self'",
             "'unsafe-inline'",

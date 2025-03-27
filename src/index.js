@@ -181,14 +181,6 @@ function initWebServer(port) {
     res.sendFile(path.join(__dirname, "src/web/views/profile.html"));
   });
 
-  app.get("/debug-session", (req, res) => {
-    res.json({
-      sessionExists: !!req.session,
-      sessionUser: req.session?.user || null,
-      cookies: req.headers.cookie,
-    });
-  });
-
   // Обработка callback от Telegram Login Widget
   app.get("/auth/telegram/callback", (req, res) => {
     try {

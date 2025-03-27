@@ -135,26 +135,27 @@
       });
 
       function onTelegramAuth(user) {
-        console.log("Telegram auth data:", user);
-        // Отправляем данные на сервер вручную
-        fetch("/auth/telegram/callback", {
+        fetch("/auth/telegram", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(user),
+          credentials: "same-origin", // Важно для работы с сессиями
         })
-          .then((response) => {
-            if (response.ok) {
-              window.location.href = "/profile";
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              console.log("Успешная авторизация, перенаправление...");
+              window.location.href = data.redirect || "/profile";
             } else {
-              console.error("Auth error:", response.status);
-              window.location.href = "/login?error=auth_error";
+              console.error("Ошибка авторизации:", data.error);
+              alert("Ошибка авторизации: " + data.error);
             }
           })
-          .catch((err) => {
-            console.error("Fetch error:", err);
-            window.location.href = "/login?error=network_error";
+          .catch((error) => {
+            console.error("Ошибка при отправке данных:", error);
+            alert("Произошла ошибка при авторизации. Попробуйте позже.");
           });
       }
     </script>

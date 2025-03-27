@@ -13,4 +13,5 @@ export default {
   // Полный URL с портом (для локальной разработки)
   FULL_WEBSITE_URL:
     process.env.WEBSITE_URL || `http://localhost:${process.env.PORT || 5200}`,
+  SESSION_SECRET: process.env.SESSION_SECRET || "your-secret-key-here",
 };

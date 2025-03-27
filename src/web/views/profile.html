@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title>Мой профиль | CatBot</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      .header {
+        backdrop-filter: blur(8px);
+        background-color: rgba(17, 24, 39, 0.8);
+      }
+
+      .cat-card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: transform 0.3s ease;
+      }
+
+      .cat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .cat-image {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+        transition: transform 0.5s ease;
+      }
+
+      .cat-card:hover .cat-image {
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Навигационная панель -->
+    <nav
+      class="py-4 fixed w-full bg-none header z-50 transition-all duration-300">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center">
+          <a href="/" class="text-xl font-bold text-white flex items-center">
+            <i class="fas fa-cat mr-2 text-indigo-500"></i>
+            <span>CatBot</span>
+          </a>
+          <!-- Десктопное меню -->
+          <div class="hidden md:flex items-center space-x-4">
+            <a
+              href="/"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-home mr-1"></i> Главная
+            </a>
+            <a
+              href="/#leaderboard"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-trophy mr-1"></i> Топ котов
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
+              <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+            </a>
+            <a
+              href="/logout"
+              class="text-gray-300 hover:text-white transition-colors">
+              <i class="fas fa-sign-out-alt mr-1"></i> Выйти
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Содержимое страницы -->
+    <div class="container mx-auto pt-28 pb-16 px-4">
+      <div class="max-w-6xl mx-auto">
+        <!-- Заголовок профиля -->
+        <div
+          class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
+          <div
+            class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center">
+            <img
+              id="user-avatar"
+              class="w-24 h-24 rounded-full"
+              src=""
+              alt="Аватар пользователя"
+              onerror="this.src='https://via.placeholder.com/96?text=Avatar'" />
+          </div>
+          <div class="text-center md:text-left">
+            <h1 class="text-3xl font-bold mb-2" id="user-name">Загрузка...</h1>
+            <p class="text-gray-400">
+              <i class="fab fa-telegram text-indigo-400 mr-1"></i>
+              <span id="user-username">@username</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Раздел с лайкнутыми котами -->
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-6 flex items-center">
+            <i class="fas fa-heart text-red-500 mr-3"></i> Мои лайки
+          </h2>
+
+          <!-- Скелетон-загрузчик для карточек -->
+          <div
+            id="likes-skeleton"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="cat-card">
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="p-4 space-y-3">
+                <div
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              </div>
+            </div>
+            <div class="cat-card">
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="p-4 space-y-3">
+                <div
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              </div>
+            </div>
+            <div class="cat-card">
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="p-4 space-y-3">
+                <div
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Контейнер для карточек с лайкнутыми котами -->
+          <div
+            id="user-likes"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            style="display: none">
+            <!-- Сюда будут добавляться карточки лайкнутых котов -->
+          </div>
+
+          <!-- Сообщение об отсутствии лайков -->
+          <div
+            id="no-likes"
+            class="text-center py-12 bg-gray-800 rounded-lg"
+            style="display: none">
+            <i class="fas fa-heart-broken text-4xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">У вас пока нет лайков</h3>
+            <p class="text-gray-400 mb-6">
+              Используйте бота в Telegram, чтобы поставить лайки интересным
+              породам котов
+            </p>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
+              <i class="fab fa-telegram-plane mr-2"></i> Открыть бота
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Анимация хедера при скролле
+      window.addEventListener("scroll", function () {
+        const nav = document.querySelector("nav");
+        if (window.scrollY > 10) {
+          nav.classList.add("shadow-md");
+          nav.classList.add("bg-gray-900");
+          nav.classList.remove("bg-none");
+        } else {
+          nav.classList.remove("shadow-md");
+          nav.classList.remove("bg-gray-900");
+          nav.classList.add("bg-none");
+        }
+      });
+
+      // Загрузка данных пользователя и его лайков
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          // Загрузка данных профиля
+          const profileResponse = await fetch("/api/profile");
+
+          if (!profileResponse.ok) {
+            // Если ошибка авторизации - перенаправляем на страницу логина
+            if (profileResponse.status === 401) {
+              window.location.href = "/login";
+              return;
+            }
+            throw new Error("Ошибка загрузки профиля");
+          }
+
+          const profileData = await profileResponse.json();
+
+          // Заполняем данные профиля
+          document.getElementById("user-name").textContent =
+            profileData.first_name +
+            (profileData.last_name ? " " + profileData.last_name : "");
+          document.getElementById("user-username").textContent =
+            "@" + profileData.username;
+
+          if (profileData.photo_url) {
+            document.getElementById("user-avatar").src = profileData.photo_url;
+          }
+
+          // Загрузка лайкнутых котов
+          const likesResponse = await fetch("/api/mylikes");
+          if (!likesResponse.ok) {
+            throw new Error("Ошибка загрузки лайков");
+          }
+
+          const likesData = await likesResponse.json();
+
+          // Скрываем скелетон
+          document.getElementById("likes-skeleton").style.display = "none";
+
+          // Проверяем, есть ли лайки
+          if (likesData.length === 0) {
+            document.getElementById("no-likes").style.display = "block";
+            return;
+          }
+
+          // Отображаем лайкнутых котов
+          const likesContainer = document.getElementById("user-likes");
+          likesContainer.style.display = "grid";
+
+          likesData.forEach((cat) => {
+            const card = document.createElement("div");
+            card.className = "cat-card";
+            card.innerHTML = `
+              <div class="overflow-hidden">
+                <img src="${cat.image_url}" alt="${cat.breed_name}" class="cat-image"
+                     onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+              </div>
+              <div class="p-4">
+                <h3 class="text-xl font-bold mb-1">${cat.breed_name}</h3>
+                <a href="/catDetails?id=${cat.cat_id}" class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                  <i class="fas fa-info-circle mr-1"></i> Подробнее
+                </a>
+              </div>
+            `;
+            likesContainer.appendChild(card);
+          });
+        } catch (error) {
+          console.error("Ошибка:", error);
+          alert("Произошла ошибка при загрузке данных. Попробуйте позже.");
+        }
+      });
+    </script>
+  </body>
+</html>

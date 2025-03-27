@@ -12,6 +12,8 @@ import { incrementMessageCount } from "./utils/messageCounter.js";
 import { WebSocketService } from "./web/WebSocketServer.js";
 import { setupApiRoutes } from "./web/ApiRoutes.js";
 import { likesEvents } from "./database/LikesRepository.js";
+import session from "express-session";
+import crypto from "crypto";
 
 // Импорт команд бота
 import factCommand from "./bot/commands/FactCommand.js";
@@ -101,6 +103,20 @@ function initWebServer(port) {
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
 
+  // Добавляем middleware для сессий
+  app.use(
+    session({
+      secret:
+        process.env.SESSION_SECRET || crypto.randomBytes(64).toString("hex"),
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+      },
+    })
+  );
+
   // Настройка WebSocket
   const wsService = new WebSocketService(server);
 
@@ -133,6 +149,89 @@ function initWebServer(port) {
   // маршрут для страницы поиска похожих котов
   app.get("/similar", (req, res) => {
     res.sendFile(path.join(__dirname, "src/web/views/similar.html"));
+  });
+
+  // маршруты для авторизации
+  app.get("/login", (req, res) => {
+    // Если пользователь уже авторизован, перенаправляем на профиль
+    if (req.session.user) {
+      return res.redirect("/profile");
+    }
+    res.sendFile(path.join(__dirname, "src/web/views/login.html"));
+  });
+
+  app.get("/profile", (req, res) => {
+    // Если пользователь не авторизован, перенаправляем на страницу входа
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+    res.sendFile(path.join(__dirname, "src/web/views/profile.html"));
+  });
+
+  // Обработка callback от Telegram Login Widget
+  app.get("/auth/telegram/callback", (req, res) => {
+    try {
+      // Проверка данных от Telegram
+      const {
+        id,
+        first_name,
+        last_name,
+        username,
+        photo_url,
+        auth_date,
+        hash,
+      } = req.query;
+
+      // Проверка hash
+      const botToken = config.BOT_TOKEN;
+      const secretKey = crypto.createHash("sha256").update(botToken).digest();
+
+      //  проверочный хеш
+      const dataCheckString = Object.keys(req.query)
+        .filter((key) => key !== "hash")
+        .sort()
+        .map((key) => `${key}=${req.query[key]}`)
+        .join("\n");
+
+      const hmac = crypto
+        .createHmac("sha256", secretKey)
+        .update(dataCheckString)
+        .digest("hex");
+
+      // Если хеш не совпадает, отправляем на страницу логина
+      if (hmac !== hash) {
+        console.error("Неверный хеш при авторизации через Telegram");
+        return res.redirect("/login?error=invalid_hash");
+      }
+
+      // Проверяем, что запрос не старше 24 часов
+      const authDate = parseInt(auth_date);
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (currentTime - authDate > 86400) {
+        return res.redirect("/login?error=expired");
+      }
+
+      // сохранение сессии
+      req.session.user = {
+        id,
+        first_name,
+        last_name,
+        username,
+        photo_url,
+      };
+
+      // Перенаправление на профиль
+      res.redirect("/profile");
+    } catch (error) {
+      console.error("Ошибка авторизации через Telegram:", error);
+      res.redirect("/login?error=auth_error");
+    }
+  });
+
+  // Выход из системы
+  app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/");
   });
 
   // Запуск сервера

@@ -27,6 +27,14 @@ export function setupApiRoutes(app) {
   // Применяем базовый лимитер ко всем маршрутам API
   router.use(apiLimiter);
 
+  // Middleware для проверки авторизации
+  const requireAuth = (req, res, next) => {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    next();
+  };
+
   // Существующие маршруты с дополнительными лимитами где необходимо
   router.get("/cat/:id", async (req, res) => {
     try {
@@ -80,6 +88,24 @@ export function setupApiRoutes(app) {
     } catch (err) {
       console.error("Error fetching random images:", err);
       res.status(500).json({ error: "Failed to fetch random images" });
+    }
+  });
+
+  // API для получения профиля пользователя
+  router.get("/profile", requireAuth, (req, res) => {
+    // Возвращаем данные пользователя из сессии
+    res.json(req.session.user);
+  });
+
+  // API для получения лайкнутых котов пользователя
+  router.get("/mylikes", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.user.id.toString();
+      const userLikes = await catService.getUserLikes(userId);
+      res.json(userLikes);
+    } catch (err) {
+      console.error("Error fetching user likes:", err);
+      res.status(500).json({ error: "Failed to fetch user likes" });
     }
   });
 

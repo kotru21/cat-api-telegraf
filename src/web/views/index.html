@@ -765,5 +765,67 @@
       // Загружаем изображения только при загрузке страницы
       document.addEventListener("DOMContentLoaded", loadRandomHeroCats);
     </script>
+
+    <script>
+      // Загрузка статуса авторизации и обновление навигации
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          const profileResponse = await fetch("/api/profile");
+
+          // Находим контейнер для десктопного меню
+          const desktopMenu = document.querySelector(
+            ".hidden.md\\:flex.items-center.space-x-4"
+          );
+
+          if (profileResponse.ok) {
+            // Пользователь авторизован - добавляем ссылку на профиль
+            const profileData = await profileResponse.json();
+
+            // Создаем ссылку на профиль
+            const profileLink = document.createElement("a");
+            profileLink.href = "/profile";
+            profileLink.className =
+              "text-gray-300 hover:text-white transition-colors";
+            profileLink.innerHTML = `
+              <i class="fas fa-user mr-1"></i> ${
+                profileData.first_name || "Профиль"
+              }
+            `;
+
+            // ссылка перед кнопкой "Открыть бота"
+            const botButton = desktopMenu.querySelector(
+              'a[href^="https://t.me/"]'
+            );
+            desktopMenu.insertBefore(profileLink, botButton);
+
+            // ссылка на выход
+            const logoutLink = document.createElement("a");
+            logoutLink.href = "/logout";
+            logoutLink.className =
+              "text-gray-300 hover:text-white transition-colors";
+            logoutLink.innerHTML =
+              '<i class="fas fa-sign-out-alt mr-1"></i> Выйти';
+
+            desktopMenu.appendChild(logoutLink);
+          } else {
+            // Пользователь не авторизован - добавляем ссылку на вход
+            const loginLink = document.createElement("a");
+            loginLink.href = "/login";
+            loginLink.className =
+              "text-gray-300 hover:text-white transition-colors";
+            loginLink.innerHTML =
+              '<i class="fas fa-sign-in-alt mr-1"></i> Войти';
+
+            // Добавляем ссылку перед кнопкой "Открыть бота"
+            const botButton = desktopMenu.querySelector(
+              'a[href^="https://t.me/"]'
+            );
+            desktopMenu.insertBefore(loginLink, botButton);
+          }
+        } catch (error) {
+          console.error("Ошибка проверки авторизации:", error);
+        }
+      });
+    </script>
   </body>
 </html>

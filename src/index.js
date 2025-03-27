@@ -94,6 +94,9 @@ function initWebServer(port) {
           connectSrc: ["'self'", "ws:", "wss:"],
           fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
           objectSrc: ["'none'"],
+          frameSrc: ["'self'", "https://oauth.telegram.org"],
+          // для совместимости со старыми браузерами
+          childSrc: ["'self'", "https://oauth.telegram.org"],
           upgradeInsecureRequests: [],
         },
       },

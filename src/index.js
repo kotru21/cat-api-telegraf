@@ -117,7 +117,7 @@ function initWebServer(port) {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true, // для HTTPS на Heroku
+        secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
         httpOnly: true,
         sameSite: "lax",
@@ -169,13 +169,14 @@ function initWebServer(port) {
   });
 
   app.get("/profile", (req, res) => {
-    console.log("Запрос на /profile, сессия:", JSON.stringify(req.session));
-    // Если пользователь не авторизован, перенаправляем на страницу входа
+    console.log("Запрос на /profile, сессия:", req.session);
+
     if (!req.session.user) {
       console.log("Пользователь не авторизован, перенаправление на /login");
       return res.redirect("/login");
     }
-    console.log("Пользователь авторизован, отправляем profile.html");
+
+    console.log("Пользователь авторизован:", req.session.user);
     res.sendFile(path.join(__dirname, "src/web/views/profile.html"));
   });
 
@@ -241,8 +242,8 @@ function initWebServer(port) {
           return res.redirect("/login?error=session_error");
         }
 
-        console.log("Сессия сохранена, перенаправление на /profile");
-        return res.redirect("/profile");
+        console.log("Сессия успешно сохранена. Перенаправление на /profile");
+        res.redirect("/profile");
       });
     } catch (error) {
       console.error("Ошибка авторизации через Telegram:", error);

@@ -117,8 +117,9 @@ function initWebServer(port) {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production", // secure только для HTTPS
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+        httpOnly: true,
         sameSite: "lax",
       },
     })
@@ -223,7 +224,7 @@ function initWebServer(port) {
         return res.redirect("/login?error=expired");
       }
 
-      // сохранение сессии
+      // После успешной авторизации
       req.session.user = {
         id,
         first_name,
@@ -234,7 +235,7 @@ function initWebServer(port) {
 
       console.log("Сессия сохранена:", req.session.user);
 
-      // Убедитесь, что сессия сохранилась перед редиректом
+      // Сохраняем сессию перед редиректом
       req.session.save((err) => {
         if (err) {
           console.error("Ошибка сохранения сессии:", err);
@@ -245,7 +246,7 @@ function initWebServer(port) {
         return res.redirect("/profile");
       });
     } catch (error) {
-      console.error("Ошибка авторизации через Telegram:", error, error.stack);
+      console.error("Ошибка авторизации через Telegram:", error);
       res.redirect("/login?error=auth_error");
     }
   });
@@ -256,28 +257,19 @@ function initWebServer(port) {
     res.redirect("/");
   });
 
-  // Запуск сервера
-  server
-    .listen(port, () => {
-      // Используем только WEBSITE_URL без добавления порта для Heroku
-      const fullUrl = config.WEBSITE_URL || `http://localhost:${port}`;
+  server.listen(port, () => {
+    const websiteUrl = process.env.WEBSITE_URL || `http://localhost:${port}`;
 
-      const httpUrl = fullUrl;
-      const wsUrl =
-        fullUrl.replace("http:", "ws:").replace("https:", "wss") + "/wss";
-
-      console.log(`Сервер запущен на порту ${port}`);
-      console.log(`Веб-интерфейс доступен по адресу: ${httpUrl}`);
-      console.log(`WebSocket доступен по адресу: ${wsUrl}`);
-      console.log(`Панель администратора: ${httpUrl}/admin`);
-      console.log(`API лидерборда: ${httpUrl}/api/leaderboard`);
-    })
-    .on("error", (err) => {
-      console.error(`Ошибка запуска сервера: ${err.message}`);
-      if (err.code === "EADDRINUSE") {
-        console.error(`Порт ${port} уже используется другим приложением.`);
-      }
-    });
+    console.log(`Сервер запущен на порту ${port}`);
+    console.log(`Веб-интерфейс доступен по адресу: ${websiteUrl}`);
+    console.log(
+      `WebSocket доступен по адресу: ${websiteUrl
+        .replace("http:", "ws:")
+        .replace("https:", "wss:")}/wss`
+    );
+    console.log(`Панель администратора: ${websiteUrl}/admin`);
+    console.log(`API лидерборда: ${websiteUrl}/api/leaderboard`);
+  });
 
   return { server, wsService };
 }

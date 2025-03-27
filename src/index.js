@@ -71,6 +71,8 @@ function initWebServer(port) {
   const server = createServer(app);
   const __dirname = path.resolve();
 
+  app.set("trust proxy", 1);
+
   // Настройка middleware
   app.use(
     helmet({
@@ -108,15 +110,16 @@ function initWebServer(port) {
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
 
-  // Добавляем middleware для сессий
   app.use(
     session({
-      secret: crypto.randomBytes(32).toString("hex"), // сильный случайный секрет
+      secret:
+        process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production", // secure: true только в production
+        secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+        sameSite: "lax",
       },
     })
   );
@@ -165,18 +168,21 @@ function initWebServer(port) {
   });
 
   app.get("/profile", (req, res) => {
-    console.log("Запрос на /profile, сессия:", req.session);
+    console.log("Запрос на /profile, сессия:", JSON.stringify(req.session));
     // Если пользователь не авторизован, перенаправляем на страницу входа
     if (!req.session.user) {
       console.log("Пользователь не авторизован, перенаправление на /login");
       return res.redirect("/login");
     }
+    console.log("Пользователь авторизован, отправляем profile.html");
     res.sendFile(path.join(__dirname, "src/web/views/profile.html"));
   });
 
   // Обработка callback от Telegram Login Widget
   app.get("/auth/telegram/callback", (req, res) => {
     try {
+      console.log("Получен callback от Telegram:", req.query);
+
       // Проверка данных от Telegram
       const {
         id,
@@ -235,8 +241,8 @@ function initWebServer(port) {
           return res.redirect("/login?error=session_error");
         }
 
-        // Перенаправление на профиль
-        res.redirect("/profile");
+        console.log("Перенаправление на /profile");
+        return res.redirect("/profile");
       });
     } catch (error) {
       console.error("Ошибка авторизации через Telegram:", error, error.stack);
@@ -253,16 +259,12 @@ function initWebServer(port) {
   // Запуск сервера
   server
     .listen(port, () => {
-      const websiteUrl = config.WEBSITE_URL;
-      const baseUrl = websiteUrl.endsWith("/")
-        ? websiteUrl.slice(0, -1)
-        : websiteUrl;
-      const fullUrl =
-        port === 80 || port === 443 ? baseUrl : `${baseUrl}:${port}`;
+      // Используем только WEBSITE_URL без добавления порта для Heroku
+      const fullUrl = config.WEBSITE_URL || `http://localhost:${port}`;
 
       const httpUrl = fullUrl;
       const wsUrl =
-        fullUrl.replace("http:", "ws:").replace("https:", "wss:") + "/wss";
+        fullUrl.replace("http:", "ws:").replace("https:", "wss") + "/wss";
 
       console.log(`Сервер запущен на порту ${port}`);
       console.log(`Веб-интерфейс доступен по адресу: ${httpUrl}`);

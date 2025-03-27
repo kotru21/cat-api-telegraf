@@ -121,6 +121,9 @@
             errorMessage = "Истек срок действия данных авторизации.";
           } else if (error === "auth_error") {
             errorMessage = "Ошибка обработки данных авторизации.";
+          } else if (error === "session_error") {
+            errorMessage =
+              "Ошибка сохранения сессии. Пожалуйста, попробуйте снова.";
           }
 
           errorContainer.textContent = errorMessage;

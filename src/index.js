@@ -111,12 +111,11 @@ function initWebServer(port) {
   // Добавляем middleware для сессий
   app.use(
     session({
-      secret:
-        process.env.SESSION_SECRET || crypto.randomBytes(64).toString("hex"),
+      secret: crypto.randomBytes(32).toString("hex"), // сильный случайный секрет
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production", // secure: true только в production
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
       },
     })
@@ -166,8 +165,10 @@ function initWebServer(port) {
   });
 
   app.get("/profile", (req, res) => {
+    console.log("Запрос на /profile, сессия:", req.session);
     // Если пользователь не авторизован, перенаправляем на страницу входа
     if (!req.session.user) {
+      console.log("Пользователь не авторизован, перенаправление на /login");
       return res.redirect("/login");
     }
     res.sendFile(path.join(__dirname, "src/web/views/profile.html"));
@@ -225,10 +226,20 @@ function initWebServer(port) {
         photo_url,
       };
 
-      // Перенаправление на профиль
-      res.redirect("/profile");
+      console.log("Сессия сохранена:", req.session.user);
+
+      // Убедитесь, что сессия сохранилась перед редиректом
+      req.session.save((err) => {
+        if (err) {
+          console.error("Ошибка сохранения сессии:", err);
+          return res.redirect("/login?error=session_error");
+        }
+
+        // Перенаправление на профиль
+        res.redirect("/profile");
+      });
     } catch (error) {
-      console.error("Ошибка авторизации через Telegram:", error);
+      console.error("Ошибка авторизации через Telegram:", error, error.stack);
       res.redirect("/login?error=auth_error");
     }
   });

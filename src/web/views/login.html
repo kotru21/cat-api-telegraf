@@ -92,6 +92,7 @@
             data-telegram-login="catbotjss_bot"
             data-size="large"
             data-auth-url="/auth/telegram/callback"
+            data-onauth="onTelegramAuth(user)"
             data-request-access="write"></script>
         </div>
 
@@ -132,6 +133,30 @@
           loginCard.firstElementChild.after(errorContainer);
         }
       });
+
+      function onTelegramAuth(user) {
+        console.log("Telegram auth data:", user);
+        // Отправляем данные на сервер вручную
+        fetch("/auth/telegram/callback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(user),
+        })
+          .then((response) => {
+            if (response.ok) {
+              window.location.href = "/profile";
+            } else {
+              console.error("Auth error:", response.status);
+              window.location.href = "/login?error=auth_error";
+            }
+          })
+          .catch((err) => {
+            console.error("Fetch error:", err);
+            window.location.href = "/login?error=network_error";
+          });
+      }
     </script>
   </body>
 </html>

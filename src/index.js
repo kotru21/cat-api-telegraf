@@ -259,6 +259,74 @@ function initWebServer(port) {
     }
   });
 
+  app.post("/auth/telegram/callback", (req, res) => {
+    try {
+      console.log("Получен POST-callback от Telegram:", req.body);
+
+      // Проверка данных от Telegram
+      const {
+        id,
+        first_name,
+        last_name,
+        username,
+        photo_url,
+        auth_date,
+        hash,
+      } = req.body;
+
+      // Проверка hash
+      const botToken = config.BOT_TOKEN;
+      const secretKey = crypto.createHash("sha256").update(botToken).digest();
+
+      const dataCheckString = Object.keys(req.body)
+        .filter((key) => key !== "hash")
+        .sort()
+        .map((key) => `${key}=${req.body[key]}`)
+        .join("\n");
+
+      console.log("Строка проверки:", dataCheckString);
+      console.log(
+        "Секретный ключ (первые 10 символов):",
+        secretKey.toString("hex").substring(0, 10) + "..."
+      );
+
+      const hmac = crypto
+        .createHmac("sha256", secretKey)
+        .update(dataCheckString)
+        .digest("hex");
+      console.log("Вычисленный хеш:", hmac);
+      console.log("Полученный хеш:", hash);
+
+      // Если хеш не совпадает, отправляем ошибку
+      if (hmac !== hash) {
+        console.error("Неверный хеш при авторизации через Telegram");
+        return res.status(403).json({ error: "invalid_hash" });
+      }
+
+      // Проверяем, что запрос не старше 24 часов
+      const authDate = parseInt(auth_date);
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (currentTime - authDate > 86400) {
+        return res.status(403).json({ error: "expired" });
+      }
+
+      // После успешной авторизации
+      req.session.user = { id, first_name, last_name, username, photo_url };
+
+      req.session.save((err) => {
+        if (err) {
+          console.error("Ошибка сохранения сессии:", err);
+          return res.status(500).json({ error: "session_error" });
+        }
+
+        res.status(200).json({ success: true, redirect: "/profile" });
+      });
+    } catch (error) {
+      console.error("Ошибка авторизации через Telegram:", error);
+      res.status(500).json({ error: "auth_failed" });
+    }
+  });
+
   // Выход из системы
   app.get("/logout", (req, res) => {
     req.session.destroy();

@@ -117,7 +117,7 @@ function initWebServer(port) {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production", // secure только для HTTPS
+        secure: true, // для HTTPS на Heroku
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
         httpOnly: true,
         sameSite: "lax",
@@ -233,21 +233,20 @@ function initWebServer(port) {
         photo_url,
       };
 
-      console.log("Сессия сохранена:", req.session.user);
+      console.log("Данные пользователя сохранены в сессии:", req.session.user);
 
-      // Сохраняем сессию перед редиректом
       req.session.save((err) => {
         if (err) {
           console.error("Ошибка сохранения сессии:", err);
           return res.redirect("/login?error=session_error");
         }
 
-        console.log("Перенаправление на /profile");
+        console.log("Сессия сохранена, перенаправление на /profile");
         return res.redirect("/profile");
       });
     } catch (error) {
       console.error("Ошибка авторизации через Telegram:", error);
-      res.redirect("/login?error=auth_error");
+      res.redirect("/login?error=auth_failed");
     }
   });
 
@@ -258,17 +257,20 @@ function initWebServer(port) {
   });
 
   server.listen(port, () => {
-    const websiteUrl = process.env.WEBSITE_URL || `http://localhost:${port}`;
+    // Получаем базовый URL без слеша в конце
+    const baseUrl = (
+      process.env.WEBSITE_URL || `http://localhost:${port}`
+    ).replace(/\/$/, "");
 
     console.log(`Сервер запущен на порту ${port}`);
-    console.log(`Веб-интерфейс доступен по адресу: ${websiteUrl}`);
+    console.log(`Веб-интерфейс доступен по адресу: ${baseUrl}`);
     console.log(
-      `WebSocket доступен по адресу: ${websiteUrl
+      `WebSocket доступен по адресу: ${baseUrl
         .replace("http:", "ws:")
         .replace("https:", "wss:")}/wss`
     );
-    console.log(`Панель администратора: ${websiteUrl}/admin`);
-    console.log(`API лидерборда: ${websiteUrl}/api/leaderboard`);
+    console.log(`Панель администратора: ${baseUrl}/admin`);
+    console.log(`API лидерборда: ${baseUrl}/api/leaderboard`);
   });
 
   return { server, wsService };

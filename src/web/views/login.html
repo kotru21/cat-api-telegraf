@@ -95,17 +95,24 @@
             data-request-access="write"></script>
         </div>
         <script type="text/javascript">
+          console.log("Скрипт авторизации загружен");
+
           function onTelegramAuth(user) {
-            alert(
-              "Logged in as " +
-                user.first_name +
-                " " +
-                user.last_name +
-                " (" +
-                user.id +
-                (user.username ? ", @" + user.username : "") +
-                ")"
-            );
+            console.log("Функция onTelegramAuth вызвана", user);
+            try {
+              alert(
+                "Logged in as " +
+                  user.first_name +
+                  " " +
+                  user.last_name +
+                  " (" +
+                  user.id +
+                  (user.username ? ", @" + user.username : "") +
+                  ")"
+              );
+            } catch (error) {
+              console.error("Ошибка в функции onTelegramAuth:", error);
+            }
           }
         </script>
 

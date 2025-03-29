@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title>Вход - CatBot</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script async src="https://telegram.org/js/telegram-widget.js"></script>
+    <style>
+      body {
+        background-color: #111827;
+        color: #f9fafb;
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+      .auth-container {
+        max-width: 500px;
+        margin: 100px auto;
+        padding: 2rem;
+        background-color: #1f2937;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-container">
+      <h1 class="text-3xl font-bold mb-8 text-center">Вход в CatBot</h1>
+      <p class="mb-6 text-center text-gray-400">
+        Войдите через свой аккаунт Telegram, чтобы увидеть ваши лайки
+      </p>
+
+      <div class="flex justify-center mb-8">
+        <script
+          async
+          src="https://telegram.org/js/telegram-widget.js?8"
+          data-telegram-login="@catbotjss_bot"
+          data-size="large"
+          data-onauth="onTelegramAuth(user)"
+          data-request-access="write"></script>
+      </div>
+      <script type="text/javascript">
+        function onTelegramAuth(user) {
+          alert(
+            "Logged in as " +
+              user.first_name +
+              " " +
+              user.last_name +
+              " (" +
+              user.id +
+              (user.username ? ", @" + user.username : "") +
+              ")"
+          );
+        }
+      </script>
+
+      <div class="text-center">
+        <a href="/" class="text-indigo-400 hover:text-indigo-300">
+          <i class="fas fa-arrow-left mr-2"></i> Вернуться на главную
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

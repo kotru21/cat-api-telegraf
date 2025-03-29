@@ -93,19 +93,19 @@
             data-size="large"
             data-onauth="onTelegramAuth(user)"
             data-request-access="write"></script>
-        </div>
-        <script type="text/javascript">
-          console.log("Скрипт авторизации загружен");
+          <script type="text/javascript">
+            console.log("Скрипт авторизации загружен");
 
-          function onTelegramAuth(user) {
-            console.log("Функция onTelegramAuth вызвана", user);
-            try {
-              console.log(JSON.stringify(user, null, 2));
-            } catch (error) {
-              console.error("Ошибка в функции onTelegramAuth:", error);
+            function onTelegramAuth(user) {
+              console.log("Функция onTelegramAuth вызвана", user);
+              try {
+                console.log(JSON.stringify(user, null, 2));
+              } catch (error) {
+                console.error("Ошибка в функции onTelegramAuth:", error);
+              }
             }
-          }
-        </script>
+          </script>
+        </div>
 
         <div class="mt-8 text-center text-sm text-gray-400">
           Авторизуясь, вы соглашаетесь с тем, что мы сохраним ваш Telegram ID

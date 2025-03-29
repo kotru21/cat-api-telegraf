@@ -86,6 +86,7 @@ function initWebServer(port) {
             "https://cdn.tailwindcss.com",
             "https://cdnjs.cloudflare.com",
             "https://telegram.org",
+            "https://oauth.telegram.org",
           ],
           scriptSrcAttr: ["'unsafe-inline'"], // Для обработчиков событий в атрибутах
           styleSrc: [

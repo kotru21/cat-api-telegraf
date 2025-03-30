@@ -73,6 +73,14 @@ function initWebServer(port) {
 
   app.set("trust proxy", 1);
 
+  // Отключение CSP для страницы логина и авторизации
+  app.use((req, res, next) => {
+    if (req.path === "/login" || req.path.startsWith("/auth/telegram")) {
+      res.setHeader("Content-Security-Policy", "");
+    }
+    next();
+  });
+
   // Настройка middleware
   app.use(
     helmet({

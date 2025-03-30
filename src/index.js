@@ -74,69 +74,12 @@ function initWebServer(port) {
   app.set("trust proxy", 1);
 
   // Настройка middleware
-  app.use((req, res, next) => {
-    // Проверяем, является ли запрос страницей логина
-    if (req.path === "/login") {
-      // Минимальные ограничения CSP для страницы логина
-      helmet({
-        contentSecurityPolicy: false, // Отключаем CSP для страницы логина
-        crossOriginEmbedderPolicy: false,
-      })(req, res, next);
-    } else {
-      // Стандартные настройки CSP для остальных страниц
-      helmet({
-        contentSecurityPolicy: {
-          useDefaults: false,
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: [
-              "'self'",
-              "'unsafe-inline'",
-              "'unsafe-eval'",
-              "https://cdn.tailwindcss.com",
-              "https://cdnjs.cloudflare.com",
-              "https://telegram.org",
-              "https://*.telegram.org",
-              "https://telegram.me",
-              "https://t.me",
-              "https://core.telegram.org",
-            ],
-            connectSrc: ["'self'", "ws:", "wss:", "https://*.telegram.org"],
-            styleSrc: [
-              "'self'",
-              "'unsafe-inline'",
-              "https://*.telegram.org",
-              "https://cdnjs.cloudflare.com",
-            ],
-            imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-            fontSrc: [
-              "'self'",
-              "https://cdnjs.cloudflare.com",
-              "https://*.telegram.org",
-            ],
-            objectSrc: ["'none'"],
-            mediaSrc: ["'self'"],
-            frameSrc: [
-              "'self'",
-              "https://*.telegram.org",
-              "https://telegram.me",
-              "https://t.me",
-            ],
-            childSrc: [
-              "'self'",
-              "https://*.telegram.org",
-              "https://telegram.me",
-              "https://t.me",
-            ],
-            formAction: ["'self'", "https://*.telegram.org"],
-            workerSrc: ["'self'", "blob:"],
-            manifestSrc: ["'self'"],
-          },
-        },
-        crossOriginEmbedderPolicy: false,
-      })(req, res, next);
-    }
-  });
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
   // Включаем CORS
   app.use(

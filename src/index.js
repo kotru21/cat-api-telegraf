@@ -86,7 +86,6 @@ function initWebServer(port) {
             "https://cdn.tailwindcss.com",
             "https://cdnjs.cloudflare.com",
             "https://telegram.org",
-            "https://oauth.telegram.org",
             "https://*.telegram.org",
             "https://telegram.me",
             "https://t.me",
@@ -99,22 +98,8 @@ function initWebServer(port) {
             "https://cdnjs.cloudflare.com",
             "https://*.telegram.org",
           ],
-          imgSrc: [
-            "'self'",
-            "data:",
-            "https:",
-            "http:",
-            "https://*.telegram.org",
-            "https://t.me",
-          ],
-          connectSrc: [
-            "'self'",
-            "ws:",
-            "wss:",
-            "https://*.telegram.org",
-            "https://telegram.me",
-            "https://t.me",
-          ],
+          imgSrc: ["'self'", "data:", "https:", "http:"],
+          connectSrc: ["'self'", "ws:", "wss:"],
           fontSrc: [
             "'self'",
             "https://cdnjs.cloudflare.com",
@@ -123,26 +108,25 @@ function initWebServer(port) {
           objectSrc: ["'none'"],
           frameSrc: [
             "'self'",
-            "https://oauth.telegram.org",
             "https://*.telegram.org",
             "https://telegram.me",
             "https://t.me",
           ],
           childSrc: [
             "'self'",
-            "https://oauth.telegram.org",
             "https://*.telegram.org",
             "https://telegram.me",
             "https://t.me",
           ],
-          upgradeInsecureRequests: [],
         },
       },
       crossOriginEmbedderPolicy: false, // Для возможности загрузки изображений с других доменов
     })
   );
 
-  // app.use(cors());
+  // Включаем CORS
+  app.use(cors());
+
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
 

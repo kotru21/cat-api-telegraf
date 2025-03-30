@@ -112,20 +112,20 @@ function initWebServer(port) {
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
 
-  // app.use(
-  //   session({
-  //     secret:
-  //       process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
-  //     resave: false,
-  //     saveUninitialized: false,
-  //     cookie: {
-  //       secure: process.env.NODE_ENV === "production",
-  //       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
-  //       httpOnly: true,
-  //       sameSite: "lax",
-  //     },
-  //   })
-  // );
+  app.use(
+    session({
+      secret:
+        process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+        httpOnly: true,
+        sameSite: "lax",
+      },
+    })
+  );
 
   // Настройка WebSocket
   const wsService = new WebSocketService(server);

@@ -77,11 +77,12 @@ function initWebServer(port) {
   app.use(
     helmet({
       contentSecurityPolicy: {
+        useDefaults: false,
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: [
             "'self'",
-            "'unsafe-inline'", // 'unsafe-inline' для разрешения встроенных скриптов
+            "'unsafe-inline'",
             "'unsafe-eval'",
             "https://cdn.tailwindcss.com",
             "https://cdnjs.cloudflare.com",
@@ -91,21 +92,21 @@ function initWebServer(port) {
             "https://t.me",
             "https://core.telegram.org",
           ],
-          scriptSrcAttr: ["'unsafe-inline'"], // Для обработчиков событий в атрибутах
+          connectSrc: ["'self'", "ws:", "wss:", "https://*.telegram.org"],
           styleSrc: [
             "'self'",
             "'unsafe-inline'",
-            "https://cdnjs.cloudflare.com",
             "https://*.telegram.org",
+            "https://cdnjs.cloudflare.com",
           ],
-          imgSrc: ["'self'", "data:", "https:", "http:"],
-          connectSrc: ["'self'", "ws:", "wss:"],
+          imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
           fontSrc: [
             "'self'",
             "https://cdnjs.cloudflare.com",
             "https://*.telegram.org",
           ],
           objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
           frameSrc: [
             "'self'",
             "https://*.telegram.org",
@@ -118,9 +119,12 @@ function initWebServer(port) {
             "https://telegram.me",
             "https://t.me",
           ],
+          formAction: ["'self'", "https://*.telegram.org"],
+          workerSrc: ["'self'", "blob:"],
+          manifestSrc: ["'self'"],
         },
       },
-      crossOriginEmbedderPolicy: false, // Для возможности загрузки изображений с других доменов
+      crossOriginEmbedderPolicy: false,
     })
   );
 

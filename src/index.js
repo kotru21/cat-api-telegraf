@@ -73,19 +73,13 @@ function initWebServer(port) {
 
   app.set("trust proxy", 1);
 
-  // Настройка middleware в зависимости от пути
-  app.use((req, res, next) => {
-    if (req.path === "/login" || req.path.startsWith("/auth/telegram")) {
-      // Для страницы логина и маршрутов авторизации отключаем CSP
-      helmet({
-        contentSecurityPolicy: false,
-        crossOriginEmbedderPolicy: false,
-      })(req, res, next);
-    } else {
-      // Для всех остальных страниц используем стандартные настройки CSP
-      helmet()(req, res, next);
-    }
-  });
+  // Применяем Helmet без CSP для всего приложения
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
   // Включаем CORS
   app.use(

@@ -73,86 +73,78 @@ function initWebServer(port) {
 
   app.set("trust proxy", 1);
 
-  // Отключение CSP для страницы логина и авторизации
-  app.use((req, res, next) => {
-    if (req.path === "/login" || req.path.startsWith("/auth/telegram")) {
-      res.setHeader("Content-Security-Policy", "");
-    }
-    next();
-  });
-
-  // Настройка middleware
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        useDefaults: false,
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: [
-            "'self'",
-            "'unsafe-inline'",
-            "'unsafe-eval'",
-            "https://cdn.tailwindcss.com",
-            "https://cdnjs.cloudflare.com",
-            "https://telegram.org",
-            "https://*.telegram.org",
-            "https://telegram.me",
-            "https://t.me",
-            "https://core.telegram.org",
-            "https://oauth.telegram.org",
-            "https://tg.dev",
-          ],
-          connectSrc: [
-            "'self'",
-            "ws:",
-            "wss:",
-            "https://*.telegram.org",
-            "https://oauth.telegram.org",
-            "https://tg.dev",
-          ],
-          styleSrc: [
-            "'self'",
-            "'unsafe-inline'",
-            "https://*.telegram.org",
-            "https://cdnjs.cloudflare.com",
-          ],
-          imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-          fontSrc: [
-            "'self'",
-            "https://cdnjs.cloudflare.com",
-            "https://*.telegram.org",
-          ],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: [
-            "'self'",
-            "https://*.telegram.org",
-            "https://telegram.me",
-            "https://t.me",
-            "https://oauth.telegram.org",
-            "https://tg.dev",
-          ],
-          childSrc: [
-            "'self'",
-            "https://*.telegram.org",
-            "https://telegram.me",
-            "https://t.me",
-            "https://oauth.telegram.org",
-            "https://tg.dev",
-          ],
-          formAction: [
-            "'self'",
-            "https://*.telegram.org",
-            "https://oauth.telegram.org",
-            "https://t.me",
-          ],
-          workerSrc: ["'self'", "blob:"],
-          manifestSrc: ["'self'"],
-        },
-      },
-      crossOriginEmbedderPolicy: false,
-    })
-  );
+  // // Настройка middleware. Отключено из-за проблем с CSP и Telegram Login Widget
+  // app.use(
+  //   helmet({
+  //     contentSecurityPolicy: {
+  //       useDefaults: false,
+  //       directives: {
+  //         defaultSrc: ["'self'"],
+  //         scriptSrc: [
+  //           "'self'",
+  //           "'unsafe-inline'",
+  //           "'unsafe-eval'",
+  //           "https://cdn.tailwindcss.com",
+  //           "https://cdnjs.cloudflare.com",
+  //           "https://telegram.org",
+  //           "https://*.telegram.org",
+  //           "https://telegram.me",
+  //           "https://t.me",
+  //           "https://core.telegram.org",
+  //           "https://oauth.telegram.org",
+  //           "https://tg.dev",
+  //         ],
+  //         connectSrc: [
+  //           "'self'",
+  //           "ws:",
+  //           "wss:",
+  //           "https://*.telegram.org",
+  //           "https://oauth.telegram.org",
+  //           "https://tg.dev",
+  //         ],
+  //         styleSrc: [
+  //           "'self'",
+  //           "'unsafe-inline'",
+  //           "https://*.telegram.org",
+  //           "https://cdnjs.cloudflare.com",
+  //         ],
+  //         imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+  //         fontSrc: [
+  //           "'self'",
+  //           "https://cdnjs.cloudflare.com",
+  //           "https://*.telegram.org",
+  //         ],
+  //         objectSrc: ["'none'"],
+  //         mediaSrc: ["'self'"],
+  //         frameSrc: [
+  //           "'self'",
+  //           "https://*.telegram.org",
+  //           "https://telegram.me",
+  //           "https://t.me",
+  //           "https://oauth.telegram.org",
+  //           "https://tg.dev",
+  //         ],
+  //         childSrc: [
+  //           "'self'",
+  //           "https://*.telegram.org",
+  //           "https://telegram.me",
+  //           "https://t.me",
+  //           "https://oauth.telegram.org",
+  //           "https://tg.dev",
+  //         ],
+  //         formAction: [
+  //           "'self'",
+  //           "https://*.telegram.org",
+  //           "https://oauth.telegram.org",
+  //           "https://t.me",
+  //         ],
+  //         workerSrc: ["'self'", "blob:"],
+  //         manifestSrc: ["'self'"],
+  //       },
+  //     },
+  //     crossOriginEmbedderPolicy: false,
+  //   })
+  // );
 
   // Включаем CORS
   app.use(

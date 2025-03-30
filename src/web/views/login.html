@@ -91,20 +91,8 @@
             src="https://telegram.org/js/telegram-widget.js?21"
             data-telegram-login="catbotjss_bot"
             data-size="large"
-            data-onauth="onTelegramAuth(user)"
+            data-auth-url="/auth/telegram"
             data-request-access="write"></script>
-          <script type="text/javascript">
-            console.log("Скрипт авторизации загружен");
-
-            function onTelegramAuth(user) {
-              console.log("Функция onTelegramAuth вызвана", user);
-              try {
-                console.log(JSON.stringify(user, null, 2));
-              } catch (error) {
-                console.error("Ошибка в функции onTelegramAuth:", error);
-              }
-            }
-          </script>
         </div>
 
         <div class="mt-8 text-center text-sm text-gray-400">

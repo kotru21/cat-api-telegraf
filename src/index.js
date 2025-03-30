@@ -73,11 +73,11 @@ function initWebServer(port) {
 
   app.set("trust proxy", 1);
 
-  // Применяем Helmet без CSP для всего приложения
+  // Настройка middleware
   app.use(
+    // not including the frameguard() middleware
     helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
+      frameguard: false,
     })
   );
 

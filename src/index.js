@@ -74,9 +74,8 @@ function initWebServer(port) {
   app.set("trust proxy", 1);
 
   // Настройка middleware
-  app.use((req, res, next) => {
+  app.use(
     helmet({
-      frameguard: false,
       contentSecurityPolicy: {
         useDefaults: false,
         directives: {
@@ -92,8 +91,17 @@ function initWebServer(port) {
             "https://telegram.me",
             "https://t.me",
             "https://core.telegram.org",
+            "https://oauth.telegram.org",
+            "https://tg.dev",
           ],
-          connectSrc: ["'self'", "ws:", "wss:", "https://*.telegram.org"],
+          connectSrc: [
+            "'self'",
+            "ws:",
+            "wss:",
+            "https://*.telegram.org",
+            "https://oauth.telegram.org",
+            "https://tg.dev",
+          ],
           styleSrc: [
             "'self'",
             "'unsafe-inline'",
@@ -113,21 +121,30 @@ function initWebServer(port) {
             "https://*.telegram.org",
             "https://telegram.me",
             "https://t.me",
+            "https://oauth.telegram.org",
+            "https://tg.dev",
           ],
           childSrc: [
             "'self'",
             "https://*.telegram.org",
             "https://telegram.me",
             "https://t.me",
+            "https://oauth.telegram.org",
+            "https://tg.dev",
           ],
-          formAction: ["'self'", "https://*.telegram.org"],
+          formAction: [
+            "'self'",
+            "https://*.telegram.org",
+            "https://oauth.telegram.org",
+            "https://t.me",
+          ],
           workerSrc: ["'self'", "blob:"],
           manifestSrc: ["'self'"],
         },
       },
       crossOriginEmbedderPolicy: false,
-    })(req, res, next);
-  });
+    })
+  );
 
   // Включаем CORS
   app.use(

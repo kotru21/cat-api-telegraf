@@ -71,61 +71,61 @@ function initWebServer(port) {
   const server = createServer(app);
   const __dirname = path.resolve();
 
-  app.set("trust proxy", 1);
+  // app.set("trust proxy", 1);
 
-  // Настройка middleware
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: [
-            "'self'",
-            "'unsafe-inline'", // 'unsafe-inline' для разрешения встроенных скриптов
-            "'unsafe-eval'",
-            "https://cdn.tailwindcss.com",
-            "https://cdnjs.cloudflare.com",
-            "https://telegram.org",
-            "https://oauth.telegram.org",
-          ],
-          scriptSrcAttr: ["'unsafe-inline'"], // Для обработчиков событий в атрибутах
-          styleSrc: [
-            "'self'",
-            "'unsafe-inline'",
-            "https://cdnjs.cloudflare.com",
-          ],
-          imgSrc: ["'self'", "data:", "https:", "http:"],
-          connectSrc: ["'self'", "ws:", "wss:"],
-          fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-          objectSrc: ["'none'"],
-          frameSrc: ["'self'", "https://oauth.telegram.org"],
-          // для совместимости со старыми браузерами
-          childSrc: ["'self'", "https://oauth.telegram.org"],
-          upgradeInsecureRequests: [],
-        },
-      },
-      crossOriginEmbedderPolicy: false, // Для возможности загрузки изображений с других доменов
-    })
-  );
+  // // Настройка middleware
+  // app.use(
+  //   helmet({
+  //     contentSecurityPolicy: {
+  //       directives: {
+  //         defaultSrc: ["'self'"],
+  //         scriptSrc: [
+  //           "'self'",
+  //           "'unsafe-inline'", // 'unsafe-inline' для разрешения встроенных скриптов
+  //           "'unsafe-eval'",
+  //           "https://cdn.tailwindcss.com",
+  //           "https://cdnjs.cloudflare.com",
+  //           "https://telegram.org",
+  //           "https://oauth.telegram.org",
+  //         ],
+  //         scriptSrcAttr: ["'unsafe-inline'"], // Для обработчиков событий в атрибутах
+  //         styleSrc: [
+  //           "'self'",
+  //           "'unsafe-inline'",
+  //           "https://cdnjs.cloudflare.com",
+  //         ],
+  //         imgSrc: ["'self'", "data:", "https:", "http:"],
+  //         connectSrc: ["'self'", "ws:", "wss:"],
+  //         fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+  //         objectSrc: ["'none'"],
+  //         frameSrc: ["'self'", "https://oauth.telegram.org"],
+  //         // для совместимости со старыми браузерами
+  //         childSrc: ["'self'", "https://oauth.telegram.org"],
+  //         upgradeInsecureRequests: [],
+  //       },
+  //     },
+  //     crossOriginEmbedderPolicy: false, // Для возможности загрузки изображений с других доменов
+  //   })
+  // );
 
-  app.use(cors());
+  // app.use(cors());
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
 
-  app.use(
-    session({
-      secret:
-        process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
-        httpOnly: true,
-        sameSite: "lax",
-      },
-    })
-  );
+  // app.use(
+  //   session({
+  //     secret:
+  //       process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
+  //     resave: false,
+  //     saveUninitialized: false,
+  //     cookie: {
+  //       secure: process.env.NODE_ENV === "production",
+  //       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+  //       httpOnly: true,
+  //       sameSite: "lax",
+  //     },
+  //   })
+  // );
 
   // Настройка WebSocket
   const wsService = new WebSocketService(server);

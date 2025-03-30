@@ -73,14 +73,6 @@ function initWebServer(port) {
 
   app.set("trust proxy", 1);
 
-  // Настройка middleware
-  app.use(
-    helmet({
-      contentSecurityPolicy: false,
-      crossOriginEmbedderPolicy: false,
-    })
-  );
-
   // Включаем CORS
   app.use(
     cors({

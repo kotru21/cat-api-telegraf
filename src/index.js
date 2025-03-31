@@ -190,9 +190,44 @@ function initWebServer(port) {
   // Настройка API маршрутов
   setupApiRoutes(app);
 
+  app.engine("html", function (filePath, options, callback) {
+    fs.readFile(filePath, "utf8", (err, content) => {
+      if (err) {
+        console.error(`Ошибка при чтении файла ${filePath}:`, err);
+        return callback(err);
+      }
+
+      // Заменяем маркеры на содержимое шаблонов
+      if (content.includes("<!-- INCLUDE_NAVIGATION -->")) {
+        const navPath = path.join(
+          __dirname, // __dirname = src/
+          "web/views/partials", // Уберите src/ из пути
+          "navigation.html"
+        );
+
+        try {
+          console.log("Попытка чтения файла навигации:", navPath);
+          const navContent = fs.readFileSync(navPath, "utf8");
+          content = content.replace("<!-- INCLUDE_NAVIGATION -->", navContent);
+        } catch (err) {
+          console.error(
+            `Ошибка при чтении navigation.html (${navPath}): ${err.message}`
+          );
+          // Продолжаем без навигации вместо падения
+        }
+      }
+
+      callback(null, content);
+    });
+  });
+
+  // Затем правильно указываем пути к views
+  app.set("views", path.join(__dirname, "web/views")); // Уберите src/
+  app.set("view engine", "html");
+
   // Настройка HTML-маршрутов
   app.get("/", (req, res) => {
-    const filePath = path.join(__dirname, "src/web/views/index.html");
+    const filePath = path.join(__dirname, "web/views/index.html"); // Уберите src/
     fs.readFile(filePath, "utf8", (err, html) => {
       if (err) return res.status(500).send("Internal Server Error");
 
@@ -201,12 +236,12 @@ function initWebServer(port) {
   });
 
   app.get("/catDetails", (req, res) => {
-    res.sendFile(path.join(__dirname, "src/web/views/catDetails.html"));
+    res.sendFile(path.join(__dirname, "web/views/catDetails.html")); // Уберите src/
   });
 
   // маршрут для страницы поиска похожих котов
   app.get("/similar", (req, res) => {
-    res.sendFile(path.join(__dirname, "src/web/views/similar.html"));
+    res.sendFile(path.join(__dirname, "web/views/similar.html")); // Уберите src/
   });
 
   // маршруты для авторизации
@@ -215,7 +250,7 @@ function initWebServer(port) {
     if (req.session.user) {
       return res.redirect("/profile");
     }
-    res.sendFile(path.join(__dirname, "src/web/views/login.html"));
+    res.sendFile(path.join(__dirname, "web/views/login.html")); // Уберите src/
   });
 
   app.get("/profile", (req, res) => {
@@ -227,7 +262,7 @@ function initWebServer(port) {
     }
 
     console.log("Пользователь авторизован:", req.session.user);
-    res.sendFile(path.join(__dirname, "src/web/views/profile.html"));
+    res.sendFile(path.join(__dirname, "web/views/profile.html")); // Уберите src/
   });
 
   // Обработка callback от Telegram Login Widget
@@ -374,33 +409,6 @@ function initWebServer(port) {
     req.session.destroy();
     res.redirect("/");
   });
-
-  app.engine("html", function (filePath, options, callback) {
-    fs.readFile(filePath, "utf8", (err, content) => {
-      if (err) return callback(err);
-
-      // Заменяем маркеры на содержимое шаблонов
-      if (content.includes("<!-- INCLUDE_NAVIGATION -->")) {
-        const navPath = path.join(
-          __dirname,
-          "src/web/views/partials",
-          "navigation.html"
-        );
-
-        try {
-          const navContent = fs.readFileSync(navPath, "utf8");
-          content = content.replace("<!-- INCLUDE_NAVIGATION -->", navContent);
-        } catch (err) {
-          console.error(`Ошибка при чтении navigation.html: ${err.message}`);
-          // Продолжаем без навигации вместо падения
-        }
-      }
-
-      callback(null, content);
-    });
-  });
-  app.set("views", path.join(__dirname, "src/web/views"));
-  app.set("view engine", "html");
 
   server.listen(port, () => {
     // Получаем базовый URL без слеша в конце

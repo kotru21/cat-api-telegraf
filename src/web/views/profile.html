@@ -106,7 +106,7 @@
               class="w-24 h-24 rounded-full"
               src=""
               alt="Аватар пользователя"
-              onerror="this.src='https://placehold.co/96x96/4F46E5/FFFFFF?text=Avatar'" />
+              data-fallback="https://placehold.co/96x96/4F46E5/FFFFFF?text=Avatar" />
           </div>
           <div class="text-center md:text-left">
             <h1 class="text-3xl font-bold mb-2" id="user-name">Загрузка...</h1>
@@ -270,6 +270,14 @@
           console.error("Ошибка:", error);
           alert("Произошла ошибка при загрузке данных. Попробуйте позже.");
         }
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const avatar = document.getElementById("user-avatar");
+        avatar.addEventListener("error", function () {
+          this.src = this.getAttribute("data-fallback");
+        });
       });
     </script>
   </body>

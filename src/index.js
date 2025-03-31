@@ -76,65 +76,61 @@ function initWebServer(port) {
   const helmetOpts = {
     contentSecurityPolicy: {
       directives: {
-        defaultSrc: [
-          "'self'",
-          "telegram.org",
-          "*.telegram.org",
-          "t.me",
-          "telegram.me",
-        ],
+        defaultSrc: ["'self'"],
         scriptSrc: [
           "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'",
           "cdn.tailwindcss.com",
           "cdnjs.cloudflare.com",
           "telegram.org",
           "*.telegram.org",
-          "telegram.me",
           "t.me",
           "oauth.telegram.org",
-          "tg.dev",
         ],
         styleSrc: [
           "'self'",
           "'unsafe-inline'",
           "cdn.tailwindcss.com",
           "cdnjs.cloudflare.com",
-          "*.telegram.org",
         ],
-        imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+        imgSrc: ["'self'", "data:", "telegram.org", "*.telegram.org", "t.me"],
         connectSrc: [
           "'self'",
           "ws:",
           "wss:",
+          "telegram.org",
           "*.telegram.org",
           "oauth.telegram.org",
         ],
-        fontSrc: ["'self'", "cdnjs.cloudflare.com", "*.telegram.org"],
+        fontSrc: ["'self'", "cdnjs.cloudflare.com"],
         objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
         frameSrc: [
           "'self'",
+          "telegram.org",
           "*.telegram.org",
-          "telegram.me",
           "t.me",
           "oauth.telegram.org",
         ],
-        childSrc: ["'self'", "*.telegram.org", "telegram.me", "t.me"],
-        formAction: ["'self'", "*.telegram.org", "oauth.telegram.org", "t.me"],
-        workerSrc: ["'self'", "blob:"],
-        manifestSrc: ["'self'"],
+        formAction: [
+          "'self'",
+          "telegram.org",
+          "*.telegram.org",
+          "oauth.telegram.org",
+        ],
       },
     },
-    crossOriginEmbedderPolicy: false,
+    // Для локальной разработки можно оставить false
+    crossOriginEmbedderPolicy:
+      process.env.NODE_ENV === "production" ? true : false,
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    // Более строгая политика
+    crossOriginResourcePolicy: { policy: "same-site" },
     referrerPolicy: {
-      policy: ["origin", "strict-origin-when-cross-origin"],
+      policy: ["strict-origin-when-cross-origin"],
     },
-    xFrameOptions: false, // Отключаем, чтобы разрешить встраивание Telegram виджетов
-    hsts: false, // Отключаем для локальной разработки
+    // Для виджета Telegram может потребоваться false
+    xFrameOptions: false,
+    // Включаем для продакшена
+    hsts: process.env.NODE_ENV === "production",
     xPoweredBy: false,
   };
 

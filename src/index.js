@@ -238,23 +238,17 @@ function initWebServer(port) {
   app.set("views", path.join(__dirname, "web/views")); // Уберите src/
   app.set("view engine", "html");
 
-  // Настройка HTML-маршрутов
   app.get("/", (req, res) => {
-    const filePath = path.join(__dirname, "web/views/index.html"); // Уберите src/
-    fs.readFile(filePath, "utf8", (err, html) => {
-      if (err) return res.status(500).send("Internal Server Error");
-
-      res.send(html);
-    });
+    res.render("index"); // Вместо sendFile или чтения файла напрямую
   });
 
   app.get("/catDetails", (req, res) => {
-    res.sendFile(path.join(__dirname, "web/views/catDetails.html")); // Уберите src/
+    res.render("catDetails"); // Вместо sendFile
   });
 
   // маршрут для страницы поиска похожих котов
   app.get("/similar", (req, res) => {
-    res.sendFile(path.join(__dirname, "web/views/similar.html")); // Уберите src/
+    res.render("similar"); // Вместо sendFile
   });
 
   // маршруты для авторизации
@@ -263,7 +257,7 @@ function initWebServer(port) {
     if (req.session.user) {
       return res.redirect("/profile");
     }
-    res.sendFile(path.join(__dirname, "web/views/login.html")); // Уберите src/
+    res.render("login"); // Вместо sendFile
   });
 
   app.get("/profile", (req, res) => {
@@ -275,7 +269,7 @@ function initWebServer(port) {
     }
 
     console.log("Пользователь авторизован:", req.session.user);
-    res.sendFile(path.join(__dirname, "web/views/profile.html")); // Уберите src/
+    res.render("profile"); // Вместо sendFile
   });
 
   // Обработка callback от Telegram Login Widget

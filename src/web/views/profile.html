@@ -12,11 +12,12 @@
     <style>
       :root {
         --primary-color: #4f46e5;
+        --primary-light: #6366f1;
         --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
+        --bg-dark: #0f172a;
+        --card-bg: #1e293b;
+        --text-light: #f8fafc;
+        --text-gray: #94a3b8;
       }
 
       body {
@@ -26,19 +27,31 @@
       }
 
       .header {
-        backdrop-filter: blur(8px);
-        background-color: rgba(17, 24, 39, 0.8);
+        backdrop-filter: blur(12px);
+        background-color: rgba(15, 23, 42, 0.75);
       }
 
       .profile-header {
         background: linear-gradient(
-          to bottom,
+          to right,
           rgba(79, 70, 229, 0.2),
-          transparent
+          rgba(236, 72, 153, 0.1)
         );
-        border-radius: 1rem;
+        border-radius: 1.25rem;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+
+      .profile-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath fill='%234f46e5' fill-opacity='0.05' d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'%3E%3C/path%3E%3C/svg%3E");
+        z-index: 0;
       }
 
       .profile-header::after {
@@ -53,11 +66,13 @@
           rgba(79, 70, 229, 0.3) 0%,
           transparent 70%
         );
+        z-index: 1;
         pointer-events: none;
       }
 
       .avatar-container {
         position: relative;
+        z-index: 2;
       }
 
       .avatar-container::after {
@@ -70,73 +85,131 @@
         border-radius: 50%;
         background: linear-gradient(45deg, #4f46e5, #ec4899);
         z-index: -1;
+        animation: rotateGradient 8s linear infinite;
+      }
+
+      @keyframes rotateGradient {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       .cat-card {
         background-color: var(--card-bg);
-        border-radius: 1rem;
+        border-radius: 1.25rem;
         overflow: hidden;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
           0 4px 6px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(75, 85, 99, 0.3);
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        position: relative;
       }
 
       .cat-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2),
           0 10px 10px -5px rgba(0, 0, 0, 0.1);
-        border-color: rgba(79, 70, 229, 0.5);
+        border-color: rgba(99, 102, 241, 0.5);
       }
 
       .cat-image {
-        height: 200px;
+        height: 220px;
         object-fit: cover;
         width: 100%;
-        transition: transform 0.5s ease;
+        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
       .cat-card:hover .cat-image {
         transform: scale(1.08);
       }
 
+      .likes-badge {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .cat-card:hover .likes-badge {
+        background-color: rgba(79, 70, 229, 0.8);
+        transform: translateY(-2px);
+      }
+
       .stat-badge {
-        background: rgba(31, 41, 55, 0.8);
-        backdrop-filter: blur(4px);
-        border: 1px solid rgba(75, 85, 99, 0.5);
-        transition: all 0.2s ease;
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(75, 85, 99, 0.4);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
       }
 
       .stat-badge:hover {
-        transform: translateY(-2px);
-        border-color: var(--primary-color);
+        transform: translateY(-3px);
+        border-color: var(--primary-light);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       }
 
       .tab-active {
-        border-bottom: 2px solid var(--primary-color);
+        position: relative;
         color: white;
       }
 
+      .tab-active::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(to right, #4f46e5, #9f7aea);
+        border-radius: 2px;
+      }
+
+      .tab-btn {
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .tab-btn:not(.tab-active)::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        right: 50%;
+        height: 2px;
+        background: linear-gradient(to right, #4f46e5, #9f7aea);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        opacity: 0;
+      }
+
+      .tab-btn:not(.tab-active):hover::after {
+        left: 0;
+        right: 0;
+        opacity: 0.6;
+      }
+
       .remove-like-btn {
-        transition: all 0.2s ease;
-        opacity: 0.85;
+        transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity: 0.9;
       }
 
       .remove-like-btn:hover {
         opacity: 1;
-        transform: scale(1.02);
+        transform: translateY(-2px);
       }
 
       .search-bar {
-        background: rgba(31, 41, 55, 0.6);
-        backdrop-filter: blur(4px);
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(8px);
         border: 1px solid rgba(75, 85, 99, 0.3);
         transition: all 0.3s ease;
       }
 
       .search-bar:focus-within {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
       }
 
       /* Анимации */
@@ -158,10 +231,19 @@
       .empty-state {
         background: linear-gradient(
           135deg,
-          rgba(31, 41, 55, 0.8),
-          rgba(17, 24, 39, 0.8)
+          rgba(30, 41, 59, 0.8),
+          rgba(15, 23, 42, 0.8)
         );
-        border: 1px dashed rgba(79, 70, 229, 0.3);
+        border: 1px dashed rgba(99, 102, 241, 0.3);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1' width='18px' height='18px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px;
       }
     </style>
   </head>
@@ -250,9 +332,9 @@
     <div class="container mx-auto pt-28 pb-16 px-4">
       <div class="max-w-6xl mx-auto">
         <!-- Профиль пользователя -->
-        <div class="profile-header p-6 mb-10">
+        <div class="profile-header p-8 mb-10">
           <div
-            class="flex flex-col md:flex-row items-center md:items-start gap-8">
+            class="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
             <!-- Аватар пользователя -->
             <div class="avatar-container">
               <img
@@ -268,35 +350,23 @@
               <h1 class="text-3xl font-bold mb-1" id="user-name">
                 Загрузка...
               </h1>
-              <p class="text-gray-400 mb-4">
+              <p class="text-gray-400 mb-6">
                 <i class="fab fa-telegram text-indigo-400 mr-1"></i>
                 <span id="user-username">@username</span>
               </p>
 
               <!-- Статистика пользователя -->
               <div
-                class="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+                class="flex flex-wrap justify-center md:justify-start gap-4 mt-2">
                 <div
-                  class="stat-badge py-2 px-4 rounded-lg flex items-center gap-2">
+                  class="stat-badge py-3 px-5 rounded-xl flex items-center gap-3">
                   <div
-                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center">
+                    class="w-12 h-12 bg-indigo-900/60 rounded-full flex items-center justify-center">
                     <i class="fas fa-heart text-red-500 text-xl"></i>
                   </div>
                   <div>
                     <div class="text-2xl font-bold" id="likes-count">0</div>
                     <div class="text-xs text-gray-400">лайков</div>
-                  </div>
-                </div>
-
-                <div
-                  class="stat-badge py-2 px-4 rounded-lg flex items-center gap-2">
-                  <div
-                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center">
-                    <i class="fas fa-calendar-alt text-green-400 text-xl"></i>
-                  </div>
-                  <div>
-                    <div class="text-2xl font-bold" id="last-active">-</div>
-                    <div class="text-xs text-gray-400">активность</div>
                   </div>
                 </div>
               </div>
@@ -307,34 +377,33 @@
         <!-- Система вкладок -->
         <div class="mb-8">
           <div class="border-b border-gray-800 flex overflow-x-auto">
-            <button class="tab-btn tab-active px-4 py-3 text-lg font-medium">
+            <button class="tab-btn tab-active px-5 py-4 text-lg font-medium">
               <i class="fas fa-heart text-red-500 mr-2"></i> Мои лайки
             </button>
             <button
-              class="tab-btn px-4 py-3 text-lg font-medium text-gray-400 hover:text-white transition-colors">
-              <i class="fas fa-history text-blue-400 mr-2"></i> История
-              активности
+              class="tab-btn px-5 py-4 text-lg font-medium text-gray-400 hover:text-white transition-colors">
+              <i class="fas fa-paw text-amber-400 mr-2"></i> Породы котов
             </button>
           </div>
         </div>
 
         <!-- Поиск и фильтры -->
-        <div class="mb-6 flex flex-col sm:flex-row gap-4 items-center">
-          <div class="search-bar rounded-xl flex items-center flex-1 px-4 py-2">
-            <i class="fas fa-search text-gray-400 mr-3"></i>
+        <div class="mb-8 flex flex-col sm:flex-row gap-4 items-center">
+          <div class="search-bar rounded-xl flex items-center flex-1 px-4 py-3">
+            <i class="fas fa-search text-indigo-400 mr-3"></i>
             <input
               type="text"
               id="search-input"
               placeholder="Найти по породе..."
-              class="bg-transparent border-none outline-none w-full text-white" />
+              class="bg-transparent border-none outline-none w-full text-white placeholder-gray-400" />
           </div>
 
           <select
             id="sort-select"
-            class="search-bar rounded-xl px-4 py-2 bg-transparent outline-none">
-            <option value="latest">Недавние сначала</option>
-            <option value="name">По алфавиту</option>
-            <option value="likes">По числу лайков</option>
+            class="search-bar rounded-xl px-4 py-3 bg-transparent outline-none text-white">
+            <option value="latest" class="bg-gray-800">Недавние сначала</option>
+            <option value="name" class="bg-gray-800">По алфавиту</option>
+            <option value="likes" class="bg-gray-800">По числу лайков</option>
           </select>
         </div>
 
@@ -345,30 +414,36 @@
             id="likes-skeleton"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="cat-card">
-              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-56 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
                   class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-10 w-full rounded-lg"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-10 w-full rounded-lg"></div>
               </div>
             </div>
             <div class="cat-card">
-              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-56 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
                   class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-10 w-full rounded-lg"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-10 w-full rounded-lg"></div>
               </div>
             </div>
             <div class="cat-card">
-              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-56 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
                   class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-10 w-full rounded-lg"></div>
+                <div
+                  class="bg-gray-700 animate-pulse h-10 w-full rounded-lg"></div>
               </div>
             </div>
           </div>
@@ -387,7 +462,7 @@
             class="empty-state text-center py-16 rounded-2xl"
             style="display: none">
             <div
-              class="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-6">
+              class="inline-flex items-center justify-center w-20 h-20 bg-gray-800/60 rounded-full mb-6">
               <i class="fas fa-heart-broken text-3xl text-red-400"></i>
             </div>
             <h3 class="text-xl font-semibold mb-3">У вас пока нет лайков</h3>
@@ -405,7 +480,7 @@
           <!-- Информация о результатах поиска -->
           <div
             id="search-results"
-            class="text-center mt-4 text-gray-400"
+            class="text-center mt-6 text-gray-400"
             style="display: none">
             Найдено <span id="results-count">0</span> котов
           </div>
@@ -655,10 +730,6 @@
 
           // Настройка поиска
           const { updateDisplayedCats } = setupSearchAndSort();
-
-          // Получение времени последнего входа
-          const lastActive = document.getElementById("last-active");
-          lastActive.textContent = "Сегодня";
 
           // Загрузка данных профиля
           const profileResponse = await fetch("/api/profile");

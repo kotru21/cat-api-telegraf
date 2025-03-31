@@ -30,6 +30,48 @@
         background-color: rgba(17, 24, 39, 0.8);
       }
 
+      .profile-header {
+        background: linear-gradient(
+          to bottom,
+          rgba(79, 70, 229, 0.2),
+          transparent
+        );
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .profile-header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          circle at 90% 10%,
+          rgba(79, 70, 229, 0.3) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+
+      .avatar-container {
+        position: relative;
+      }
+
+      .avatar-container::after {
+        content: "";
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #4f46e5, #ec4899);
+        z-index: -1;
+      }
+
       .cat-card {
         background-color: var(--card-bg);
         border-radius: 1rem;
@@ -37,11 +79,14 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
           0 4px 6px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(75, 85, 99, 0.3);
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
       }
 
       .cat-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2),
+          0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        border-color: rgba(79, 70, 229, 0.5);
       }
 
       .cat-image {
@@ -52,7 +97,71 @@
       }
 
       .cat-card:hover .cat-image {
-        transform: scale(1.05);
+        transform: scale(1.08);
+      }
+
+      .stat-badge {
+        background: rgba(31, 41, 55, 0.8);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(75, 85, 99, 0.5);
+        transition: all 0.2s ease;
+      }
+
+      .stat-badge:hover {
+        transform: translateY(-2px);
+        border-color: var(--primary-color);
+      }
+
+      .tab-active {
+        border-bottom: 2px solid var(--primary-color);
+        color: white;
+      }
+
+      .remove-like-btn {
+        transition: all 0.2s ease;
+        opacity: 0.85;
+      }
+
+      .remove-like-btn:hover {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+
+      .search-bar {
+        background: rgba(31, 41, 55, 0.6);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .search-bar:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+      }
+
+      /* Анимации */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+      }
+
+      .empty-state {
+        background: linear-gradient(
+          135deg,
+          rgba(31, 41, 55, 0.8),
+          rgba(17, 24, 39, 0.8)
+        );
+        border: 1px dashed rgba(79, 70, 229, 0.3);
       }
     </style>
   </head>
@@ -79,6 +188,11 @@
               <i class="fas fa-trophy mr-1"></i> Топ котов
             </a>
             <a
+              href="/profile"
+              class="text-white font-medium transition-colors border-b-2 border-indigo-500">
+              <i class="fas fa-user mr-1"></i> Профиль
+            </a>
+            <a
               href="https://t.me/catbotjss_bot"
               class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
               <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
@@ -89,6 +203,45 @@
               <i class="fas fa-sign-out-alt mr-1"></i> Выйти
             </a>
           </div>
+
+          <!-- Мобильная кнопка меню -->
+          <button
+            id="menuButton"
+            class="md:hidden text-gray-300 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Мобильное меню (скрыто по умолчанию) -->
+        <div id="mobileMenu" class="md:hidden hidden">
+          <div
+            class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg">
+            <a
+              href="/"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-home mr-1"></i> Главная
+            </a>
+            <a
+              href="/#leaderboard"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-trophy mr-1"></i> Топ котов
+            </a>
+            <a
+              href="/profile"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600">
+              <i class="fas fa-user mr-1"></i> Профиль
+            </a>
+            <a
+              href="https://t.me/catbotjss_bot"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+            </a>
+            <a
+              href="/logout"
+              class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+              <i class="fas fa-sign-out-alt mr-1"></i> Выйти
+            </a>
+          </div>
         </div>
       </div>
     </nav>
@@ -96,38 +249,97 @@
     <!-- Содержимое страницы -->
     <div class="container mx-auto pt-28 pb-16 px-4">
       <div class="max-w-6xl mx-auto">
-        <!-- Заголовок профиля -->
-        <div
-          class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
+        <!-- Профиль пользователя -->
+        <div class="profile-header p-6 mb-10">
           <div
-            class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center">
-            <img
-              id="user-avatar"
-              class="w-24 h-24 rounded-full"
-              src=""
-              alt="Аватар пользователя"
-              data-fallback="https://placehold.co/96x96/4F46E5/FFFFFF?text=Avatar" />
-          </div>
-          <div class="text-center md:text-left">
-            <h1 class="text-3xl font-bold mb-2" id="user-name">Загрузка...</h1>
-            <p class="text-gray-400">
-              <i class="fab fa-telegram text-indigo-400 mr-1"></i>
-              <span id="user-username">@username</span>
-            </p>
-            <div
-              class="mt-4 py-2 px-4 bg-gray-800 rounded-lg inline-flex items-center">
-              <i class="fas fa-heart text-red-500 mr-2"></i>
-              <span id="likes-count">0</span> лайков
+            class="flex flex-col md:flex-row items-center md:items-start gap-8">
+            <!-- Аватар пользователя -->
+            <div class="avatar-container">
+              <img
+                id="user-avatar"
+                class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-indigo-600 object-cover bg-gray-700"
+                src=""
+                alt="Аватар пользователя"
+                data-fallback="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='8' r='5'/><path d='M20 21a8 8 0 0 0-16 0'/></svg>" />
+            </div>
+
+            <!-- Информация о пользователе -->
+            <div class="text-center md:text-left flex-1">
+              <h1 class="text-3xl font-bold mb-1" id="user-name">
+                Загрузка...
+              </h1>
+              <p class="text-gray-400 mb-4">
+                <i class="fab fa-telegram text-indigo-400 mr-1"></i>
+                <span id="user-username">@username</span>
+              </p>
+
+              <!-- Статистика пользователя -->
+              <div
+                class="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+                <div
+                  class="stat-badge py-2 px-4 rounded-lg flex items-center gap-2">
+                  <div
+                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center">
+                    <i class="fas fa-heart text-red-500 text-xl"></i>
+                  </div>
+                  <div>
+                    <div class="text-2xl font-bold" id="likes-count">0</div>
+                    <div class="text-xs text-gray-400">лайков</div>
+                  </div>
+                </div>
+
+                <div
+                  class="stat-badge py-2 px-4 rounded-lg flex items-center gap-2">
+                  <div
+                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-green-400 text-xl"></i>
+                  </div>
+                  <div>
+                    <div class="text-2xl font-bold" id="last-active">-</div>
+                    <div class="text-xs text-gray-400">активность</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Система вкладок -->
+        <div class="mb-8">
+          <div class="border-b border-gray-800 flex overflow-x-auto">
+            <button class="tab-btn tab-active px-4 py-3 text-lg font-medium">
+              <i class="fas fa-heart text-red-500 mr-2"></i> Мои лайки
+            </button>
+            <button
+              class="tab-btn px-4 py-3 text-lg font-medium text-gray-400 hover:text-white transition-colors">
+              <i class="fas fa-history text-blue-400 mr-2"></i> История
+              активности
+            </button>
+          </div>
+        </div>
+
+        <!-- Поиск и фильтры -->
+        <div class="mb-6 flex flex-col sm:flex-row gap-4 items-center">
+          <div class="search-bar rounded-xl flex items-center flex-1 px-4 py-2">
+            <i class="fas fa-search text-gray-400 mr-3"></i>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Найти по породе..."
+              class="bg-transparent border-none outline-none w-full text-white" />
+          </div>
+
+          <select
+            id="sort-select"
+            class="search-bar rounded-xl px-4 py-2 bg-transparent outline-none">
+            <option value="latest">Недавние сначала</option>
+            <option value="name">По алфавиту</option>
+            <option value="likes">По числу лайков</option>
+          </select>
+        </div>
+
         <!-- Раздел с лайкнутыми котами -->
         <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-6 flex items-center">
-            <i class="fas fa-heart text-red-500 mr-3"></i> Мои лайки
-          </h2>
-
           <!-- Скелетон-загрузчик для карточек -->
           <div
             id="likes-skeleton"
@@ -172,25 +384,108 @@
           <!-- Сообщение об отсутствии лайков -->
           <div
             id="no-likes"
-            class="text-center py-12 bg-gray-800 rounded-lg"
+            class="empty-state text-center py-16 rounded-2xl"
             style="display: none">
-            <i class="fas fa-heart-broken text-4xl text-gray-600 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">У вас пока нет лайков</h3>
-            <p class="text-gray-400 mb-6">
+            <div
+              class="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-6">
+              <i class="fas fa-heart-broken text-3xl text-red-400"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">У вас пока нет лайков</h3>
+            <p class="text-gray-400 max-w-md mx-auto mb-8">
               Используйте бота в Telegram, чтобы поставить лайки интересным
-              породам котов
+              породам котов и они появятся здесь
             </p>
             <a
               href="https://t.me/catbotjss_bot"
-              class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
+              class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
               <i class="fab fa-telegram-plane mr-2"></i> Открыть бота
             </a>
+          </div>
+
+          <!-- Информация о результатах поиска -->
+          <div
+            id="search-results"
+            class="text-center mt-4 text-gray-400"
+            style="display: none">
+            Найдено <span id="results-count">0</span> котов
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Модальное окно подтверждения удаления -->
+    <div
+      id="confirmation-modal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
+      style="display: none">
+      <div
+        class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+        <div class="text-center mb-6">
+          <div
+            class="w-16 h-16 bg-red-900 bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-heart-broken text-red-500 text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Удалить лайк?</h3>
+          <p class="text-gray-400">
+            Вы действительно хотите удалить лайк для
+            <span id="modal-breed-name" class="text-white">этой породы</span>?
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <button
+            id="modal-cancel"
+            class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+            Отмена
+          </button>
+          <button
+            id="modal-confirm"
+            class="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+            Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast-уведомления -->
+    <div
+      id="toast-container"
+      class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
     <script>
+      // Мобильное меню
+      document.addEventListener("DOMContentLoaded", function () {
+        const menuButton = document.getElementById("menuButton");
+        const mobileMenu = document.getElementById("mobileMenu");
+
+        if (menuButton && mobileMenu) {
+          let menuOpen = false;
+
+          menuButton.addEventListener("click", function () {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+              mobileMenu.classList.remove("hidden");
+              menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
+            } else {
+              mobileMenu.classList.add("hidden");
+              menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            }
+          });
+
+          // Закрытие при клике вне меню
+          document.addEventListener("click", function (e) {
+            if (
+              menuOpen &&
+              !menuButton.contains(e.target) &&
+              !mobileMenu.contains(e.target)
+            ) {
+              mobileMenu.classList.add("hidden");
+              menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+              menuOpen = false;
+            }
+          });
+        }
+      });
+
       // Анимация хедера при скролле
       window.addEventListener("scroll", function () {
         const nav = document.querySelector("nav");
@@ -205,14 +500,170 @@
         }
       });
 
+      // Функция для отображения уведомлений
+      function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 fade-in ${
+          type === "success"
+            ? "bg-green-800"
+            : type === "error"
+            ? "bg-red-800"
+            : "bg-gray-800"
+        }`;
+
+        const icon =
+          type === "success"
+            ? "check-circle"
+            : type === "error"
+            ? "exclamation-circle"
+            : "info-circle";
+
+        toast.innerHTML = `
+          <i class="fas fa-${icon} ${
+          type === "success"
+            ? "text-green-400"
+            : type === "error"
+            ? "text-red-400"
+            : "text-blue-400"
+        }"></i>
+          <span>${message}</span>
+        `;
+
+        document.getElementById("toast-container").appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateX(100%)";
+          toast.style.transition = "all 0.5s ease";
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+      }
+
+      // Модальное окно подтверждения
+      const modal = document.getElementById("confirmation-modal");
+      const modalBreedName = document.getElementById("modal-breed-name");
+      const modalCancel = document.getElementById("modal-cancel");
+      const modalConfirm = document.getElementById("modal-confirm");
+
+      function showConfirmationModal(breedName, callback) {
+        modalBreedName.textContent = breedName;
+        modal.style.display = "flex";
+
+        const handleCancel = () => {
+          modal.style.display = "none";
+          modalCancel.removeEventListener("click", handleCancel);
+          modalConfirm.removeEventListener("click", handleConfirm);
+        };
+
+        const handleConfirm = () => {
+          modal.style.display = "none";
+          callback();
+          modalCancel.removeEventListener("click", handleCancel);
+          modalConfirm.removeEventListener("click", handleConfirm);
+        };
+
+        modalCancel.addEventListener("click", handleCancel);
+        modalConfirm.addEventListener("click", handleConfirm);
+      }
+
+      // Поиск и фильтрация
+      function setupSearchAndSort() {
+        const searchInput = document.getElementById("search-input");
+        const sortSelect = document.getElementById("sort-select");
+        const searchResults = document.getElementById("search-results");
+        const resultsCount = document.getElementById("results-count");
+        const likesContainer = document.getElementById("user-likes");
+
+        let allCats = [];
+
+        function updateDisplayedCats() {
+          // Получаем все текущие карточки
+          const cards = Array.from(likesContainer.children);
+          allCats = cards.map((card) => {
+            return {
+              element: card,
+              breedName: card.querySelector("h3").textContent.toLowerCase(),
+              likesCount:
+                parseInt(
+                  card.querySelector(".likes-badge").textContent.split(" ")[0]
+                ) || 0,
+            };
+          });
+
+          filterAndSortCats();
+        }
+
+        function filterAndSortCats() {
+          const searchTerm = searchInput.value.toLowerCase();
+          const sortBy = sortSelect.value;
+
+          // Фильтрация
+          let filteredCats = allCats.filter((cat) =>
+            cat.breedName.includes(searchTerm)
+          );
+
+          // Сортировка
+          if (sortBy === "name") {
+            filteredCats.sort((a, b) => a.breedName.localeCompare(b.breedName));
+          } else if (sortBy === "likes") {
+            filteredCats.sort((a, b) => b.likesCount - a.likesCount);
+          }
+
+          // Обновление DOM
+          likesContainer.innerHTML = "";
+          filteredCats.forEach((cat) => {
+            likesContainer.appendChild(cat.element);
+          });
+
+          // Обновление счетчика результатов
+          if (searchTerm || sortBy !== "latest") {
+            searchResults.style.display = "block";
+            resultsCount.textContent = filteredCats.length;
+          } else {
+            searchResults.style.display = "none";
+          }
+
+          // Если нет результатов, показываем сообщение
+          if (filteredCats.length === 0 && allCats.length > 0) {
+            const noResults = document.createElement("div");
+            noResults.className =
+              "empty-state text-center py-10 rounded-2xl col-span-full";
+            noResults.innerHTML = `
+              <i class="fas fa-search text-3xl text-gray-600 mb-4"></i>
+              <h3 class="text-xl font-semibold mb-2">Ничего не найдено</h3>
+              <p class="text-gray-400">Попробуйте изменить параметры поиска</p>
+            `;
+            likesContainer.appendChild(noResults);
+          }
+        }
+
+        // Обработчики событий
+        searchInput.addEventListener("input", filterAndSortCats);
+        sortSelect.addEventListener("change", filterAndSortCats);
+
+        return { updateDisplayedCats };
+      }
+
       // Загрузка данных пользователя и его лайков
       document.addEventListener("DOMContentLoaded", async function () {
         try {
+          // Настройка аватара
+          const avatar = document.getElementById("user-avatar");
+          avatar.addEventListener("error", function () {
+            this.src = this.getAttribute("data-fallback");
+          });
+
+          // Настройка поиска
+          const { updateDisplayedCats } = setupSearchAndSort();
+
+          // Получение времени последнего входа
+          const lastActive = document.getElementById("last-active");
+          lastActive.textContent = "Сегодня";
+
           // Загрузка данных профиля
           const profileResponse = await fetch("/api/profile");
 
           if (!profileResponse.ok) {
-            // Если ошибка авторизации - перенаправляем на страницу логина
             if (profileResponse.status === 401) {
               window.location.href = "/login";
               return;
@@ -230,7 +681,7 @@
             "@" + profileData.username;
 
           if (profileData.photo_url) {
-            document.getElementById("user-avatar").src = profileData.photo_url;
+            avatar.src = profileData.photo_url;
           }
 
           // Загрузка количества лайков
@@ -262,37 +713,33 @@
           likesContainer.style.display = "grid";
           likesContainer.innerHTML = ""; // Очищаем контейнер
 
-          // Обновить код генерации карточек
-
           likesData.forEach((cat) => {
-            console.log("Полученные данные о коте:", cat); // Отладочный вывод
-
-            const catId = cat.cat_id || cat.id; // Проверяем оба возможных поля
+            const catId = cat.cat_id || cat.id;
+            const breedName = cat.breed_name;
+            const likesCount = cat.likes_count || cat.count || 0;
 
             const card = document.createElement("div");
-            card.className = "cat-card";
+            card.className = "cat-card fade-in";
             card.innerHTML = `
-              <div class="overflow-hidden">
-                <img src="${cat.image_url}" alt="${
-              cat.breed_name
-            }" class="cat-image"
-                     onerror="this.src='https://placehold.co/300x200?text=No+Image'">
+              <div class="relative overflow-hidden">
+                <img src="${cat.image_url}" alt="${breedName}" class="cat-image"
+                     onerror="this.src='https://placehold.co/300x200/1F2937/4F46E5?text=Нет+изображения'">
+                <div class="absolute top-2 right-2">
+                  <span class="likes-badge px-3 py-1 bg-indigo-900 bg-opacity-80 text-white rounded-full inline-flex items-center backdrop-blur-sm">
+                    <i class="fas fa-heart text-red-500 mr-1.5"></i> ${likesCount}
+                  </span>
+                </div>
               </div>
-              <div class="p-4">
-                <h3 class="text-xl font-bold mb-1">${cat.breed_name}</h3>
-                <div class="flex flex-col space-y-2">
-                  <div class="flex justify-between items-center">
-                    <span class="likes-badge px-2 py-1 bg-indigo-900 text-indigo-300 rounded-full inline-flex items-center">
-                      <i class="fas fa-heart text-red-500 mr-1.5"></i> ${
-                        cat.likes_count || cat.count || 0
-                      } лайков
-                    </span>
-                    <a href="/catDetails?id=${catId}" class="text-indigo-400 hover:text-indigo-300 transition-colors">
-                      <i class="fas fa-info-circle mr-1"></i> Подробнее
-                    </a>
-                  </div>
-                  <button class="remove-like-btn w-full text-red-500 hover:text-red-400 bg-gray-800 hover:bg-gray-700 transition-colors py-1.5 px-3 rounded-md" data-cat-id="${catId}">
-                    <i class="fas fa-heart-broken mr-1"></i> Удалить лайк
+              <div class="p-5">
+                <h3 class="text-xl font-bold mb-3">${breedName}</h3>
+                <div class="flex flex-col space-y-3">
+                  <a href="/catDetails?id=${catId}" 
+                     class="text-center py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-info-circle mr-1"></i> Подробнее
+                  </a>
+                  <button class="remove-like-btn text-center py-2 px-4 bg-gray-800 hover:bg-gray-700 text-red-400 rounded-lg flex items-center justify-center gap-2" 
+                          data-cat-id="${catId}" data-breed-name="${breedName}">
+                    <i class="fas fa-heart-broken"></i> Удалить лайк
                   </button>
                 </div>
               </div>
@@ -300,77 +747,80 @@
             likesContainer.appendChild(card);
           });
 
+          // Обновляем отображаемые карточки для поиска и сортировки
+          updateDisplayedCats();
+
           // Настраиваем кнопки удаления лайков
           setupRemoveLikeButtons();
         } catch (error) {
           console.error("Ошибка:", error);
-          alert("Произошла ошибка при загрузке данных. Попробуйте позже.");
+          showToast("Произошла ошибка при загрузке данных", "error");
         }
       });
 
       // Функция для настройки кнопок удаления лайков
       function setupRemoveLikeButtons() {
         document.querySelectorAll(".remove-like-btn").forEach((btn) => {
-          btn.addEventListener("click", async function () {
-            if (!confirm("Вы действительно хотите удалить лайк?")) return;
-
+          btn.addEventListener("click", function () {
             const catId = this.dataset.catId;
-            console.log("Удаление лайка для catId:", catId);
+            const breedName = this.dataset.breedName;
 
-            try {
-              const response = await fetch("/api/like", {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ catId }),
-                credentials: "include", // Важно для передачи сессионных cookie
-              });
+            showConfirmationModal(breedName, async () => {
+              try {
+                const response = await fetch("/api/like", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ catId }),
+                  credentials: "include",
+                });
 
-              console.log("Статус ответа:", response.status);
+                if (response.ok) {
+                  // Удаляем карточку с анимацией
+                  const card = this.closest(".cat-card");
+                  card.style.opacity = "0";
+                  card.style.transform = "scale(0.9)";
+                  card.style.transition = "all 0.3s ease";
 
-              if (response.ok) {
-                // Удаляем карточку из DOM
-                this.closest(".cat-card").remove();
-                alert("Лайк успешно удален!");
+                  setTimeout(() => {
+                    card.remove();
 
-                // Обновляем общий счетчик лайков если он есть
-                const likesCountElement =
-                  document.getElementById("likes-count");
-                if (likesCountElement) {
-                  const currentCount = parseInt(likesCountElement.textContent);
-                  const newCount = Math.max(0, currentCount - 1);
-                  likesCountElement.textContent = newCount;
+                    // Обновляем общий счетчик лайков
+                    const likesCountElement =
+                      document.getElementById("likes-count");
+                    if (likesCountElement) {
+                      const currentCount = parseInt(
+                        likesCountElement.textContent
+                      );
+                      const newCount = Math.max(0, currentCount - 1);
+                      likesCountElement.textContent = newCount;
 
-                  // Если удалили все лайки, показываем сообщение
-                  if (newCount === 0 && document.getElementById("no-likes")) {
-                    document.getElementById("user-likes").style.display =
-                      "none";
-                    document.getElementById("no-likes").style.display = "block";
-                  }
+                      // Если удалили все лайки, показываем сообщение
+                      if (newCount === 0) {
+                        document.getElementById("user-likes").style.display =
+                          "none";
+                        document.getElementById("no-likes").style.display =
+                          "block";
+                      }
+                    }
+
+                    showToast("Лайк успешно удален", "success");
+                  }, 300);
+                } else {
+                  const errorData = await response.json();
+                  console.error("Ошибка при удалении лайка:", errorData);
+                  showToast(
+                    errorData.error || "Не удалось удалить лайк",
+                    "error"
+                  );
                 }
-              } else {
-                const errorData = await response.json();
-                console.error("Ошибка при удалении лайка:", errorData);
-                alert(
-                  `Ошибка: ${errorData.error || "Не удалось удалить лайк"}`
-                );
+              } catch (error) {
+                console.error("Ошибка при выполнении запроса:", error);
+                showToast("Произошла ошибка при удалении лайка", "error");
               }
-            } catch (error) {
-              console.error("Ошибка при выполнении запроса:", error);
-              alert("Произошла ошибка при удалении лайка");
-            }
+            });
           });
         });
       }
-    </script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const avatar = document.getElementById("user-avatar");
-        avatar.addEventListener("error", function () {
-          this.src = this.getAttribute("data-fallback");
-        });
-      });
     </script>
   </body>
 </html>

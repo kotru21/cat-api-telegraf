@@ -142,12 +142,11 @@ export class LikesRepository {
     });
   }
 
-  // Получение всех лайков пользователя
   async getUserLikes(userId) {
     const db = await this.dbPromise;
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT ul.cat_id, m.breed_name, m.image_url 
+        `SELECT ul.cat_id, m.breed_name, m.id, m.image_url, m.count as likes_count
          FROM user_likes ul
          JOIN msg m ON ul.cat_id = m.id
          WHERE ul.user_id = ?
@@ -158,7 +157,7 @@ export class LikesRepository {
             console.error("Ошибка при получении лайков пользователя:", err);
             reject(err);
           } else {
-            resolve(rows);
+            resolve(rows || []);
           }
         }
       );

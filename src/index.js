@@ -73,78 +73,72 @@ function initWebServer(port) {
 
   app.set("trust proxy", 1);
 
-  // // Настройка middleware. Отключено из-за проблем с CSP и Telegram Login Widget
-  // app.use(
-  //   helmet({
-  //     contentSecurityPolicy: {
-  //       useDefaults: false,
-  //       directives: {
-  //         defaultSrc: ["'self'"],
-  //         scriptSrc: [
-  //           "'self'",
-  //           "'unsafe-inline'",
-  //           "'unsafe-eval'",
-  //           "https://cdn.tailwindcss.com",
-  //           "https://cdnjs.cloudflare.com",
-  //           "https://telegram.org",
-  //           "https://*.telegram.org",
-  //           "https://telegram.me",
-  //           "https://t.me",
-  //           "https://core.telegram.org",
-  //           "https://oauth.telegram.org",
-  //           "https://tg.dev",
-  //         ],
-  //         connectSrc: [
-  //           "'self'",
-  //           "ws:",
-  //           "wss:",
-  //           "https://*.telegram.org",
-  //           "https://oauth.telegram.org",
-  //           "https://tg.dev",
-  //         ],
-  //         styleSrc: [
-  //           "'self'",
-  //           "'unsafe-inline'",
-  //           "https://*.telegram.org",
-  //           "https://cdnjs.cloudflare.com",
-  //         ],
-  //         imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
-  //         fontSrc: [
-  //           "'self'",
-  //           "https://cdnjs.cloudflare.com",
-  //           "https://*.telegram.org",
-  //         ],
-  //         objectSrc: ["'none'"],
-  //         mediaSrc: ["'self'"],
-  //         frameSrc: [
-  //           "'self'",
-  //           "https://*.telegram.org",
-  //           "https://telegram.me",
-  //           "https://t.me",
-  //           "https://oauth.telegram.org",
-  //           "https://tg.dev",
-  //         ],
-  //         childSrc: [
-  //           "'self'",
-  //           "https://*.telegram.org",
-  //           "https://telegram.me",
-  //           "https://t.me",
-  //           "https://oauth.telegram.org",
-  //           "https://tg.dev",
-  //         ],
-  //         formAction: [
-  //           "'self'",
-  //           "https://*.telegram.org",
-  //           "https://oauth.telegram.org",
-  //           "https://t.me",
-  //         ],
-  //         workerSrc: ["'self'", "blob:"],
-  //         manifestSrc: ["'self'"],
-  //       },
-  //     },
-  //     crossOriginEmbedderPolicy: false,
-  //   })
-  // );
+  const helmetOpts = {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [
+          "'self'",
+          "telegram.org",
+          "*.telegram.org",
+          "t.me",
+          "telegram.me",
+        ],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          "cdn.tailwindcss.com",
+          "cdnjs.cloudflare.com",
+          "telegram.org",
+          "*.telegram.org",
+          "telegram.me",
+          "t.me",
+          "oauth.telegram.org",
+          "tg.dev",
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "cdn.tailwindcss.com",
+          "cdnjs.cloudflare.com",
+          "*.telegram.org",
+        ],
+        imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
+        connectSrc: [
+          "'self'",
+          "ws:",
+          "wss:",
+          "*.telegram.org",
+          "oauth.telegram.org",
+        ],
+        fontSrc: ["'self'", "cdnjs.cloudflare.com", "*.telegram.org"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: [
+          "'self'",
+          "*.telegram.org",
+          "telegram.me",
+          "t.me",
+          "oauth.telegram.org",
+        ],
+        childSrc: ["'self'", "*.telegram.org", "telegram.me", "t.me"],
+        formAction: ["'self'", "*.telegram.org", "oauth.telegram.org", "t.me"],
+        workerSrc: ["'self'", "blob:"],
+        manifestSrc: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    referrerPolicy: {
+      policy: ["origin", "strict-origin-when-cross-origin"],
+    },
+    xFrameOptions: false, // Отключаем, чтобы разрешить встраивание Telegram виджетов
+    hsts: false, // Отключаем для локальной разработки
+    xPoweredBy: false,
+  };
+
+  app.use(helmet(helmetOpts));
 
   // Включаем CORS
   app.use(

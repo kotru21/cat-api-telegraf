@@ -367,40 +367,6 @@
       class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
     <script src="/js/navigation.js"></script>
     <script>
-      // Мобильное меню
-      document.addEventListener("DOMContentLoaded", function () {
-        const menuButton = document.getElementById("menuButton");
-        const mobileMenu = document.getElementById("mobileMenu");
-
-        if (menuButton && mobileMenu) {
-          let menuOpen = false;
-
-          menuButton.addEventListener("click", function () {
-            menuOpen = !menuOpen;
-            if (menuOpen) {
-              mobileMenu.classList.remove("hidden");
-              menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
-            } else {
-              mobileMenu.classList.add("hidden");
-              menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-            }
-          });
-
-          // Закрытие при клике вне меню
-          document.addEventListener("click", function (e) {
-            if (
-              menuOpen &&
-              !menuButton.contains(e.target) &&
-              !mobileMenu.contains(e.target)
-            ) {
-              mobileMenu.classList.add("hidden");
-              menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-              menuOpen = false;
-            }
-          });
-        }
-      });
-
       // Анимация хедера при скролле
       window.addEventListener("scroll", function () {
         const nav = document.querySelector("nav");

@@ -262,7 +262,13 @@
           likesContainer.style.display = "grid";
           likesContainer.innerHTML = ""; // Очищаем контейнер
 
+          // Обновить код генерации карточек
+
           likesData.forEach((cat) => {
+            console.log("Полученные данные о коте:", cat); // Отладочный вывод
+
+            const catId = cat.cat_id || cat.id; // Проверяем оба возможных поля
+
             const card = document.createElement("div");
             card.className = "cat-card";
             card.innerHTML = `
@@ -278,18 +284,14 @@
                   <div class="flex justify-between items-center">
                     <span class="likes-badge px-2 py-1 bg-indigo-900 text-indigo-300 rounded-full inline-flex items-center">
                       <i class="fas fa-heart text-red-500 mr-1.5"></i> ${
-                        cat.likes_count || 0
+                        cat.likes_count || cat.count || 0
                       } лайков
                     </span>
-                    <a href="/catDetails?id=${
-                      cat.cat_id
-                    }" class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                    <a href="/catDetails?id=${catId}" class="text-indigo-400 hover:text-indigo-300 transition-colors">
                       <i class="fas fa-info-circle mr-1"></i> Подробнее
                     </a>
                   </div>
-                  <button class="remove-like-btn w-full text-red-500 hover:text-red-400 bg-gray-800 hover:bg-gray-700 transition-colors py-1.5 px-3 rounded-md" data-cat-id="${
-                    cat.cat_id
-                  }">
+                  <button class="remove-like-btn w-full text-red-500 hover:text-red-400 bg-gray-800 hover:bg-gray-700 transition-colors py-1.5 px-3 rounded-md" data-cat-id="${catId}">
                     <i class="fas fa-heart-broken mr-1"></i> Удалить лайк
                   </button>
                 </div>
@@ -313,6 +315,8 @@
             if (!confirm("Вы действительно хотите удалить лайк?")) return;
 
             const catId = this.dataset.catId;
+            console.log("Удаление лайка для catId:", catId);
+
             try {
               const response = await fetch("/api/like", {
                 method: "DELETE",
@@ -320,32 +324,37 @@
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ catId }),
+                credentials: "include", // Важно для передачи сессионных cookie
               });
 
-              if (response.ok) {
-                this.closest(".cat-card").remove();
+              console.log("Статус ответа:", response.status);
 
+              if (response.ok) {
+                // Удаляем карточку из DOM
+                this.closest(".cat-card").remove();
+                alert("Лайк успешно удален!");
+
+                // Обновляем общий счетчик лайков если он есть
                 const likesCountElement =
                   document.getElementById("likes-count");
                 if (likesCountElement) {
                   const currentCount = parseInt(likesCountElement.textContent);
-                  const newCount = Math.max(0, currentCount - 1); // Не допускаем отрицательных значений
+                  const newCount = Math.max(0, currentCount - 1);
                   likesCountElement.textContent = newCount;
 
                   // Если удалили все лайки, показываем сообщение
-                  if (newCount === 0) {
+                  if (newCount === 0 && document.getElementById("no-likes")) {
                     document.getElementById("user-likes").style.display =
                       "none";
                     document.getElementById("no-likes").style.display = "block";
                   }
                 }
               } else {
-                // Получаем детали ошибки
                 const errorData = await response.json();
+                console.error("Ошибка при удалении лайка:", errorData);
                 alert(
                   `Ошибка: ${errorData.error || "Не удалось удалить лайк"}`
                 );
-                console.error("Ошибка при удалении лайка:", errorData);
               }
             } catch (error) {
               console.error("Ошибка при выполнении запроса:", error);

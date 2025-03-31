@@ -61,9 +61,22 @@ export class CatService {
 
   async removeLikeFromCat(catId, userId) {
     try {
-      return await this.likesRepository.removeLike(catId, userId);
+      console.log(
+        `CatService: removeLikeFromCat вызван с catId=${catId}, userId=${userId}`
+      );
+      // Проверим, что передаваемые параметры корректны
+      if (!catId || !userId) {
+        console.error(
+          "CatService: removeLikeFromCat получил неверные параметры"
+        );
+        return false;
+      }
+
+      const result = await this.likesRepository.removeLike(catId, userId);
+      console.log(`CatService: результат удаления лайка: ${result}`);
+      return result;
     } catch (error) {
-      console.error("Ошибка при удалении лайка:", error);
+      console.error("CatService: ошибка при удалении лайка:", error);
       throw error;
     }
   }

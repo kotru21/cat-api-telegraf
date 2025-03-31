@@ -161,12 +161,15 @@ export function setupApiRoutes(app) {
         return res.status(400).json({ error: "ID кота не указан" });
       }
 
-      const likeRemoved = await catService.removeLikeFromCat(catId, userId);
+      console.log(`Попытка удалить лайк: catId=${catId}, userId=${userId}`);
 
-      if (!likeRemoved) {
+      const result = await catService.removeLikeFromCat(catId, userId);
+
+      if (result === false) {
         return res.status(404).json({ error: "Лайк не найден или уже удален" });
       }
 
+      console.log("Лайк успешно удален");
       res.json({ success: true });
     } catch (err) {
       console.error("Ошибка удаления лайка:", err);

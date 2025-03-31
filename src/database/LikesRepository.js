@@ -47,6 +47,7 @@ export class LikesRepository {
         // Добавляем запись о лайке пользователя
         db.run(
           `INSERT INTO user_likes (user_id, cat_id) VALUES (?, ?)`,
+
           [userId, catId],
           (err) => {
             if (err) {
@@ -86,9 +87,18 @@ export class LikesRepository {
   async removeLike(catId, userId) {
     const db = await this.dbPromise;
 
-    // ставил ли пользователь лайк
+    console.log(
+      `LikesRepository: removeLike вызван с catId=${catId}, userId=${userId}`
+    );
+
+    // Проверяем, ставил ли пользователь лайк
     const hasLiked = await this.hasUserLiked(userId, catId);
+    console.log(
+      `LikesRepository: пользователь ${userId} ставил лайк коту ${catId}: ${hasLiked}`
+    );
+
     if (!hasLiked) {
+      console.log("LikesRepository: лайк не найден, возвращаем false");
       return false; // Лайк не был поставлен
     }
 
@@ -97,6 +107,7 @@ export class LikesRepository {
       db.serialize(() => {
         db.run("BEGIN TRANSACTION");
 
+        // Удаляем запись о лайке пользователя
         db.run(
           `DELETE FROM user_likes WHERE user_id = ? AND cat_id = ?`,
           [userId, catId],
@@ -108,6 +119,7 @@ export class LikesRepository {
               return;
             }
 
+            // Уменьшаем счетчик лайков для кота
             db.run(
               `UPDATE msg SET count = count - 1 WHERE id = ? AND count > 0`,
               [catId],
@@ -120,8 +132,11 @@ export class LikesRepository {
                 }
 
                 db.run("COMMIT");
+                console.log(
+                  `LikesRepository: лайк успешно удален для кота ${catId}`
+                );
 
-                //  событие обновления рейтинга
+                // Генерируем событие обновления рейтинга
                 likesEvents.emit("leaderboardChanged");
 
                 resolve(true); // Лайк успешно удален

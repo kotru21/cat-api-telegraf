@@ -1,68 +1,79 @@
-// Анимация хедера при скролле
-window.addEventListener("scroll", function () {
-  const nav = document.querySelector("nav");
-  if (window.scrollY > 10) {
-    nav.classList.add("shadow-md");
-    nav.classList.add("bg-gray-900");
-    nav.classList.remove("bg-none");
-  } else {
-    nav.classList.remove("shadow-md");
-    nav.classList.remove("bg-gray-900");
-    nav.classList.add("bg-none");
-  }
-});
+// Проверяем, был ли уже инициализирован скрипт навигации
+if (window.navigationInitialized) {
+  console.log(
+    "Навигация уже инициализирована, пропускаем повторную инициализацию"
+  );
+} else {
+  window.navigationInitialized = true;
 
-// Мобильное меню
-document.addEventListener("DOMContentLoaded", function () {
-  const menuButton = document.getElementById("menuButton");
-  const mobileMenu = document.getElementById("mobileMenu");
-
-  if (!menuButton || !mobileMenu) {
-    console.error("Элементы меню не найдены");
-    return;
-  }
-
-  let menuOpen = false;
-
-  menuButton.addEventListener("click", function (event) {
-    event.stopPropagation();
-
-    menuOpen = !menuOpen;
-
-    if (menuOpen) {
-      mobileMenu.classList.remove("hidden");
-      menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
-    } else {
-      mobileMenu.classList.add("hidden");
-      menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+  // Анимация хедера при скролле
+  window.addEventListener("scroll", function () {
+    const nav = document.querySelector("nav");
+    if (nav) {
+      if (window.scrollY > 10) {
+        nav.classList.add("shadow-md", "bg-gray-900");
+        nav.classList.remove("bg-none");
+      } else {
+        nav.classList.remove("shadow-md", "bg-gray-900");
+        nav.classList.add("bg-none");
+      }
     }
   });
 
-  // Закрытие меню при клике по пунктам меню
-  mobileMenu.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", function () {
-      mobileMenu.classList.add("hidden");
-      menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-      menuOpen = false;
+  // Мобильное меню
+  document.addEventListener("DOMContentLoaded", function () {
+    const menuButton = document.getElementById("menuButton");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    if (!menuButton || !mobileMenu) {
+      console.error("Элементы меню не найдены");
+      return;
+    }
+
+    let menuOpen = false;
+
+    menuButton.addEventListener("click", function (event) {
+      event.stopPropagation();
+
+      menuOpen = !menuOpen;
+
+      if (menuOpen) {
+        mobileMenu.classList.remove("hidden");
+        menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
+      } else {
+        mobileMenu.classList.add("hidden");
+        menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+      }
     });
-  });
 
-  // Закрытие меню при клике вне меню
-  document.addEventListener("click", function (event) {
-    if (
-      !menuButton.contains(event.target) &&
-      !mobileMenu.contains(event.target) &&
-      menuOpen
-    ) {
-      mobileMenu.classList.add("hidden");
-      menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-      menuOpen = false;
+    // Закрытие меню при клике по пунктам меню
+    mobileMenu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", function () {
+        mobileMenu.classList.add("hidden");
+        menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+        menuOpen = false;
+      });
+    });
+
+    // Закрытие меню при клике вне меню
+    document.addEventListener("click", function (event) {
+      if (
+        !menuButton.contains(event.target) &&
+        !mobileMenu.contains(event.target) &&
+        menuOpen
+      ) {
+        mobileMenu.classList.add("hidden");
+        menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+        menuOpen = false;
+      }
+    });
+
+    if (!window.authChecked) {
+      window.authChecked = true;
+      checkAuth();
     }
   });
-
-  // Проверка авторизации и настройка отображения кнопок
-  checkAuth();
-});
+}
 
 // Проверка авторизации
 async function checkAuth() {

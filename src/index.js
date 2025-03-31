@@ -159,6 +159,8 @@ function initWebServer(port) {
 
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
+  // Добавьте новый маршрут для папки js
+  app.use("/js", express.static(path.join(__dirname, "web/public/js")));
 
   app.use(
     session({
@@ -199,21 +201,26 @@ function initWebServer(port) {
 
       // Заменяем маркеры на содержимое шаблонов
       if (content.includes("<!-- INCLUDE_NAVIGATION -->")) {
+        // Используем абсолютный путь для надежности
         const navPath = path.join(
-          __dirname, // __dirname = src/
-          "web/views/partials", // Уберите src/ из пути
-          "navigation.html"
+          __dirname,
+          "web/views/partials/navigation.html"
         );
 
         try {
           console.log("Попытка чтения файла навигации:", navPath);
-          const navContent = fs.readFileSync(navPath, "utf8");
-          content = content.replace("<!-- INCLUDE_NAVIGATION -->", navContent);
+          // Проверка существования файла
+          if (fs.existsSync(navPath)) {
+            const navContent = fs.readFileSync(navPath, "utf8");
+            content = content.replace(
+              "<!-- INCLUDE_NAVIGATION -->",
+              navContent
+            );
+          } else {
+            console.error(`Файл навигации не найден: ${navPath}`);
+          }
         } catch (err) {
-          console.error(
-            `Ошибка при чтении navigation.html (${navPath}): ${err.message}`
-          );
-          // Продолжаем без навигации вместо падения
+          console.error(`Ошибка при чтении navigation.html: ${err.message}`);
         }
       }
 

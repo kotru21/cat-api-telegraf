@@ -14,6 +14,10 @@ import { setupApiRoutes } from "./web/ApiRoutes.js";
 import { likesEvents } from "./database/LikesRepository.js";
 import session from "express-session";
 import crypto from "crypto";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Импорт команд бота
 import factCommand from "./bot/commands/FactCommand.js";
@@ -69,7 +73,6 @@ function initBot() {
 function initWebServer(port) {
   const app = express();
   const server = createServer(app);
-  const __dirname = path.resolve();
 
   app.set("trust proxy", 1);
 
@@ -371,6 +374,28 @@ function initWebServer(port) {
     req.session.destroy();
     res.redirect("/");
   });
+
+  app.engine("html", function (filePath, options, callback) {
+    fs.readFile(filePath, "utf8", (err, content) => {
+      if (err) return callback(err);
+
+      // Заменяем маркеры на содержимое шаблонов
+      if (content.includes("<!-- INCLUDE_NAVIGATION -->")) {
+        const navPath = path.join(
+          __dirname,
+          "views",
+          "partials",
+          "navigation.html"
+        );
+        const navContent = fs.readFileSync(navPath, "utf8");
+        content = content.replace("<!-- INCLUDE_NAVIGATION -->", navContent);
+      }
+
+      callback(null, content);
+    });
+  });
+  app.set("views", path.join(__dirname, "views"));
+  app.set("view engine", "html");
 
   server.listen(port, () => {
     // Получаем базовый URL без слеша в конце

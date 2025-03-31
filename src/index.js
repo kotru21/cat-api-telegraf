@@ -383,18 +383,23 @@ function initWebServer(port) {
       if (content.includes("<!-- INCLUDE_NAVIGATION -->")) {
         const navPath = path.join(
           __dirname,
-          "views",
-          "partials",
+          "src/web/views/partials",
           "navigation.html"
         );
-        const navContent = fs.readFileSync(navPath, "utf8");
-        content = content.replace("<!-- INCLUDE_NAVIGATION -->", navContent);
+
+        try {
+          const navContent = fs.readFileSync(navPath, "utf8");
+          content = content.replace("<!-- INCLUDE_NAVIGATION -->", navContent);
+        } catch (err) {
+          console.error(`Ошибка при чтении navigation.html: ${err.message}`);
+          // Продолжаем без навигации вместо падения
+        }
       }
 
       callback(null, content);
     });
   });
-  app.set("views", path.join(__dirname, "views"));
+  app.set("views", path.join(__dirname, "src/web/views"));
   app.set("view engine", "html");
 
   server.listen(port, () => {

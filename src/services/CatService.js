@@ -59,12 +59,31 @@ export class CatService {
     return likesRepository.addLike(catId, userId);
   }
 
+  async removeLikeFromCat(catId, userId) {
+    try {
+      return await this.likesRepository.removeLike(catId, userId);
+    } catch (error) {
+      console.error("Ошибка при удалении лайка:", error);
+      throw error;
+    }
+  }
+
   async getLeaderboard(limit = 10) {
     return catRepository.getLeaderboard(limit);
   }
 
   async getUserLikes(userId) {
     return likesRepository.getUserLikes(userId);
+  }
+
+  async getUserLikesCount(userId) {
+    try {
+      const userLikes = await this.likesRepository.getUserLikes(userId);
+      return userLikes.length;
+    } catch (error) {
+      console.error("Ошибка при получении статистики лайков:", error);
+      throw error;
+    }
   }
 
   async getCatsByFeature(feature, value) {

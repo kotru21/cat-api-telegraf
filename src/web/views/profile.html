@@ -114,6 +114,11 @@
               <i class="fab fa-telegram text-indigo-400 mr-1"></i>
               <span id="user-username">@username</span>
             </p>
+            <div
+              class="mt-4 py-2 px-4 bg-gray-800 rounded-lg inline-flex items-center">
+              <i class="fas fa-heart text-red-500 mr-2"></i>
+              <span id="likes-count">0</span> лайков
+            </div>
           </div>
         </div>
 
@@ -228,6 +233,13 @@
             document.getElementById("user-avatar").src = profileData.photo_url;
           }
 
+          // Загрузка количества лайков
+          const likesCountResponse = await fetch("/api/user/likes/count");
+          if (likesCountResponse.ok) {
+            const { count } = await likesCountResponse.json();
+            document.getElementById("likes-count").textContent = count;
+          }
+
           // Загрузка лайкнутых котов
           const likesResponse = await fetch("/api/mylikes");
           if (!likesResponse.ok) {
@@ -255,22 +267,77 @@
             card.innerHTML = `
               <div class="overflow-hidden">
                 <img src="${cat.image_url}" alt="${cat.breed_name}" class="cat-image"
-                     onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                     onerror="this.src='https://placehold.co/300x200?text=No+Image'">
               </div>
               <div class="p-4">
                 <h3 class="text-xl font-bold mb-1">${cat.breed_name}</h3>
-                <a href="/catDetails?id=${cat.cat_id}" class="text-indigo-400 hover:text-indigo-300 transition-colors">
-                  <i class="fas fa-info-circle mr-1"></i> Подробнее
-                </a>
+                <div class="flex justify-between items-center mt-2">
+                  <a href="/catDetails?id=${cat.cat_id}" class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                    <i class="fas fa-info-circle mr-1"></i> Подробнее
+                  </a>
+                  <button class="remove-like-btn text-red-500 hover:text-red-400 transition-colors" data-cat-id="${cat.cat_id}">
+                    <i class="fas fa-heart-broken mr-1"></i> Удалить лайк
+                  </button>
+                </div>
               </div>
             `;
             likesContainer.appendChild(card);
           });
+
+          setupRemoveLikeButtons();
         } catch (error) {
           console.error("Ошибка:", error);
           alert("Произошла ошибка при загрузке данных. Попробуйте позже.");
         }
       });
+
+      // Функция для настройки кнопок удаления лайков
+      function setupRemoveLikeButtons() {
+        document.querySelectorAll(".remove-like-btn").forEach((btn) => {
+          btn.addEventListener("click", async function () {
+            if (!confirm("Вы действительно хотите удалить лайк?")) return;
+
+            const catId = this.dataset.catId;
+            try {
+              const response = await fetch("/api/like", {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ catId }),
+              });
+
+              if (response.ok) {
+                // Удаляем карточку из DOM
+                this.closest(".cat-card").remove();
+
+                // Уменьшаем счетчик
+                const likesCountElement =
+                  document.getElementById("likes-count");
+                const currentCount = parseInt(likesCountElement.textContent);
+                const newCount = currentCount - 1;
+                likesCountElement.textContent = newCount;
+
+                // Если удалили все лайки, показываем сообщение
+                if (newCount === 0) {
+                  document.getElementById("user-likes").style.display = "none";
+                  document.getElementById("no-likes").style.display = "block";
+                }
+              } else {
+                const errorData = await response.json();
+                alert(
+                  `Не удалось удалить лайк: ${
+                    errorData.error || "Неизвестная ошибка"
+                  }`
+                );
+              }
+            } catch (error) {
+              console.error("Ошибка при удалении лайка:", error);
+              alert("Произошла ошибка при удалении лайка");
+            }
+          });
+        });
+      }
     </script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

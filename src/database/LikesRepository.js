@@ -82,6 +82,57 @@ export class LikesRepository {
     });
   }
 
+  // Удаление лайка
+  async removeLike(catId, userId) {
+    const db = await this.dbPromise;
+
+    // ставил ли пользователь лайк
+    const hasLiked = await this.hasUserLiked(userId, catId);
+    if (!hasLiked) {
+      return false; // Лайк не был поставлен
+    }
+
+    return new Promise((resolve, reject) => {
+      // Начинаем транзакцию для гарантии целостности данных
+      db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+
+        db.run(
+          `DELETE FROM user_likes WHERE user_id = ? AND cat_id = ?`,
+          [userId, catId],
+          (err) => {
+            if (err) {
+              db.run("ROLLBACK");
+              console.error("Ошибка удаления лайка пользователя:", err);
+              reject(err);
+              return;
+            }
+
+            db.run(
+              `UPDATE msg SET count = count - 1 WHERE id = ? AND count > 0`,
+              [catId],
+              (err) => {
+                if (err) {
+                  db.run("ROLLBACK");
+                  console.error("Ошибка обновления счетчика лайков:", err);
+                  reject(err);
+                  return;
+                }
+
+                db.run("COMMIT");
+
+                //  событие обновления рейтинга
+                likesEvents.emit("leaderboardChanged");
+
+                resolve(true); // Лайк успешно удален
+              }
+            );
+          }
+        );
+      });
+    });
+  }
+
   async getLikes(catId) {
     const db = await this.dbPromise;
     return new Promise((resolve, reject) => {

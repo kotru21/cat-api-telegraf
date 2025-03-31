@@ -150,5 +150,41 @@ export function setupApiRoutes(app) {
       res.status(400).json({ error: error.message });
     }
   });
+
+  // удаления лайка
+  router.delete("/like", requireAuth, async (req, res) => {
+    try {
+      const { catId } = req.body;
+      const userId = req.session.user.id.toString();
+
+      if (!catId) {
+        return res.status(400).json({ error: "ID кота не указан" });
+      }
+
+      const likeRemoved = await catService.removeLikeFromCat(catId, userId);
+
+      if (!likeRemoved) {
+        return res.status(404).json({ error: "Лайк не найден или уже удален" });
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Ошибка удаления лайка:", err);
+      res.status(500).json({ error: "Не удалось удалить лайк" });
+    }
+  });
+
+  // API для получения количества лайков
+  router.get("/user/likes/count", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.user.id.toString();
+      const count = await catService.getUserLikesCount(userId);
+      res.json({ count });
+    } catch (err) {
+      console.error("Ошибка получения количества лайков:", err);
+      res.status(500).json({ error: "Не удалось получить количество лайков" });
+    }
+  });
+
   app.use("/api", router);
 }

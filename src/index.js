@@ -79,20 +79,32 @@ function initWebServer(port) {
         defaultSrc: ["'self'"],
         scriptSrc: [
           "'self'",
+          "'unsafe-inline'", // Необходимо для inline-скриптов на страницах
+          "'unsafe-eval'", // Может потребоваться для некоторых библиотек
           "cdn.tailwindcss.com",
           "cdnjs.cloudflare.com",
           "telegram.org",
           "*.telegram.org",
           "t.me",
           "oauth.telegram.org",
+          "placehold.co",
         ],
         styleSrc: [
           "'self'",
-          "'unsafe-inline'",
+          "'unsafe-inline'", // Необходимо для Tailwind и встроенных стилей
           "cdn.tailwindcss.com",
           "cdnjs.cloudflare.com",
+          "*.telegram.org",
         ],
-        imgSrc: ["'self'", "data:", "telegram.org", "*.telegram.org", "t.me"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "telegram.org",
+          "*.telegram.org",
+          "t.me",
+          "placehold.co", // Добавляем placehold.co вместо placeholder.com
+          "https://*", // Разрешаем изображения с https
+        ],
         connectSrc: [
           "'self'",
           "ws:",
@@ -118,18 +130,16 @@ function initWebServer(port) {
         ],
       },
     },
-    // Для локальной разработки можно оставить false
-    crossOriginEmbedderPolicy:
-      process.env.NODE_ENV === "production" ? true : false,
+    // Отключаем COEP для работы с внешними ресурсами
+    crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-    // Более строгая политика
-    crossOriginResourcePolicy: { policy: "same-site" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     referrerPolicy: {
-      policy: ["strict-origin-when-cross-origin"],
+      policy: ["origin", "strict-origin-when-cross-origin"],
     },
-    // Для виджета Telegram может потребоваться false
+    // Разрешаем iframe для виджета Telegram
     xFrameOptions: false,
-    // Включаем для продакшена
+    // Активируем HSTS только в production
     hsts: process.env.NODE_ENV === "production",
     xPoweredBy: false,
   };

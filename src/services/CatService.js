@@ -72,7 +72,7 @@ export class CatService {
         return false;
       }
 
-      const result = await this.likesRepository.removeLike(catId, userId);
+      const result = await likesRepository.removeLike(catId, userId);
       console.log(`CatService: результат удаления лайка: ${result}`);
       return result;
     } catch (error) {

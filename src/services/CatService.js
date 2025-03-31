@@ -91,11 +91,11 @@ export class CatService {
 
   async getUserLikesCount(userId) {
     try {
-      const userLikes = await this.likesRepository.getUserLikes(userId);
-      return userLikes.length;
+      const userLikes = await likesRepository.getUserLikes(userId);
+      return userLikes ? userLikes.length : 0;
     } catch (error) {
       console.error("Ошибка при получении статистики лайков:", error);
-      throw error;
+      return 0;
     }
   }
 

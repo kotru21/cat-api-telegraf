@@ -184,7 +184,7 @@ export function setupApiRoutes(app) {
       const count = await catService.getUserLikesCount(userId);
       res.json({ count });
     } catch (err) {
-      console.error("Ошибка получения количества лайков:", err);
+      console.error("Ошибка при получении количества лайков:", err);
       res.status(500).json({ error: "Не удалось получить количество лайков" });
     }
   });

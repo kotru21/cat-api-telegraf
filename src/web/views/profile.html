@@ -646,26 +646,8 @@
             this.src = this.getAttribute("data-fallback");
           });
 
-          // Глобальная функция для обновления счетчика лайков
-          window.updateLikesCount = async function () {
-            try {
-              const likesCountResponse = await fetch("/api/user/likes/count");
-              if (likesCountResponse.ok) {
-                const data = await likesCountResponse.json();
-                const count = data.count || 0;
-                document.getElementById("likes-count").textContent = count;
-                return count;
-              }
-              return false;
-            } catch (error) {
-              console.error("Ошибка при обновлении счетчика лайков:", error);
-              return false;
-            }
-          };
-
           // Настройка поиска
           const { updateDisplayedCats } = setupSearchAndSort();
-          window.updateDisplayedCats = updateDisplayedCats;
 
           // Получение времени последнего входа
           const lastActive = document.getElementById("last-active");
@@ -695,8 +677,12 @@
             avatar.src = profileData.photo_url;
           }
 
-          // Загрузка количества лайков с использованием новой функции
-          await window.updateLikesCount();
+          // Загрузка количества лайков
+          const likesCountResponse = await fetch("/api/user/likes/count");
+          if (likesCountResponse.ok) {
+            const { count } = await likesCountResponse.json();
+            document.getElementById("likes-count").textContent = count;
+          }
 
           // Загрузка лайкнутых котов
           const likesResponse = await fetch("/api/mylikes");
@@ -788,22 +774,29 @@
                   card.style.transform = "scale(0.9)";
                   card.style.transition = "all 0.3s ease";
 
-                  setTimeout(async () => {
+                  setTimeout(() => {
                     card.remove();
 
-                    // Обновляем счетчик через API вместо локального изменения
-                    await window.updateLikesCount();
+                    const likesCountElement =
+                      document.getElementById("likes-count");
+                    if (likesCountElement) {
+                      const currentCount = parseInt(
+                        likesCountElement.textContent
+                      );
+                      const newCount = Math.max(0, currentCount - 1);
+                      likesCountElement.textContent = newCount;
 
-                    const likesContainer =
-                      document.getElementById("user-likes");
-                    if (likesContainer.children.length === 0) {
-                      likesContainer.style.display = "none";
-                      document.getElementById("no-likes").style.display =
-                        "block";
-                    } else {
-                      // Обновляем карточки для поиска и сортировки
-                      if (typeof window.updateDisplayedCats === "function") {
-                        window.updateDisplayedCats();
+                      const likesContainer =
+                        document.getElementById("user-likes");
+                      if (likesContainer.children.length === 0) {
+                        likesContainer.style.display = "none";
+                        document.getElementById("no-likes").style.display =
+                          "block";
+                      } else {
+                        // Если карточки остались, обновляем список для поиска и сортировки
+                        if (typeof updateDisplayedCats === "function") {
+                          updateDisplayedCats();
+                        }
                       }
                     }
 

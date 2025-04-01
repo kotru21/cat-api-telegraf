@@ -1,12 +1,14 @@
 import database from "./Database.js";
+import { LikesRepositoryInterface } from "./interfaces/LikesRepositoryInterface.js";
 
 // Добавим систему событий для оповещения об изменениях
 import { EventEmitter } from "events";
 
 export const likesEvents = new EventEmitter();
 
-export class LikesRepository {
+export class LikesRepository extends LikesRepositoryInterface {
   constructor() {
+    super();
     this.dbPromise = database.get();
   }
 
@@ -47,7 +49,6 @@ export class LikesRepository {
         // Добавляем запись о лайке пользователя
         db.run(
           `INSERT INTO user_likes (user_id, cat_id) VALUES (?, ?)`,
-
           [userId, catId],
           (err) => {
             if (err) {

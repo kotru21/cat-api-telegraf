@@ -1,7 +1,9 @@
 import database from "./Database.js";
+import { CatRepositoryInterface } from "./interfaces/CatRepositoryInterface.js";
 
-export class CatRepository {
+export class CatRepository extends CatRepositoryInterface {
   constructor() {
+    super();
     this.dbPromise = database.get();
   }
 

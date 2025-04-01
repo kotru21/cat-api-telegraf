@@ -1,127 +1,52 @@
-import { CatApiClient } from "../api/CatApiClient.js";
-import catRepository from "../database/CatRepository.js";
-import likesRepository from "../database/LikesRepository.js";
-import config from "../config/index.js";
+import catInfoService from "./CatInfoService.js";
+import likeService from "./LikeService.js";
+import leaderboardService from "./LeaderboardService.js";
 
 export class CatService {
   constructor() {
-    this.catApiClient = new CatApiClient(config.CAT_API_TOKEN);
+    this.catInfoService = catInfoService;
+    this.likeService = likeService;
+    this.leaderboardService = leaderboardService;
   }
 
   async getRandomCat(retryCount = 0) {
-    try {
-      const catDetails = await this.catApiClient.getRandomCatWithBreed();
-
-      // Проверка наличия данных о породе
-      if (!catDetails?.breeds?.[0]) {
-        throw new Error("Нет данных о породе кота");
-      }
-
-      const breed = catDetails.breeds[0];
-
-      const catData = {
-        id: catDetails.id,
-        url: catDetails.url,
-        breeds: [
-          {
-            id: breed.id,
-            name: breed.name,
-            temperament: breed.temperament,
-            origin: breed.origin,
-            life_span: breed.life_span,
-            wikipedia_url: breed.wikipedia_url,
-            weight: breed.weight,
-            description: breed.description,
-          },
-        ],
-      };
-
-      await catRepository.saveCatDetails(catData);
-      return catData;
-    } catch (error) {
-      console.error("Ошибка получения данных:", error);
-      if (retryCount < 3) {
-        return this.getRandomCat(retryCount + 1);
-      }
-      throw error;
-    }
+    return this.catInfoService.getRandomCat(retryCount);
   }
 
   async getCatById(id) {
-    return catRepository.getCatById(id);
+    return this.catInfoService.getCatById(id);
   }
 
   async getLikesForCat(catId) {
-    return likesRepository.getLikes(catId);
+    return this.likeService.getLikesForCat(catId);
   }
 
   async addLikeToCat(catId, userId) {
-    return likesRepository.addLike(catId, userId);
+    return this.likeService.addLikeToCat(catId, userId);
   }
 
   async removeLikeFromCat(catId, userId) {
-    try {
-      console.log(
-        `CatService: removeLikeFromCat вызван с catId=${catId}, userId=${userId}`
-      );
-      // Проверим, что передаваемые параметры корректны
-      if (!catId || !userId) {
-        console.error(
-          "CatService: removeLikeFromCat получил неверные параметры"
-        );
-        return false;
-      }
-
-      const result = await likesRepository.removeLike(catId, userId);
-      console.log(`CatService: результат удаления лайка: ${result}`);
-      return result;
-    } catch (error) {
-      console.error("CatService: ошибка при удалении лайка:", error);
-      throw error;
-    }
+    return this.likeService.removeLikeFromCat(catId, userId);
   }
 
   async getLeaderboard(limit = 10) {
-    return catRepository.getLeaderboard(limit);
+    return this.leaderboardService.getLeaderboard(limit);
   }
 
   async getUserLikes(userId) {
-    return likesRepository.getUserLikes(userId);
+    return this.likeService.getUserLikes(userId);
   }
 
   async getUserLikesCount(userId) {
-    try {
-      const userLikes = await likesRepository.getUserLikes(userId);
-      return userLikes ? userLikes.length : 0;
-    } catch (error) {
-      console.error("Ошибка при получении статистики лайков:", error);
-      return 0;
-    }
+    return this.likeService.getUserLikesCount(userId);
   }
 
   async getCatsByFeature(feature, value) {
-    if (!feature || !value) {
-      throw new Error("Feature and value are required");
-    }
-
-    // проверка, что feature - допустимое поле
-    const allowedFeatures = [
-      "origin",
-      "temperament",
-      "life_span",
-      "weight_imperial",
-      "weight_metric",
-    ];
-
-    if (!allowedFeatures.includes(feature)) {
-      throw new Error(`Invalid feature: ${feature}`);
-    }
-
-    return catRepository.getCatsByFeature(feature, value);
+    return this.catInfoService.getCatsByFeature(feature, value);
   }
 
   async getRandomImages(count = 3) {
-    return catRepository.getRandomImages(count);
+    return this.catInfoService.getRandomImages(count);
   }
 }
 

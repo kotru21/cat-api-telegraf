@@ -51,7 +51,6 @@ function initBot() {
     incrementMessageCount();
     return next();
   });
-
   // Регистрация middleware команд
   bot.use(
     factCommand.middleware(),

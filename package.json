@@ -1,7 +1,7 @@
 {
   "name": "tg-bot-telegraph",
-  "version": "1.0.0",
-  "description": "A simple telegraf.js bot",
+  "version": "5.0.0",
+  "description": "Telegraf.js cats bot with web panel",
   "main": "src/index.js",
   "type": "module",
   "scripts": {

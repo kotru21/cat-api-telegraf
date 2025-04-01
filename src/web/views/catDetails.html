@@ -310,7 +310,10 @@
               }
               return response.json();
             })
-            .then((data) => {
+            .then((response) => {
+              // Извлекаем данные из вложенного объекта data
+              const data = response.data;
+
               // Обновляем заголовок страницы
               document.title = `${data.breed_name} | Cat Details`;
 
@@ -319,7 +322,7 @@
                 data.breed_name;
               document.getElementById("description").textContent =
                 data.description;
-              document.getElementById("likes-count").textContent = data.count;
+              document.getElementById("likes-count").textContent = data.likes; // Используем likes вместо count
               document.getElementById("wiki-link").href = data.wikipedia_url;
               document.getElementById("origin").textContent = data.origin;
               document.getElementById("temperament").textContent =

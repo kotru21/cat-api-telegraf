@@ -1,5 +1,6 @@
 import database from "./Database.js";
 import { CatRepositoryInterface } from "./interfaces/CatRepositoryInterface.js";
+import { SearchStrategyFactory } from "./strategies/SearchStrategyFactory.js";
 
 export class CatRepository extends CatRepositoryInterface {
   constructor() {
@@ -23,6 +24,7 @@ export class CatRepository extends CatRepositoryInterface {
           weight_imperial, weight_metric
         ) VALUES (?, ?, ?, ?, ?, COALESCE((SELECT count FROM msg WHERE id = ?), 0),
           ?, ?, ?, ?, ?, ?)`,
+
         [
           catData.id,
           breed.name,
@@ -100,49 +102,17 @@ export class CatRepository extends CatRepositoryInterface {
   }
 
   async getCatsByFeature(feature, value) {
+    if (!feature || !value) {
+      throw new Error("Feature and value are required");
+    }
+
     const db = await this.dbPromise;
 
-    // Подготовка поискового запроса в зависимости от типа характеристики
-    let query = "";
-    let params = [];
+    // Используем фабрику для получения нужной стратегии
+    const searchStrategy = SearchStrategyFactory.createStrategy(feature);
 
-    if (feature === "temperament") {
-      // Для темперамента ищется частичное совпадение
-      query = `SELECT id, breed_name, image_url, description, wikipedia_url, count 
-               FROM msg 
-               WHERE temperament LIKE ? 
-               ORDER BY count DESC`;
-      params = [`%${value}%`];
-    } else if (
-      feature === "life_span" ||
-      feature === "weight_metric" ||
-      feature === "weight_imperial"
-    ) {
-      // Обрабатываем возраст и вес
-      const numValue = parseFloat(value);
-
-      if (isNaN(numValue)) {
-        throw new Error(`Value for ${feature} must be a number`);
-      }
-
-      // получение всех записей с параметром для последующей фильтрации
-      query = `SELECT id, breed_name, image_url, description, wikipedia_url, count, 
-                     ${feature} as range_value
-               FROM msg 
-               ORDER BY count DESC`;
-      params = [];
-
-      console.log(
-        `Выполняется запрос для поиска по ${feature} с ручной фильтрацией, значение: ${value}`
-      );
-    } else {
-      // Для всех остальных полей -- точное совпадение
-      query = `SELECT id, breed_name, image_url, description, wikipedia_url, count 
-               FROM msg 
-               WHERE ${feature} = ? 
-               ORDER BY count DESC`;
-      params = [value];
-    }
+    // Получаем SQL-запрос от стратегии
+    const { query, params } = searchStrategy.createQuery(feature, value);
 
     return new Promise((resolve, reject) => {
       db.all(query, params, (err, rows) => {
@@ -151,51 +121,15 @@ export class CatRepository extends CatRepositoryInterface {
           reject(err);
         }
 
-        // Фильтруем результаты программно для возраста и веса
-        if (
-          (feature === "life_span" ||
-            feature === "weight_metric" ||
-            feature === "weight_imperial") &&
-          rows
-        ) {
-          const numValue = parseFloat(value);
-          const filteredRows = rows.filter((row) => {
-            try {
-              if (!row.range_value) return false;
+        // Применяем дополнительную фильтрацию, если это необходимо
+        const filteredRows = searchStrategy.filterResults(rows, feature, value);
 
-              // парсинг диапазона (например "12 - 15" или "3 - 6")
-              const parts = row.range_value
-                .split("-")
-                .map((part) => parseFloat(part.trim()));
+        console.log(
+          `Найдено котов по ${feature}=${value}:`,
+          filteredRows?.length || 0
+        );
 
-              // проверка, входит ли искомое значение в диапазон
-              if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-                const min = parts[0];
-                const max = parts[1];
-
-                // допуск 5% для поиска
-                return numValue >= min * 0.95 && numValue <= max * 1.05;
-              }
-
-              return false;
-            } catch (e) {
-              console.error(`Ошибка при обработке ${feature}:`, e);
-              return false;
-            }
-          });
-
-          console.log(
-            `Найдено котов по ${feature}=${value} (после фильтрации):`,
-            filteredRows.length
-          );
-          resolve(filteredRows);
-        } else {
-          console.log(
-            `Найдено котов по ${feature}=${value}:`,
-            rows?.length || 0
-          );
-          resolve(rows || []);
-        }
+        resolve(filteredRows || []);
       });
     });
   }

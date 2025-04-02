@@ -5,13 +5,10 @@ import { setupCatRoutes } from "./routes/catRoutes.js";
 import { setupUserRoutes } from "./routes/userRoutes.js";
 import { setupAuthRoutes } from "./routes/authRoutes.js";
 import { setupDebugRoutes } from "./routes/debugRoutes.js";
+import defaultCatService from "../services/CatService.js";
 
 export function setupApiRoutes(app, dependencies = {}) {
-  // Получаем сервисы через инъекцию зависимостей или используем значения по умолчанию
-  const {
-    catService: catServiceInstance = require("../services/CatService.js")
-      .default,
-  } = dependencies;
+  const { catService: catServiceInstance = defaultCatService } = dependencies;
 
   const router = express.Router();
 

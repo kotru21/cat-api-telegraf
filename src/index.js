@@ -158,14 +158,9 @@ function initWebServer(port) {
 
   app.use(express.json());
   app.use("/static", express.static(path.join(__dirname, "public")));
-  // Добавьте новый маршрут для папки js
-  app.use("/js", express.static(path.join(__dirname, "web/public/js")));
 
-  console.log("Путь к JS:", path.join(__dirname, "web/public/js"));
-  console.log(
-    "Файл navigation.js существует:",
-    fs.existsSync(path.join(__dirname, "web/public/js/navigation.js"))
-  );
+  app.use("/js", express.static(path.join(__dirname, "web/public/js")));
+  app.use("/media", express.static(path.join(__dirname, "web/public/media")));
 
   app.use(
     session({

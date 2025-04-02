@@ -1,5 +1,4 @@
 import config from "./config/index.js";
-import { likesEvents } from "./database/LikesRepository.js";
 
 // Импорт команд бота
 import factCommand from "./bot/commands/FactCommand.js";
@@ -7,11 +6,11 @@ import menuCommand from "./bot/commands/MenuCommand.js";
 import myLikesCommand from "./bot/commands/MyLikesCommand.js";
 import topCommand from "./bot/commands/TopCommand.js";
 import likeAction from "./bot/actions/LikeAction.js";
+import { likesEvents } from "./database/LikesRepository.js";
 
 import { BotService } from "./bot/BotService.js";
 import { WebServer } from "./web/WebServer.js";
 import { DatabaseService } from "./database/DatabaseService.js";
-import { likesEvents } from "./database/LikesRepository.js";
 
 class Application {
   constructor() {

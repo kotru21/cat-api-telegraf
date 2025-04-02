@@ -1,18 +1,17 @@
-import config from "./src/config/index.js";
-import { likesEvents } from "./src/database/LikesRepository.js";
+import config from "./config/index.js";
+import { likesEvents } from "./database/LikesRepository.js";
 
 // Импорт команд бота
-import factCommand from "./src/bot/commands/FactCommand.js";
-import menuCommand from "./src/bot/commands/MenuCommand.js";
-import myLikesCommand from "./src/bot/commands/MyLikesCommand.js";
-import topCommand from "./src/bot/commands/TopCommand.js"; // Новый импорт
-import likeAction from "./src/bot/actions/LikeAction.js";
+import factCommand from "./bot/commands/FactCommand.js";
+import menuCommand from "./bot/commands/MenuCommand.js";
+import myLikesCommand from "./bot/commands/MyLikesCommand.js";
+import topCommand from "./bot/commands/TopCommand.js";
+import likeAction from "./bot/actions/LikeAction.js";
 
-import config from "./src/config/index.js";
-import { BotService } from "./src/bot/BotService.js";
-import { WebServer } from "./src/web/WebServer.js";
-import { DatabaseService } from "./src/database/DatabaseService.js";
-import { likesEvents } from "./src/database/LikesRepository.js";
+import { BotService } from "./bot/BotService.js";
+import { WebServer } from "./web/WebServer.js";
+import { DatabaseService } from "./database/DatabaseService.js";
+import { likesEvents } from "./database/LikesRepository.js";
 
 class Application {
   constructor() {

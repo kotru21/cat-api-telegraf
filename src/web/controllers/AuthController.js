@@ -30,10 +30,16 @@ export class AuthController {
       .update(dataCheckString)
       .digest("hex");
 
-    // Проверка валидности хеша и времени запроса
-    const isHashValid = hmac === hash;
+    const isHashValid = hmac.toLowerCase() === hash.toLowerCase();
     const isTimeValid =
       Date.now() / 1000 - parseInt(otherData.auth_date) <= 86400;
+
+    // Для отладки
+    console.log("Received data:", data);
+    console.log("Data check string:", dataCheckString);
+    console.log("Computed HMAC:", hmac);
+    console.log("Received Hash:", hash);
+    console.log("Hash valid:", isHashValid);
 
     return {
       isValid: isHashValid && isTimeValid,

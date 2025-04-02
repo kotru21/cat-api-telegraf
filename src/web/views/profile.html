@@ -576,8 +576,10 @@
           document.getElementById("user-username").textContent =
             "@" + profileData.username;
 
-          if (profileData.photo_url) {
+          if (profileData.photo_url && profileData.photo_url.trim() !== "") {
             avatar.src = profileData.photo_url;
+          } else {
+            avatar.src = avatar.getAttribute("data-fallback");
           }
 
           // Загрузка количества лайков

@@ -20,9 +20,17 @@ export class AuthController {
     const botToken = this.config.BOT_TOKEN;
     const secretKey = crypto.createHash("sha256").update(botToken).digest();
 
-    const dataCheckString = Object.keys(otherData)
+    const filteredData = {};
+    for (const key in otherData) {
+      if (otherData[key] !== undefined && otherData[key] !== null) {
+        filteredData[key] = otherData[key];
+      }
+    }
+
+    // Создаем строку для проверки в правильном формате
+    const dataCheckString = Object.keys(filteredData)
       .sort()
-      .map((key) => `${key}=${otherData[key]}`)
+      .map((key) => `${key}=${filteredData[key]}`)
       .join("\n");
 
     const hmac = crypto
@@ -36,6 +44,7 @@ export class AuthController {
 
     // Для отладки
     console.log("Received data:", data);
+    console.log("Filtered data:", filteredData);
     console.log("Data check string:", dataCheckString);
     console.log("Computed HMAC:", hmac);
     console.log("Received Hash:", hash);

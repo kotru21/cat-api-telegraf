@@ -474,38 +474,40 @@
           filterAndSortCats();
         }
 
-        function filterAndSortCats() {
-          const searchTerm = searchInput.value.toLowerCase();
-          const sortBy = sortSelect.value;
+        function filterCats(cats, searchTerm) {
+          return cats.filter((cat) => cat.breedName.includes(searchTerm));
+        }
 
-          // Фильтрация
-          let filteredCats = allCats.filter((cat) =>
-            cat.breedName.includes(searchTerm)
-          );
-
-          // Сортировка
+        function sortCats(cats, sortBy) {
           if (sortBy === "name") {
-            filteredCats.sort((a, b) => a.breedName.localeCompare(b.breedName));
+            return [...cats].sort((a, b) =>
+              a.breedName.localeCompare(b.breedName)
+            );
           } else if (sortBy === "likes") {
-            filteredCats.sort((a, b) => b.likesCount - a.likesCount);
+            return [...cats].sort((a, b) => b.likesCount - a.likesCount);
           }
+          return cats; //
+        }
 
-          // Обновление DOM
+        function updateDOM(cats, searchTerm) {
+          // Очистка контейнера
           likesContainer.innerHTML = "";
-          filteredCats.forEach((cat) => {
+
+          // Добавление отфильтрованных и отсортированных котов
+          cats.forEach((cat) => {
             likesContainer.appendChild(cat.element);
           });
 
           // Обновление счетчика результатов
-          if (searchTerm || sortBy !== "latest") {
+          if (searchTerm || sortSelect.value !== "latest") {
             searchResults.style.display = "block";
-            resultsCount.textContent = filteredCats.length;
+            resultsCount.textContent = cats.length;
           } else {
             searchResults.style.display = "none";
           }
 
           // Если нет результатов, показываем сообщение
-          if (filteredCats.length === 0 && allCats.length > 0) {
+          if (cats.length === 0 && allCats.length > 0) {
             const noResults = document.createElement("div");
             noResults.className =
               "empty-state text-center py-10 rounded-2xl col-span-full";
@@ -516,6 +518,17 @@
             `;
             likesContainer.appendChild(noResults);
           }
+        }
+
+        function filterAndSortCats() {
+          const searchTerm = searchInput.value.toLowerCase();
+          const sortBy = sortSelect.value;
+
+          let resultCats = filterCats(allCats, searchTerm);
+
+          resultCats = sortCats(resultCats, sortBy);
+
+          updateDOM(resultCats, searchTerm);
         }
 
         // Обработчики событий

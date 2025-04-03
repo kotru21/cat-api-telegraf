@@ -163,6 +163,41 @@
         );
         border: 1px dashed rgba(79, 70, 229, 0.3);
       }
+
+      /* Стили для правильной предзагрузки изображений */
+      .img-preload {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .img-loaded {
+        opacity: 1;
+      }
+
+      /* Контейнер для изображения во время загрузки */
+      .img-container {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .img-container .skeleton {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+
+      .skeleton-hidden {
+        opacity: 0;
+      }
+
+      .img-container img {
+        position: relative;
+        z-index: 2;
+      }
     </style>
   </head>
   <body>
@@ -597,58 +632,139 @@
 
           const likesData = await likesResponse.json();
 
-          // Скрываем скелетон
           document.getElementById("likes-skeleton").style.display = "none";
 
-          // Проверяем, есть ли лайки
           if (likesData.length === 0) {
             document.getElementById("no-likes").style.display = "block";
             return;
           }
 
+          const preloadPromises = likesData.map((cat, index) => {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.onload = () => resolve({ success: true, cat, img, index });
+              img.onerror = () => resolve({ success: false, cat, index });
+              img.src = cat.image_url;
+
+              // Проверка для уже кэшированных изображений
+              if (img.complete) {
+                resolve({ success: true, cat, img, index });
+              }
+            });
+          });
+
+          const imageResults = await Promise.race([
+            Promise.all(preloadPromises),
+            new Promise((resolve) =>
+              setTimeout(() => resolve({ timeout: true }), 3000)
+            ),
+          ]);
+
+          const hasTimeout = imageResults && imageResults.timeout;
+
           // Отображаем лайкнутых котов
           const likesContainer = document.getElementById("user-likes");
           likesContainer.style.display = "grid";
-          likesContainer.innerHTML = ""; // Очищаем контейнер
+          likesContainer.innerHTML = "";
 
-          likesData.forEach((cat) => {
+          likesData.forEach((cat, dataIndex) => {
             const catId = cat.cat_id || cat.id;
             const breedName = cat.breed_name;
             const likesCount = cat.likes_count || cat.count || 0;
 
+            // предзагруженное изображение, если доступно
+            const preloadedImage =
+              !hasTimeout && Array.isArray(imageResults)
+                ? imageResults.find((r) => r.index === dataIndex && r.success)
+                : null;
+
             const card = document.createElement("div");
             card.className = "cat-card fade-in";
-            card.innerHTML = `
-              <div class="relative overflow-hidden">
-                <img src="${cat.image_url}" alt="${breedName}" class="cat-image"
-                     onerror="this.src='https://placehold.co/300x200/1F2937/4F46E5?text=Нет+изображения'">
-                <div class="absolute top-2 right-2">
-                  <span class="likes-badge px-3 py-1 bg-indigo-900 bg-opacity-80 text-white rounded-full inline-flex items-center backdrop-blur-sm">
-                    <i class="fas fa-heart text-red-500 mr-1.5"></i> ${likesCount}
-                  </span>
-                </div>
-              </div>
-              <div class="p-5">
-                <h3 class="text-xl font-bold mb-3">${breedName}</h3>
-                <div class="flex flex-col space-y-3">
-                  <a href="/catDetails?id=${catId}" 
-                     class="text-center py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-info-circle mr-1"></i> Подробнее
-                  </a>
-                  <button class="remove-like-btn text-center py-2 px-4 bg-gray-800 hover:bg-gray-700 text-red-400 rounded-lg flex items-center justify-center gap-2" 
-                          data-cat-id="${catId}" data-breed-name="${breedName}">
-                    <i class="fas fa-heart-broken"></i> Удалить лайк
-                  </button>
-                </div>
+
+            const imgContainer = document.createElement("div");
+            imgContainer.className = "img-container relative overflow-hidden";
+            imgContainer.style.height = "200px";
+
+            const skeleton = document.createElement("div");
+            skeleton.className = "skeleton bg-gray-700 animate-pulse";
+            skeleton.style.width = "100%";
+            skeleton.style.height = "100%";
+
+            // Создаем изображение
+            const img = document.createElement("img");
+            img.alt = breedName;
+            img.className = "cat-image w-full img-preload";
+
+            if (preloadedImage && preloadedImage.img) {
+              img.src = preloadedImage.img.src;
+            } else {
+              img.src = cat.image_url;
+            }
+
+            img.onload = function () {
+              requestAnimationFrame(() => {
+                img.classList.add("img-loaded");
+                skeleton.classList.add("skeleton-hidden");
+              });
+            };
+
+            img.onerror = function () {
+              this.src =
+                "https://placehold.co/300x200/1F2937/4F46E5?text=Нет+изображения";
+              requestAnimationFrame(() => {
+                img.classList.add("img-loaded");
+                skeleton.classList.add("skeleton-hidden");
+              });
+            };
+
+            // Бейдж с лайками
+            const likeBadge = document.createElement("div");
+            likeBadge.className = "absolute top-2 right-2";
+            likeBadge.innerHTML = `
+              <span class="likes-badge px-3 py-1 bg-indigo-900 bg-opacity-80 text-white rounded-full inline-flex items-center backdrop-blur-sm">
+                <i class="fas fa-heart text-red-500 mr-1.5"></i> ${likesCount}
+              </span>
+            `;
+
+            // Если изображение уже предзагружено, добавляем класс загрузки с задержкой
+            if (preloadedImage && preloadedImage.img) {
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  img.classList.add("img-loaded");
+                  skeleton.classList.add("skeleton-hidden");
+                }, 50);
+              });
+            }
+
+            imgContainer.appendChild(skeleton);
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(likeBadge);
+
+            const infoDiv = document.createElement("div");
+            infoDiv.className = "p-5";
+            infoDiv.innerHTML = `
+              <h3 class="text-xl font-bold mb-3">${breedName}</h3>
+              <div class="flex flex-col space-y-3">
+                <a href="/catDetails?id=${catId}" 
+                   class="text-center py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+                  <i class="fas fa-info-circle mr-1"></i> Подробнее
+                </a>
+                <button class="remove-like-btn text-center py-2 px-4 bg-gray-800 hover:bg-gray-700 text-red-400 rounded-lg flex items-center justify-center gap-2" 
+                        data-cat-id="${catId}" data-breed-name="${breedName}">
+                  <i class="fas fa-heart-broken"></i> Удалить лайк
+                </button>
               </div>
             `;
+
+            // итоговая карточка
+            card.appendChild(imgContainer);
+            card.appendChild(infoDiv);
+
             likesContainer.appendChild(card);
           });
 
-          // Обновляем отображаемые карточки для поиска и сортировки
           updateDisplayedCats();
 
-          // Настраиваем кнопки удаления лайков
           setupRemoveLikeButtons();
         } catch (error) {
           console.error("Ошибка:", error);

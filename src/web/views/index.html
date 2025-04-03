@@ -519,57 +519,79 @@
             return;
           }
 
-          // Предзагрузка всех изображений перед обновлением таблицы с улучшенной обработкой
-          const preloadPromises = leaderboard.map((row) => {
-            return new Promise((resolve) => {
-              const img = new Image();
-              img.onload = () => resolve({ success: true, row, img });
-              img.onerror = () => resolve({ success: false, row });
-              img.src = row.image_url;
+          // Массив для хранения результатов предзагрузки
+          let preloadResults = [];
+          let hasTimeout = false;
 
-              // Важно: установить complete, чтобы предотвратить кэшированные изображения от поэтапной загрузки
-              if (img.complete) {
-                resolve({ success: true, row, img });
-              }
+          try {
+            // Предзагрузка изображений
+            const preloadPromises = leaderboard.map((row, index) => {
+              return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve({ success: true, row, img, index });
+                img.onerror = () => resolve({ success: false, row, index });
+                img.src = row.image_url;
+
+                // Проверка для уже кэшированных изображений
+                if (img.complete) {
+                  resolve({ success: true, row, img, index });
+                }
+              });
             });
-          });
 
-          // Добавляем минимальную задержку для плавности
-          const minLoadTime = new Promise((resolve) =>
-            setTimeout(resolve, 500)
-          );
-
-          // Ждем, пока все изображения загрузятся ИЛИ пройдет 3 секунды (таймаут)
-          Promise.race([
-            Promise.all(preloadPromises),
-            new Promise((resolve) =>
-              setTimeout(() => resolve("timeout"), 3000)
-            ),
-          ])
-            .then(() => minLoadTime)
-            .then((results) => {
-              tableBody.innerHTML = "";
-
-              if (results === "timeout") {
-                // Если был таймаут, рендерим строки с заглушками
-                leaderboard.forEach((row, index) =>
-                  createTableRow(row, index, false)
-                );
-              } else {
-                // Иначе рендерим с предзагруженными изображениями
-                results.forEach((result, index) => {
-                  createTableRow(result.row, index, result.success, result.img);
-                });
-              }
+            // Устанавливаем таймаут для загрузки
+            const timeoutPromise = new Promise((resolve) => {
+              setTimeout(() => {
+                hasTimeout = true;
+                resolve();
+              }, 3000);
             });
+
+            // Ждем либо загрузку всех изображений, либо таймаут
+            await Promise.race([
+              Promise.all(preloadPromises).then((results) => {
+                preloadResults = results;
+              }),
+              timeoutPromise,
+            ]);
+
+            // Добавляем минимальную задержку для плавности UI
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          } catch (err) {
+            console.error("Ошибка предзагрузки изображений:", err);
+          }
+
+          // Очищаем таблицу
+          tableBody.innerHTML = "";
+
+          // Если произошел таймаут и не все изображения загружены,
+          // создаем строки таблицы без предзагруженных изображений
+          if (hasTimeout && preloadResults.length < leaderboard.length) {
+            leaderboard.forEach((row, index) => {
+              createTableRow(row, index, false);
+            });
+          } else {
+            // Сортируем результаты по исходному индексу
+            preloadResults.sort((a, b) => a.index - b.index);
+
+            // Создаем строки с предзагруженными изображениями
+            preloadResults.forEach((result) => {
+              createTableRow(
+                result.row,
+                result.index,
+                result.success,
+                result.img
+              );
+            });
+          }
         } catch (err) {
-          console.error(err);
+          console.error("Ошибка загрузки данных лидерборда:", err);
           tableBody.innerHTML =
             '<tr><td colspan="4" class="text-center py-8 text-gray-400">Ошибка загрузки. Пожалуйста, попробуйте позже.</td></tr>';
         }
       };
 
-      // Новая функция для создания строки таблицы
+      // Функция для создания строки таблицы
       function createTableRow(
         row,
         index,
@@ -609,41 +631,40 @@
         // Создаем изображение с классом для предзагрузки
         const img = document.createElement("img");
         img.className = "w-24 h-24 object-cover rounded-lg mx-auto img-preload";
-        img.alt = row.breed_name;
-        img.src = imageLoaded ? preloadedImg.src : row.image_url;
+        img.alt = row.breed_name || "Cat breed";
 
-        // Устанавливаем обработчик для плавного появления уже после добавления в DOM
-        if (imageLoaded) {
-          // Если изображение уже загружено, добавим класс img-loaded после небольшой задержки
+        // Устанавливаем источник изображения
+        if (imageLoaded && preloadedImg) {
+          img.src = preloadedImg.src;
+        } else {
+          img.src = row.image_url || "";
+        }
+
+        // Обработчики событий для изображения
+        img.onload = function () {
+          img.classList.add("img-loaded");
+          setTimeout(() => {
+            skeleton.style.display = "none";
+          }, 300);
+        };
+
+        img.onerror = function () {
+          img.src = "https://via.placeholder.com/96?text=No+Image";
+          img.classList.add("img-loaded");
+          setTimeout(() => {
+            skeleton.style.display = "none";
+          }, 300);
+        };
+
+        // Если изображение уже загружено, добавляем класс загрузки с задержкой
+        if (imageLoaded && preloadedImg) {
           setTimeout(() => {
             img.classList.add("img-loaded");
-            // Удаляем скелетон после завершения анимации
             setTimeout(() => {
               skeleton.style.display = "none";
             }, 300);
           }, 50);
-        } else {
-          // Если изображение не загружено (или был таймаут), добавляем обработчики
-          img.onload = function () {
-            img.classList.add("img-loaded");
-            setTimeout(() => {
-              skeleton.style.display = "none";
-            }, 300);
-          };
-          img.onerror = function () {
-            img.src = "https://via.placeholder.com/96?text=No+Image";
-            img.classList.add("img-loaded");
-            setTimeout(() => {
-              skeleton.style.display = "none";
-            }, 300);
-          };
         }
-
-        // Добавляем backup на случай ошибки
-        img.onerror = function () {
-          img.src = "https://via.placeholder.com/96?text=No+Image";
-          img.classList.add("img-loaded");
-        };
 
         // Собираем структуру изображения
         imgContainer.appendChild(skeleton);
@@ -656,7 +677,7 @@
         nameCell.innerHTML = `
           <a href="${"/catDetails?id=" + row.id}" 
              class="text-indigo-400 hover:text-indigo-300 transition-colors">
-            ${row.breed_name}
+            ${row.breed_name || "Unknown Breed"}
           </a>
         `;
 
@@ -664,7 +685,7 @@
         const likesCell = document.createElement("td");
         likesCell.innerHTML = `
           <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
-            <i class="fas fa-heart text-red-500 mr-1.5"></i> ${row.count}
+            <i class="fas fa-heart text-red-500 mr-1.5"></i> ${row.count || 0}
           </div>
         `;
 
@@ -709,7 +730,6 @@
       });
     </script>
 
-    <!-- Скрипт для WebSocket -->
     <script type="module">
       const messageOutputDiv = document.getElementById("messageOutput");
       const timeOutputDiv = document.getElementById("timeOutput");

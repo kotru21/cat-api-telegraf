@@ -183,6 +183,12 @@
         left: 0;
         width: 100%;
         height: 100%;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+
+      .skeleton-hidden {
+        opacity: 0;
       }
 
       .img-container img {
@@ -601,7 +607,6 @@
         const tr = document.createElement("tr");
         tr.className = "";
 
-        // Создаем ячейку с номером
         const rankCell = document.createElement("td");
         rankCell.className = "text-left";
         rankCell.innerHTML = `
@@ -612,7 +617,6 @@
           </div>
         `;
 
-        // Создаем ячейку с изображением
         const imgCell = document.createElement("td");
         imgCell.className = "text-center";
 
@@ -622,18 +626,16 @@
         imgContainer.style.width = "96px";
         imgContainer.style.height = "96px";
 
-        // Добавляем скелетон, который будет под изображением
+        // скелетон, который будет под изображением
         const skeleton = document.createElement("div");
         skeleton.className = "skeleton bg-gray-700 animate-pulse rounded-lg";
         skeleton.style.width = "100%";
         skeleton.style.height = "100%";
 
-        // Создаем изображение с классом для предзагрузки
         const img = document.createElement("img");
         img.className = "w-24 h-24 object-cover rounded-lg mx-auto img-preload";
         img.alt = row.breed_name || "Cat breed";
 
-        // Устанавливаем источник изображения
         if (imageLoaded && preloadedImg) {
           img.src = preloadedImg.src;
         } else {
@@ -642,36 +644,35 @@
 
         // Обработчики событий для изображения
         img.onload = function () {
-          img.classList.add("img-loaded");
-          setTimeout(() => {
-            skeleton.style.display = "none";
-          }, 300);
+          requestAnimationFrame(() => {
+            img.classList.add("img-loaded");
+
+            skeleton.classList.add("skeleton-hidden");
+          });
         };
 
         img.onerror = function () {
           img.src = "https://via.placeholder.com/96?text=No+Image";
-          img.classList.add("img-loaded");
-          setTimeout(() => {
-            skeleton.style.display = "none";
-          }, 300);
+          requestAnimationFrame(() => {
+            img.classList.add("img-loaded");
+            skeleton.classList.add("skeleton-hidden");
+          });
         };
 
-        // Если изображение уже загружено, добавляем класс загрузки с задержкой
         if (imageLoaded && preloadedImg) {
-          setTimeout(() => {
-            img.classList.add("img-loaded");
+          requestAnimationFrame(() => {
             setTimeout(() => {
-              skeleton.style.display = "none";
-            }, 300);
-          }, 50);
+              img.classList.add("img-loaded");
+              skeleton.classList.add("skeleton-hidden");
+            }, 50);
+          });
         }
 
-        // Собираем структуру изображения
         imgContainer.appendChild(skeleton);
         imgContainer.appendChild(img);
         imgCell.appendChild(imgContainer);
 
-        // Создаем ячейку с названием породы
+        // ячейка с названием породы
         const nameCell = document.createElement("td");
         nameCell.className = "text-left";
         nameCell.innerHTML = `
@@ -681,7 +682,7 @@
           </a>
         `;
 
-        // Создаем ячейку с количеством лайков
+        // ячейка с количеством лайков
         const likesCell = document.createElement("td");
         likesCell.innerHTML = `
           <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
@@ -689,13 +690,11 @@
           </div>
         `;
 
-        // Добавляем все ячейки в строку
         tr.appendChild(rankCell);
         tr.appendChild(imgCell);
         tr.appendChild(nameCell);
         tr.appendChild(likesCell);
 
-        // Добавляем строку в таблицу
         tableBody.appendChild(tr);
       }
 
@@ -715,7 +714,6 @@
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
 
-          // Обновляем лидерборд только когда получаем сигнал об изменении
           if (data.leaderboardChanged) {
             console.log("Leaderboard changed, updating data...");
             fetchLeaderboard();
@@ -724,7 +722,8 @@
 
         ws.onerror = (error) => {
           console.error("WebSocket error:", error);
-          // В случае ошибки WebSocket переключаемся на периодический опрос
+          // В случае ошибки WebSocket ппереключение на http polling
+          console.log("Switching to HTTP polling for leaderboard updates...");
           setInterval(fetchLeaderboard, 30000); // раз в 30 секунд
         };
       });
@@ -900,13 +899,13 @@
                 };
 
                 // Добавляем обработчик для плавного появления
-                setTimeout(() => {
-                  imgElement.classList.add("img-loaded");
-                  // Удаляем скелетон после завершения анимации
+                requestAnimationFrame(() => {
                   setTimeout(() => {
-                    skeleton.style.display = "none";
-                  }, 300);
-                }, 50);
+                    imgElement.classList.add("img-loaded");
+                    // Плавно скрываем скелетон вместо установки display: none
+                    skeleton.classList.add("skeleton-hidden");
+                  }, 50);
+                });
 
                 // Собираем элемент
                 imgWrap.appendChild(skeleton);

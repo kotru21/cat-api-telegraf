@@ -198,6 +198,20 @@
         position: relative;
         z-index: 2;
       }
+
+      /* Стили для плавного перехода между скелетоном и контентом */
+      .likes-container {
+        position: relative;
+      }
+
+      #likes-skeleton {
+        transition: opacity 0.5s ease;
+      }
+
+      #user-likes {
+        transition: opacity 0.5s ease;
+        opacity: 0;
+      }
     </style>
   </head>
   <body>
@@ -291,7 +305,7 @@
         </div>
 
         <!-- Раздел с лайкнутыми котами -->
-        <div class="mb-8">
+        <div class="likes-container mb-8">
           <!-- Скелетон-загрузчик для карточек -->
           <div
             id="likes-skeleton"
@@ -328,8 +342,7 @@
           <!-- Контейнер для карточек с лайкнутыми котами -->
           <div
             id="user-likes"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            style="display: none">
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Сюда будут добавляться карточки лайкнутых котов -->
           </div>
 
@@ -632,10 +645,16 @@
 
           const likesData = await likesResponse.json();
 
-          document.getElementById("likes-skeleton").style.display = "none";
-
+          // Обрабатываем случай с отсутствием лайков
           if (likesData.length === 0) {
-            document.getElementById("no-likes").style.display = "block";
+            // Плавно скрываем скелетон
+            const skeleton = document.getElementById("likes-skeleton");
+            skeleton.style.opacity = "0";
+
+            setTimeout(() => {
+              skeleton.style.display = "none";
+              document.getElementById("no-likes").style.display = "block";
+            }, 500);
             return;
           }
 
@@ -664,8 +683,8 @@
 
           // Отображаем лайкнутых котов
           const likesContainer = document.getElementById("user-likes");
+          // Показываем контейнер но пока с нулевой прозрачностью
           likesContainer.style.display = "grid";
-          likesContainer.innerHTML = "";
 
           likesData.forEach((cat, dataIndex) => {
             const catId = cat.cat_id || cat.id;
@@ -761,6 +780,21 @@
             card.appendChild(infoDiv);
 
             likesContainer.appendChild(card);
+          });
+
+          // После заполнения контейнера выполняем плавный переход
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              // Плавно скрываем скелетон и показываем контент
+              document.getElementById("likes-skeleton").style.opacity = "0";
+              likesContainer.style.opacity = "1";
+
+              // Удаляем скелетон из DOM после завершения анимации
+              setTimeout(() => {
+                document.getElementById("likes-skeleton").style.display =
+                  "none";
+              }, 500); // Совпадает со временем transition
+            }, 50);
           });
 
           updateDisplayedCats();

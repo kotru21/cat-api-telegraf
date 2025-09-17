@@ -17,7 +17,7 @@ export function setupSession(app, config) {
     if (!process.env.REDIS_URL && !config.REDIS_URL) {
       throw new Error("REDIS_URL is required in production for session store.");
     }
-    const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
+  let redisUrl = config.REDIS_URL || process.env.REDIS_URL;
     const allowSelfSigned =
       config.REDIS_ALLOW_SELF_SIGNED ||
       process.env.REDIS_ALLOW_SELF_SIGNED === "true";
@@ -31,6 +31,15 @@ export function setupSession(app, config) {
       reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
     };
     if (isRediss && allowSelfSigned) {
+      // При rediss:// клиент сам включает строгий TLS. Чтобы ослабить проверку, переводим на ручной режим:
+      // 1. Меняем схему на redis:// (отключаем авто TLS) и явно задаём socket.tls.
+      try {
+        const u = new URL(redisUrl);
+        u.protocol = "redis:"; // снимаем auto TLS
+        redisUrl = u.toString();
+      } catch {
+        // оставляем как есть; если парсинг упал — лучше не рушить приложение
+      }
       socketOptions.tls = { rejectUnauthorized: false };
     }
     const redisClient = createRedisClient({
@@ -40,7 +49,7 @@ export function setupSession(app, config) {
     // Lazy connect; errors are handled by redis client
     redisClient.connect().catch(() => {});
     // Логи Redis клиента
-    if (isRediss && allowSelfSigned) {
+    if (allowSelfSigned) {
       logger.warn(
         {
           redisUrl,

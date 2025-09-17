@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import logger from "../../utils/logger.js";
 
 export class AuthController {
   constructor(config) {
@@ -76,6 +77,16 @@ export class AuthController {
         hash,
       } = req.query;
 
+      const startTs = Date.now();
+      logger.info(
+        {
+          route: "GET /auth/telegram/callback",
+          queryKeys: Object.keys(req.query),
+          hasSession: !!req.session,
+        },
+        "Auth callback received"
+      );
+
       const validation = this.validateTelegramData({
         id,
         first_name,
@@ -87,24 +98,52 @@ export class AuthController {
       });
 
       if (!validation.isValid) {
+        logger.warn(
+          { reason: validation.error },
+          "Auth callback validation failed"
+        );
         return res.redirect(`/login?error=${validation.error}`);
       }
 
       // После успешной авторизации
       req.session.user = { id, first_name, last_name, username, photo_url };
 
-      req.session.save((err) => {
-        if (err) {
-          // eslint-disable-next-line no-console
-          console.error("Ошибка сохранения сессии:", err);
-          return res.redirect("/login?error=session_error");
-        }
-
-        res.redirect("/profile");
+      // Обёртка с таймаутом чтобы не висеть 30s из-за store
+      const savePromise = new Promise((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
       });
+
+      const timeoutMs = 5000;
+      try {
+        await Promise.race([
+          savePromise,
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("session_save_timeout")),
+              timeoutMs
+            )
+          ),
+        ]);
+        logger.info(
+          { elapsed: Date.now() - startTs },
+          "Auth callback session saved"
+        );
+        return res.redirect("/profile");
+      } catch (e) {
+        logger.error({ err: e }, "Auth callback session save failed");
+        return res.redirect(
+          `/login?error=${
+            e.message === "session_save_timeout"
+              ? "session_timeout"
+              : "session_error"
+          }`
+        );
+      }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Ошибка авторизации через Telegram:", error);
+      logger.error({ err: error }, "Auth callback fatal error");
       res.redirect("/login?error=auth_failed");
     }
   }
@@ -120,6 +159,15 @@ export class AuthController {
         auth_date,
         hash,
       } = req.body;
+      const startTs = Date.now();
+      logger.info(
+        {
+          route: "POST /auth/telegram/callback",
+          bodyKeys: Object.keys(req.body || {}),
+          hasSession: !!req.session,
+        },
+        "Auth callback POST received"
+      );
 
       const validation = this.validateTelegramData({
         id,
@@ -132,24 +180,50 @@ export class AuthController {
       });
 
       if (!validation.isValid) {
+        logger.warn(
+          { reason: validation.error },
+          "Auth callback POST validation failed"
+        );
         return res.status(403).json({ error: validation.error });
       }
 
       // После успешной авторизации
       req.session.user = { id, first_name, last_name, username, photo_url };
 
-      req.session.save((err) => {
-        if (err) {
-          // eslint-disable-next-line no-console
-          console.error("Ошибка сохранения сессии:", err);
-          return res.status(500).json({ error: "session_error" });
-        }
-
-        res.status(200).json({ success: true, redirect: "/profile" });
+      const savePromise = new Promise((resolve, reject) => {
+        req.session.save((err) => {
+          if (err) return reject(err);
+          resolve();
+        });
       });
+
+      const timeoutMs = 5000;
+      try {
+        await Promise.race([
+          savePromise,
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("session_save_timeout")),
+              timeoutMs
+            )
+          ),
+        ]);
+        logger.info(
+          { elapsed: Date.now() - startTs },
+          "Auth callback POST session saved"
+        );
+        return res.status(200).json({ success: true, redirect: "/profile" });
+      } catch (e) {
+        logger.error({ err: e }, "Auth callback POST session save failed");
+        return res.status(500).json({
+          error:
+            e.message === "session_save_timeout"
+              ? "session_timeout"
+              : "session_error",
+        });
+      }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Ошибка авторизации через Telegram:", error);
+      logger.error({ err: error }, "Auth callback POST fatal error");
       res.status(500).json({ error: "auth_failed" });
     }
   }

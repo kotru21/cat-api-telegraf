@@ -1,6 +1,7 @@
 import session from "express-session";
 import { createClient as createRedisClient } from "redis";
 import { RedisStore } from "connect-redis";
+import logger from "../../utils/logger.js";
 
 export function setupSession(app, config) {
   // Production requires explicit secret
@@ -24,10 +25,17 @@ export function setupSession(app, config) {
     });
     // Lazy connect; errors are handled by redis client
     redisClient.connect().catch(() => {});
-    store = new RedisStore({
-      client: redisClient,
-      prefix: "sess:",
-    });
+    // Логи Redis клиента
+    redisClient.on("ready", () => logger.info("Redis session client ready"));
+    redisClient.on("error", (err) =>
+      logger.error({ err }, "Redis session client error")
+    );
+    redisClient.on("reconnecting", () =>
+      logger.warn("Redis session client reconnecting")
+    );
+    redisClient.on("end", () => logger.warn("Redis session client ended"));
+
+    store = new RedisStore({ client: redisClient, prefix: "sess:" });
   }
 
   app.use(
@@ -41,6 +49,7 @@ export function setupSession(app, config) {
         httpOnly: true,
         sameSite: "lax",
       },
+      proxy: true,
       store,
     })
   );

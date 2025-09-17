@@ -37,7 +37,6 @@ export function setupSession(app, config) {
       );
     }
 
-    // Простая конфигурация без TLS опций в socket
     const clientConfig = {
       url: redisUrl,
       socket: socketOptions,

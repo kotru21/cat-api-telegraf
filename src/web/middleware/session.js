@@ -28,11 +28,12 @@ export function setupSession(app, config) {
     // 1. Если strict TLS (по умолчанию) — НЕ указывать socket.tls вообще.
     // 2. Если разрешён self-signed — указываем socket.tls = { rejectUnauthorized:false }.
     const socketOptions = { reconnectStrategy: (r) => Math.min(r * 50, 2000) };
-    // redis@5: если URL rediss:// -> TLS автоматически включён. Дополнительные опции нужны только если хотим ослабить проверку.
+
+    // Если это rediss:// URL и разрешены самоподписанные сертификаты
     if (isRediss && allowSelfSigned) {
-      socketOptions.tls = true; // признак TLS
-      // @redis/client не принимает rejectUnauthorized непосредственно рядом, поэтому используем override глобально через env.
-      // Однако безопаснее вызвать с кастомным агентом - для простоты временно используем NODE_TLS_REJECT_UNAUTHORIZED=0 (предложим пользователю вариант ниже).
+      socketOptions.tls = {
+        rejectUnauthorized: false,
+      };
     }
     const redisClient = createRedisClient({
       url: redisUrl,

@@ -1,6 +1,6 @@
 import session from "express-session";
 import { createClient as createRedisClient } from "redis";
-import RedisStore from "connect-redis";
+import connectRedis from "connect-redis";
 
 export function setupSession(app, config) {
   // Production requires explicit secret
@@ -24,6 +24,7 @@ export function setupSession(app, config) {
     });
     // Lazy connect; errors are handled by redis client
     redisClient.connect().catch(() => {});
+    const RedisStore = connectRedis(session);
     store = new RedisStore({
       client: redisClient,
       prefix: "sess:",

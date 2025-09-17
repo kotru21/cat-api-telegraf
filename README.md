@@ -239,21 +239,55 @@ cat-api-telegraf/
 
 ### Переменные окружения
 
-| Переменная       | Тип     | По умолчанию            | Описание                               |
-| ---------------- | ------- | ----------------------- | -------------------------------------- |
-| `CATAPI_KEY`     | string  | **обязательно**         | API ключ The Cat API                   |
-| `PORT`           | number  | `5200`                  | Порт HTTP/WebSocket сервера            |
-| `WEBSITE_URL`    | string  | `http://localhost`      | Базовый URL приложения                 |
-| `WEB_ENABLED`    | boolean | `true`                  | Включить веб-сервер                    |
-| `BOT_ENABLED`    | boolean | `true`                  | Включить Telegram бота                 |
-| `BOT_TOKEN`      | string  | опционально\*           | Токен Telegram бота                    |
-| `SESSION_SECRET` | string  | `your-secret-key-here`  | Секрет для сессий                      |
-| `NODE_ENV`       | enum    | `development`           | Окружение: development/test/production |
-| `DATABASE_URL`   | string  | `file:./prisma/main.db` | Строка подключения к БД                |
-| `REDIS_URL`      | string  | опционально\*\*         | URL Redis для сессий                   |
+| Переменная                | Тип     | По умолчанию            | Описание                                                                                                                                             |
+| ------------------------- | ------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CATAPI_KEY`              | string  | **обязательно**         | API ключ The Cat API                                                                                                                                 |
+| `PORT`                    | number  | `5200`                  | Порт HTTP/WebSocket сервера                                                                                                                          |
+| `WEBSITE_URL`             | string  | `http://localhost`      | Базовый URL приложения                                                                                                                               |
+| `WEB_ENABLED`             | boolean | `true`                  | Включить веб-сервер                                                                                                                                  |
+| `BOT_ENABLED`             | boolean | `true`                  | Включить Telegram бота                                                                                                                               |
+| `BOT_TOKEN`               | string  | опционально\*           | Токен Telegram бота                                                                                                                                  |
+| `SESSION_SECRET`          | string  | `your-secret-key-here`  | Секрет для сессий                                                                                                                                    |
+| `NODE_ENV`                | enum    | `development`           | Окружение: development/test/production                                                                                                               |
+| `DATABASE_URL`            | string  | `file:./prisma/main.db` | Строка подключения к БД                                                                                                                              |
+| `REDIS_URL`               | string  | опционально\*\*         | URL Redis для сессий                                                                                                                                 |
+| `REDIS_ALLOW_SELF_SIGNED` | boolean | (нет)                   | ВРЕМЕННО: разрешить self-signed TLS сертификат для `rediss://` (устанавливает `rejectUnauthorized=false`). Использовать только для отладки/туннелей. |
 
 **\*** Обязательно, если `BOT_ENABLED=true`  
 **\*\*** Обязательно в продакшене
+
+> :warning: **Безопасность Redis TLS**  
+> Если при подключении к Redis по `rediss://` вы получаете ошибку вида `self-signed certificate in certificate chain`, сначала убедитесь, что:
+>
+> 1. URL действительно начинается с `rediss://` (TLS).
+> 2. Вы используете актуальную версию Node.js (обновлённый store корневых сертификатов).
+> 3. Нет перехватывающего корпоративного/проксирующего SSL (MITM).
+>
+> Переменная `REDIS_ALLOW_SELF_SIGNED=true` временно отключит проверку (`rejectUnauthorized=false`). Это снижает безопасность (возможен MITM) — не оставляйте так в постоянном продакшене. Лучшие варианты:
+>
+> - Установить корректный сертификат, доверенный публичному CA.
+> - Или указать собственный CA: см. пример ниже.
+
+```js
+// Пример (не включён по умолчанию) как явно задать CA:
+import fs from "node:fs";
+createClient({
+  url: process.env.REDIS_URL,
+  socket: {
+    tls: true,
+    // строгая проверка + кастомный CA
+    ca: [fs.readFileSync(process.env.REDIS_CA_FILE, "utf8")],
+    rejectUnauthorized: true,
+  },
+});
+```
+
+> Безопасность: если ваш Redis доступен по `rediss://` и имеет самоподписанный сертификат (например, через dev-туннель), можно временно установить `REDIS_ALLOW_SELF_SIGNED=true` для отключения проверки подлинности сертификата. В продакшене рекомендуется:
+>
+> 1. Установить валидный сертификат от доверенного CA ИЛИ импортировать CA в доверенные хранилища.
+> 2. Либо настроить собственный stunnel/прокси с корректной цепочкой доверия.
+>
+> Никогда не оставляйте `REDIS_ALLOW_SELF_SIGNED=true` постоянно: это снижает защиту от MITM.
 
 ### Режимы работы
 

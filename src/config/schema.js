@@ -29,6 +29,8 @@ export const EnvSchema = z
       .enum(["development", "test", "production"])
       .default("development"),
     REDIS_URL: z.string().url().optional(),
+    // Разрешить отключение проверки TLS для self-signed (rediss://). Использовать ТОЛЬКО временно.
+    REDIS_ALLOW_SELF_SIGNED: BOOL_ENV.optional(),
     DATABASE_URL: z
       .string()
       .min(1, "DATABASE_URL is required")

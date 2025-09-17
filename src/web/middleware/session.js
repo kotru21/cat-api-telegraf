@@ -17,19 +17,54 @@ export function setupSession(app, config) {
     if (!process.env.REDIS_URL && !config.REDIS_URL) {
       throw new Error("REDIS_URL is required in production for session store.");
     }
+    const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
+    const allowSelfSigned =
+      config.REDIS_ALLOW_SELF_SIGNED ||
+      process.env.REDIS_ALLOW_SELF_SIGNED === "true";
+    const isRediss = redisUrl.startsWith("rediss://");
     const redisClient = createRedisClient({
-      url: config.REDIS_URL || process.env.REDIS_URL,
+      url: redisUrl,
       socket: {
         reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
+        tls: isRediss
+          ? {
+              rejectUnauthorized: !allowSelfSigned,
+            }
+          : undefined,
       },
     });
     // Lazy connect; errors are handled by redis client
     redisClient.connect().catch(() => {});
     // Логи Redis клиента
+    if (isRediss && allowSelfSigned) {
+      logger.warn(
+        {
+          redisUrl,
+          securityWarning:
+            "TLS certificate verification is DISABLED for Redis (self-signed allowed). Do NOT use this permanently in production.",
+        },
+        "Redis session client: self-signed certificate allowed"
+      );
+    }
     redisClient.on("ready", () => logger.info("Redis session client ready"));
-    redisClient.on("error", (err) =>
-      logger.error({ err }, "Redis session client error")
-    );
+    redisClient.on("error", (err) => {
+      if (
+        err &&
+        err.code === "SELF_SIGNED_CERT_IN_CHAIN" &&
+        isRediss &&
+        !allowSelfSigned
+      ) {
+        logger.error(
+          {
+            err,
+            hint: "Detected self-signed certificate from Redis. If this is intentional (dev tunnel), set REDIS_ALLOW_SELF_SIGNED=true temporarily. Prefer configuring a proper CA cert instead.",
+          },
+          "Redis session client error"
+        );
+      } else {
+        logger.error({ err }, "Redis session client error");
+      }
+    });
     redisClient.on("reconnecting", () =>
       logger.warn("Redis session client reconnecting")
     );

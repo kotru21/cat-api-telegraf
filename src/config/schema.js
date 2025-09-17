@@ -29,7 +29,15 @@ export const EnvSchema = z
       .enum(["development", "test", "production"])
       .default("development"),
     REDIS_URL: z.string().url().optional(),
-    DATABASE_URL: z.string().url().optional(),
+    DATABASE_URL: z
+      .string()
+      .min(1, "DATABASE_URL is required")
+      .refine(
+        (v) => v.startsWith("postgres://") || v.startsWith("postgresql://"),
+        {
+          message: "DATABASE_URL must start with postgres:// or postgresql://",
+        }
+      ),
   })
   .superRefine((env, ctx) => {
     const botEnabled = env.BOT_ENABLED ?? true;
@@ -59,13 +67,7 @@ export const EnvSchema = z
           path: ["REDIS_URL"],
         });
       }
-      if (!env.DATABASE_URL) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "DATABASE_URL is required in production",
-          path: ["DATABASE_URL"],
-        });
-      }
+      // Дополнительных проверок не нужно: уже обязательный и проверен выше
     }
   });
 

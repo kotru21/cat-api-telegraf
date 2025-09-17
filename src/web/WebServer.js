@@ -4,18 +4,23 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { WebSocketService } from "./WebSocketServer.js";
+import { createAppContext } from "../application/context.js";
 import { setupApiRoutes } from "./ApiRoutes.js";
 import { setupSecurity } from "./middleware/security.js";
 import { setupSession } from "./middleware/session.js";
 import { AuthController } from "./controllers/AuthController.js";
+import { AppError } from "../application/errors.js";
+import logger from "../utils/logger.js";
+import pinoHttp from "pino-http";
 
+import AppEvents, { EVENTS } from "../application/events.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export class WebServer {
-  constructor(config, eventEmitters = {}) {
+  constructor(config, dependencies = {}) {
     this.config = config;
-    this.eventEmitters = eventEmitters;
+    this.dependencies = dependencies;
     this.app = express();
     this.server = createServer(this.app);
     this.wsService = null;
@@ -24,30 +29,58 @@ export class WebServer {
   initialize() {
     this.app.set("trust proxy", 1);
 
-    // Настройка безопасности
+    // Security middleware (CSP, CORS, essential headers)
     setupSecurity(this.app);
 
-    // Настройка статических файлов
+    // HTTP request logging
+    this.app.use(
+      pinoHttp({
+        logger,
+        genReqId: (req, res) => req.headers["x-request-id"] || undefined,
+        // pino-http@9: signature (req, res, err)
+        customLogLevel: (req, res, err) => {
+          if (err || (res && res.statusCode >= 500)) return "error";
+          if (res && res.statusCode >= 400) return "warn";
+          return "info";
+        },
+      })
+    );
+
+    // Static files
     this.setupStaticFiles();
 
-    // Настройка сессий
+    // Session management
     setupSession(this.app, this.config);
 
-    // Настройка WebSocket
-    this.wsService = new WebSocketService(this.server);
+    // WebSocket setup
+    const appCtx = createAppContext(this.dependencies);
+    this.wsService = new WebSocketService(this.server, "/wss", {
+      catService: appCtx.catService,
+      enablePolling: false,
+    });
 
-    // Настройка событий лидерборда
-    if (this.eventEmitters.likesEvents) {
-      this.setupLeaderboardEvents();
-    }
+    // Leaderboard updates via AppEvents
+    this.setupLeaderboardEvents();
 
-    // Настройка шаблонизатора
+    // View engine
     this.setupTemplateEngine();
 
-    // API маршруты
+    // API routes
     setupApiRoutes(this.app);
 
-    // Общие маршруты
+    // Centralized error handler (last)
+    // eslint-disable-next-line no-unused-vars
+    this.app.use((err, req, res, next) => {
+      if (err instanceof AppError) {
+        logger.warn({ err }, "AppError");
+        return res
+          .status(err.status)
+          .json({ error: err.message, code: err.code });
+      }
+      logger.error({ err }, "Unhandled error");
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+
     this.setupRoutes();
 
     // Контроллер аутентификации
@@ -67,7 +100,7 @@ export class WebServer {
   }
 
   setupLeaderboardEvents() {
-    this.eventEmitters.likesEvents.on("leaderboardChanged", async () => {
+    AppEvents.on(EVENTS.LEADERBOARD_CHANGED, async () => {
       const changed = await this.wsService.updateLeaderboardHash();
       if (changed) {
         this.wsService.broadcastData({ leaderboardChanged: true });
@@ -79,7 +112,7 @@ export class WebServer {
     this.app.engine("html", (filePath, options, callback) => {
       fs.readFile(filePath, "utf8", (err, content) => {
         if (err) {
-          console.error(`Ошибка при чтении файла ${filePath}:`, err);
+          logger.error({ err, filePath }, `Error reading template file`);
           return callback(err);
         }
 
@@ -98,10 +131,10 @@ export class WebServer {
                 navContent
               );
             } else {
-              console.error(`Файл навигации не найден: ${navPath}`);
+              logger.warn({ navPath }, `Navigation partial not found`);
             }
           } catch (err) {
-            console.error(`Ошибка при чтении navigation.html: ${err.message}`);
+            logger.error({ err }, `Error reading navigation.html`);
           }
         }
 
@@ -114,12 +147,20 @@ export class WebServer {
   }
 
   setupRoutes() {
-    // Основные маршруты
+    // Views
     this.app.get("/", (req, res) => res.render("index"));
     this.app.get("/catDetails", (req, res) => res.render("catDetails"));
     this.app.get("/similar", (req, res) => res.render("similar"));
 
-    // Профиль пользователя
+    // Health checks
+    this.app.get("/healthz", (req, res) =>
+      res.status(200).json({ status: "ok" })
+    );
+    this.app.get("/readyz", (req, res) =>
+      res.status(200).json({ status: "ready" })
+    );
+
+    // User profile view (requires session)
     this.app.get("/profile", (req, res) => {
       if (!req.session.user) {
         return res.redirect("/login");
@@ -127,7 +168,7 @@ export class WebServer {
       res.render("profile");
     });
 
-    // Страница входа
+    // Login page
     this.app.get("/login", (req, res) => {
       if (req.session.user) {
         return res.redirect("/profile");
@@ -135,7 +176,7 @@ export class WebServer {
       res.render("login");
     });
 
-    // Выход из системы
+    // Logout
     this.app.get("/logout", (req, res) => {
       req.session.destroy();
       res.redirect("/");
@@ -149,13 +190,15 @@ export class WebServer {
       this.server.listen(port, () => {
         // Получаем базовый URL без слеша в конце
         const baseUrl = (
-          this.config.WEBSITE_URL || `http://localhost:${port}`
+          this.config.FULL_WEBSITE_URL ||
+          this.config.WEBSITE_URL ||
+          `http://localhost:${port}`
         ).replace(/\/$/, "");
 
-        console.log(`Сервер запущен на порту ${port}`);
-        console.log(`Веб-интерфейс доступен по адресу: ${baseUrl}`);
-        console.log(
-          `WebSocket доступен по адресу: ${baseUrl
+        logger.info({ port }, `Server is running on port ${port}`);
+        logger.info({ baseUrl }, `Web UI is available at: ${baseUrl}`);
+        logger.info(
+          `WebSocket is available at: ${baseUrl
             .replace("http:", "ws:")
             .replace("https:", "wss:")}/wss`
         );
@@ -171,10 +214,21 @@ export class WebServer {
   close() {
     return new Promise((resolve) => {
       if (this.server) {
-        this.server.close(() => {
-          console.log("Веб-сервер остановлен");
-          resolve();
-        });
+        const finalize = () => {
+          this.server.close(() => {
+            logger.info("Web server stopped");
+            resolve();
+          });
+        };
+
+        if (this.wsService && typeof this.wsService.close === "function") {
+          this.wsService
+            .close()
+            .then(() => finalize())
+            .catch(() => finalize());
+        } else {
+          finalize();
+        }
       } else {
         resolve();
       }

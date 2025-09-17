@@ -1,6 +1,10 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
-import catService from "../../services/CatService.js";
+import {
+  getUserLikes,
+  getCatDetails,
+} from "../../application/use-cases/index.js";
+import logger from "../../utils/logger.js";
 
 export class MyLikesCommand extends BaseCommand {
   constructor() {
@@ -11,8 +15,9 @@ export class MyLikesCommand extends BaseCommand {
   register() {
     this.composer.command(this.name, async (ctx) => {
       try {
+        const appCtx = this.createAppContext();
         const userId = ctx.from.id.toString();
-        const userLikes = await catService.getUserLikes(userId);
+        const userLikes = await getUserLikes(appCtx, { userId });
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.reply("Вы еще не поставили ни одного лайка 😿");
@@ -22,7 +27,10 @@ export class MyLikesCommand extends BaseCommand {
         // Отображаем первую запись с фото и кнопками навигации
         await this.sendLikeInfo(ctx, userLikes, 0);
       } catch (error) {
-        console.error("Ошибка при получении лайков:", error);
+        logger.error(
+          { err: error, userId: ctx.from?.id },
+          "MyLikesCommand: failed to fetch likes"
+        );
         await ctx.reply(
           "Извините, произошла ошибка при получении списка ваших лайков"
         );
@@ -32,8 +40,9 @@ export class MyLikesCommand extends BaseCommand {
     // Обработчики кнопок навигации по лайкам
     this.composer.action(/^like_nav:(prev|next):(\d+)$/, async (ctx) => {
       try {
+        const appCtx = this.createAppContext();
         const userId = ctx.from.id.toString();
-        const userLikes = await catService.getUserLikes(userId);
+        const userLikes = await getUserLikes(appCtx, { userId });
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.answerCbQuery("Список лайков пуст");
@@ -53,15 +62,19 @@ export class MyLikesCommand extends BaseCommand {
         await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
         await ctx.answerCbQuery();
       } catch (error) {
-        console.error("Ошибка при навигации по лайкам:", error);
+        logger.error(
+          { err: error, userId: ctx.from?.id },
+          "MyLikesCommand: likes navigation error"
+        );
         await ctx.answerCbQuery("Произошла ошибка");
       }
     });
 
     this.composer.action(/^like_details:(.+)$/, async (ctx) => {
       try {
+        const appCtx = this.createAppContext();
         const catId = ctx.match[1];
-        const catDetails = await catService.getCatById(catId);
+        const catDetails = await getCatDetails(appCtx, { id: catId });
 
         if (!catDetails) {
           await ctx.answerCbQuery("Информация о коте не найдена");
@@ -92,7 +105,7 @@ export class MyLikesCommand extends BaseCommand {
 
         await ctx.answerCbQuery("Подробная информация о коте");
       } catch (error) {
-        console.error("Ошибка при получении подробностей о коте:", error);
+        logger.error({ err: error }, "MyLikesCommand: failed to fetch details");
         await ctx.answerCbQuery("Произошла ошибка при получении информации");
       }
     });

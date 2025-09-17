@@ -1,37 +1,60 @@
+import { executeUseCase } from "../../application/context.js";
+import logger from "../../utils/logger.js";
+import {
+  likeCat,
+  unlikeCat,
+  getCatDetails,
+  getLeaderboard,
+  getCatsByFeature,
+  getRandomImages,
+  getUserLikes,
+  getUserLikesCount,
+} from "../../application/use-cases/index.js";
 export function setupCatRoutes(
   router,
   { catService, requireAuth, leaderboardLimiter }
 ) {
-  // Получение данных о коте по ID
-  router.get("/cat/:id", async (req, res) => {
+  const appCtx = { catService };
+
+  /**
+   * Безопасное выполнение use-case для веб-роутов
+   */
+  const executeUseCaseWeb = async (useCaseFn, params, req) => {
+    const meta = {
+      userId: req.session?.user?.id,
+      userAgent: req.headers["user-agent"],
+      ip: req.ip,
+      route: req.route?.path,
+    };
+    return executeUseCase(useCaseFn, appCtx, params, meta);
+  };
+  // GET /cat/:id — fetch cat by id
+  router.get("/cat/:id", async (req, res, next) => {
     try {
       const id = req.params.id;
       if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
         return res.status(400).json({ error: "Invalid ID format" });
       }
 
-      const catData = await catService.getCatById(id);
-      if (!catData) return res.status(404).json({ error: "Cat not found" });
+      const catData = await executeUseCaseWeb(getCatDetails, { id }, req);
       res.json(catData);
     } catch (err) {
-      console.error("Error fetching cat:", err);
-      res.status(500).json({ error: "Failed to fetch cat data" });
+      next(err);
     }
   });
 
-  // Получение лидерборда
-  router.get("/leaderboard", leaderboardLimiter, async (req, res) => {
+  // GET /leaderboard — fetch leaderboard
+  router.get("/leaderboard", leaderboardLimiter, async (req, res, next) => {
     try {
-      const rows = await catService.getLeaderboard();
+      const rows = await executeUseCaseWeb(getLeaderboard, {}, req);
       res.json(rows);
     } catch (err) {
-      console.error("Error fetching leaderboard:", err);
-      res.status(500).json({ error: "Failed to fetch leaderboard" });
+      next(err);
     }
   });
 
-  // Поиск котов по характеристикам
-  router.get("/similar", async (req, res) => {
+  // GET /similar — filter cats by feature
+  router.get("/similar", async (req, res, next) => {
     try {
       const { feature, value } = req.query;
 
@@ -39,49 +62,55 @@ export function setupCatRoutes(
         return res.status(400).json({ error: "Missing required parameters" });
       }
 
-      const cats = await catService.getCatsByFeature(feature, value);
+      const cats = await executeUseCaseWeb(
+        getCatsByFeature,
+        {
+          feature,
+          value,
+        },
+        req
+      );
       res.json(cats);
     } catch (err) {
-      console.error("Error fetching similar cats:", err);
-      res.status(500).json({ error: "Failed to fetch similar cats" });
+      next(err);
     }
   });
 
-  // Получение случайных изображений
-  router.get("/random-images", async (req, res) => {
+  // GET /random-images — random images
+  router.get("/random-images", async (req, res, next) => {
     try {
       const count = parseInt(req.query.count) || 3;
-      const images = await catService.getRandomImages(count);
+      const images = await executeUseCaseWeb(getRandomImages, { count }, req);
       res.json(images);
     } catch (err) {
-      console.error("Error fetching random images:", err);
-      res.status(500).json({ error: "Failed to fetch random images" });
+      next(err);
     }
   });
 
-  // Удаление лайка
-  router.delete("/like", requireAuth, async (req, res) => {
+  // DELETE /like — remove like
+  router.delete("/like", requireAuth, async (req, res, next) => {
     try {
       const { catId } = req.body;
       const userId = req.session.user.id.toString();
 
       if (!catId) {
-        return res.status(400).json({ error: "ID кота не указан" });
+        return res.status(400).json({ error: "catId is required" });
       }
 
-      console.log(`Попытка удалить лайк: catId=${catId}, userId=${userId}`);
+      logger.debug({ catId, userId }, "Attempt to remove like");
 
-      const result = await catService.removeLikeFromCat(catId, userId);
+      const result = await executeUseCaseWeb(unlikeCat, { catId, userId }, req);
 
       if (result === false) {
-        return res.status(404).json({ error: "Лайк не найден или уже удален" });
+        return res
+          .status(404)
+          .json({ error: "Like not found or already removed" });
       }
 
-      console.log("Лайк успешно удален");
-      res.json({ success: true });
+      logger.info({ catId, userId }, "Like removed successfully");
+      res.json({ ok: true });
     } catch (err) {
-      console.error("Ошибка удаления лайка:", err);
-      res.status(500).json({ error: "Не удалось удалить лайк" });
+      next(err);
     }
   });
 }

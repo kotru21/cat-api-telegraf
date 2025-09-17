@@ -1,7 +1,14 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import config from "../../config/index.js";
-import catService from "../../services/CatService.js";
+import {
+  getRandomCat,
+  getLikesForCat,
+  getUserLikes,
+  getLeaderboard,
+  getCatDetails,
+} from "../../application/use-cases/index.js";
+import logger from "../../utils/logger.js";
 
 export class MenuCommand extends BaseCommand {
   constructor() {
@@ -28,9 +35,13 @@ export class MenuCommand extends BaseCommand {
       await ctx.reply("Получаю случайного кота...");
       // Имитируем обработку команды /fact
       try {
-        const catData = await catService.getRandomCat();
+        const catData = await this.executeUseCase(getRandomCat, {}, ctx);
         const breed = catData.breeds[0];
-        const [likes] = await catService.getLikesForCat(catData.id);
+        const [likes] = await this.executeUseCase(
+          getLikesForCat,
+          { catId: catData.id },
+          ctx
+        );
 
         await ctx.replyWithPhoto(
           { url: catData.url },
@@ -49,7 +60,7 @@ export class MenuCommand extends BaseCommand {
           }
         );
       } catch (error) {
-        console.error("Ошибка при получении факта:", error);
+        logger.error({ err: error }, "MenuCommand: failed to fetch random cat");
         await ctx.reply(
           "Извините, произошла ошибка при получении информации о породе кошки"
         );
@@ -61,7 +72,11 @@ export class MenuCommand extends BaseCommand {
       // Прямой вызов кода обработки команды
       try {
         const userId = ctx.from.id.toString();
-        const userLikes = await catService.getUserLikes(userId);
+        const userLikes = await this.executeUseCase(
+          getUserLikes,
+          { userId },
+          ctx
+        );
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.reply("Вы еще не поставили ни одного лайка 😿");
@@ -71,7 +86,7 @@ export class MenuCommand extends BaseCommand {
         // Отображаем первую запись с фото и кнопками навигации
         await this.sendLikeInfo(ctx, userLikes, 0);
       } catch (error) {
-        console.error("Ошибка при получении лайков:", error);
+        logger.error({ err: error }, "MenuCommand: failed to fetch user likes");
         await ctx.reply(
           "Извините, произошла ошибка при получении списка ваших лайков"
         );
@@ -82,7 +97,11 @@ export class MenuCommand extends BaseCommand {
       await ctx.reply("Загружаю рейтинг...");
       // Прямой вызов кода обработки команды
       try {
-        const topCats = await catService.getLeaderboard(10);
+        const topCats = await this.executeUseCase(
+          getLeaderboard,
+          { limit: 10 },
+          ctx
+        );
 
         if (!topCats || topCats.length === 0) {
           await ctx.reply("Пока нет популярных пород в рейтинге 😿");
@@ -123,7 +142,10 @@ export class MenuCommand extends BaseCommand {
           }
         );
       } catch (error) {
-        console.error("Ошибка при получении топа:", error);
+        logger.error(
+          { err: error },
+          "MenuCommand: failed to fetch leaderboard"
+        );
         await ctx.reply(
           "Извините, произошла ошибка при получении рейтинга популярных пород"
         );
@@ -149,7 +171,11 @@ export class MenuCommand extends BaseCommand {
     this.composer.action(/^like_nav:(prev|next):(\d+)$/, async (ctx) => {
       try {
         const userId = ctx.from.id.toString();
-        const userLikes = await catService.getUserLikes(userId);
+        const userLikes = await this.executeUseCase(
+          getUserLikes,
+          { userId },
+          ctx
+        );
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.answerCbQuery("Список лайков пуст");
@@ -169,7 +195,7 @@ export class MenuCommand extends BaseCommand {
         await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
         await ctx.answerCbQuery();
       } catch (error) {
-        console.error("Ошибка при навигации по лайкам:", error);
+        logger.error({ err: error }, "MenuCommand: likes navigation error");
         await ctx.answerCbQuery("Произошла ошибка");
       }
     });
@@ -177,7 +203,11 @@ export class MenuCommand extends BaseCommand {
     this.composer.action(/^like_details:(.+)$/, async (ctx) => {
       try {
         const catId = ctx.match[1];
-        const catDetails = await catService.getCatById(catId);
+        const catDetails = await this.executeUseCase(
+          getCatDetails,
+          { id: catId },
+          ctx
+        );
 
         if (!catDetails) {
           await ctx.answerCbQuery("Информация о коте не найдена");
@@ -208,7 +238,10 @@ export class MenuCommand extends BaseCommand {
 
         await ctx.answerCbQuery("Подробная информация о коте");
       } catch (error) {
-        console.error("Ошибка при получении подробностей о коте:", error);
+        logger.error(
+          { err: error },
+          "MenuCommand: failed to fetch cat details"
+        );
         await ctx.answerCbQuery("Произошла ошибка при получении информации");
       }
     });

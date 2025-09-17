@@ -1,21 +1,15 @@
-import { CatApiClient } from "../api/CatApiClient.js";
-import catRepository from "../database/CatRepository.js";
-import config from "../config/index.js";
-
 export class CatInfoService {
-  constructor(
-    catApiClient = new CatApiClient(config.CAT_API_TOKEN),
-    repository = catRepository
-  ) {
+  // Объектная инъекция зависимостей (awilix PROXY)
+  constructor({ catApiClient, catRepository }) {
     this.catApiClient = catApiClient;
-    this.repository = repository;
+    this.repository = catRepository;
   }
 
   async getRandomCat(retryCount = 0) {
     try {
       const catDetails = await this.catApiClient.getRandomCatWithBreed();
 
-      // Проверка наличия данных о породе
+      // Проверяем наличие данных о породе
       if (!catDetails?.breeds?.[0]) {
         throw new Error("Нет данных о породе кота");
       }
@@ -42,7 +36,6 @@ export class CatInfoService {
       await this.repository.saveCatDetails(catData);
       return catData;
     } catch (error) {
-      console.error("Ошибка получения данных:", error);
       if (retryCount < 3) {
         return this.getRandomCat(retryCount + 1);
       }
@@ -59,7 +52,7 @@ export class CatInfoService {
       throw new Error("Feature and value are required");
     }
 
-    // проверка, что feature - допустимое поле
+    // Проверяем, что feature — допустимое поле
     const allowedFeatures = [
       "origin",
       "temperament",
@@ -79,5 +72,3 @@ export class CatInfoService {
     return this.repository.getRandomImages(count);
   }
 }
-
-export default new CatInfoService();

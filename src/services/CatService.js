@@ -1,9 +1,6 @@
-import catInfoService from "./CatInfoService.js";
-import likeService from "./LikeService.js";
-import leaderboardService from "./LeaderboardService.js";
-
 export class CatService {
-  constructor() {
+  // объектная инъекция через awilix PROXY
+  constructor({ catInfoService, likeService, leaderboardService }) {
     this.catInfoService = catInfoService;
     this.likeService = likeService;
     this.leaderboardService = leaderboardService;
@@ -49,5 +46,3 @@ export class CatService {
     return this.catInfoService.getRandomImages(count);
   }
 }
-
-export default new CatService();

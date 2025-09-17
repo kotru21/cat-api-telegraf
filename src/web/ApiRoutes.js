@@ -5,40 +5,41 @@ import { setupCatRoutes } from "./routes/catRoutes.js";
 import { setupUserRoutes } from "./routes/userRoutes.js";
 import { setupAuthRoutes } from "./routes/authRoutes.js";
 import { setupDebugRoutes } from "./routes/debugRoutes.js";
-import defaultCatService from "../services/CatService.js";
+import { createAppContext } from "../application/context.js";
 
 export function setupApiRoutes(app, dependencies = {}) {
-  const { catService: catServiceInstance = defaultCatService } = dependencies;
+  const { catService: overrideCatService } = dependencies;
+  const appCtx = createAppContext({ catService: overrideCatService });
 
   const router = express.Router();
 
-  // Создаем лимитеры запросов
+  // Request rate limiters
   const { apiLimiter, leaderboardLimiter } = createRateLimiters();
 
-  // Применяем базовый лимитер ко всем маршрутам API
+  // Global API limiter
   router.use(apiLimiter);
 
-  // Настраиваем middleware аутентификации
+  // Auth middleware
   const { requireAuth } = setupAuthMiddleware();
 
-  // Настраиваем маршруты по категориям
+  // Category routes
   setupCatRoutes(router, {
-    catService: catServiceInstance,
+    catService: appCtx.catService,
     requireAuth,
     leaderboardLimiter,
   });
 
   setupUserRoutes(router, {
-    catService: catServiceInstance,
+    catService: appCtx.catService,
     requireAuth,
   });
 
   setupAuthRoutes(router, {
-    catService: catServiceInstance,
+    catService: appCtx.catService,
   });
 
   setupDebugRoutes(router);
 
-  // Подключаем роутер к приложению
+  // Mount router at /api
   app.use("/api", router);
 }

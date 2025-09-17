@@ -1,6 +1,10 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
-import catService from "../../services/CatService.js";
+import {
+  getRandomCat,
+  getLikesForCat,
+} from "../../application/use-cases/index.js";
+import logger from "../../utils/logger.js";
 
 export class FactCommand extends BaseCommand {
   constructor() {
@@ -11,9 +15,13 @@ export class FactCommand extends BaseCommand {
   register() {
     this.composer.command(this.name, async (ctx) => {
       try {
-        const catData = await catService.getRandomCat();
+        const catData = await this.executeUseCase(getRandomCat, {}, ctx);
         const breed = catData.breeds[0];
-        const [likes] = await catService.getLikesForCat(catData.id);
+        const [likes] = await this.executeUseCase(
+          getLikesForCat,
+          { catId: catData.id },
+          ctx
+        );
 
         await ctx.replyWithPhoto(
           { url: catData.url },
@@ -28,7 +36,10 @@ export class FactCommand extends BaseCommand {
           }
         );
       } catch (error) {
-        console.error("Ошибка при получении факта:", error);
+        logger.error(
+          { err: error, userId: ctx.from?.id },
+          "Failed to fetch random cat fact"
+        );
         await ctx.reply(
           "Извините, произошла ошибка при получении информации о породе кошки"
         );

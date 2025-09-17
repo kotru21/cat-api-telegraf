@@ -42,13 +42,21 @@ export class AuthController {
     const isTimeValid =
       Date.now() / 1000 - parseInt(otherData.auth_date) <= 86400;
 
-    // Для отладки
-    console.log("Received data:", data);
-    console.log("Filtered data:", filteredData);
-    console.log("Data check string:", dataCheckString);
-    console.log("Computed HMAC:", hmac);
-    console.log("Received Hash:", hash);
-    console.log("Hash valid:", isHashValid);
+    // Детальные логи только в development
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log("Received data:", data);
+      // eslint-disable-next-line no-console
+      console.log("Filtered data:", filteredData);
+      // eslint-disable-next-line no-console
+      console.log("Data check string:", dataCheckString);
+      // eslint-disable-next-line no-console
+      console.log("Computed HMAC:", hmac);
+      // eslint-disable-next-line no-console
+      console.log("Received Hash:", hash);
+      // eslint-disable-next-line no-console
+      console.log("Hash valid:", isHashValid);
+    }
 
     return {
       isValid: isHashValid && isTimeValid,
@@ -87,6 +95,7 @@ export class AuthController {
 
       req.session.save((err) => {
         if (err) {
+          // eslint-disable-next-line no-console
           console.error("Ошибка сохранения сессии:", err);
           return res.redirect("/login?error=session_error");
         }
@@ -94,6 +103,7 @@ export class AuthController {
         res.redirect("/profile");
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Ошибка авторизации через Telegram:", error);
       res.redirect("/login?error=auth_failed");
     }
@@ -130,6 +140,7 @@ export class AuthController {
 
       req.session.save((err) => {
         if (err) {
+          // eslint-disable-next-line no-console
           console.error("Ошибка сохранения сессии:", err);
           return res.status(500).json({ error: "session_error" });
         }
@@ -137,6 +148,7 @@ export class AuthController {
         res.status(200).json({ success: true, redirect: "/profile" });
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Ошибка авторизации через Telegram:", error);
       res.status(500).json({ error: "auth_failed" });
     }

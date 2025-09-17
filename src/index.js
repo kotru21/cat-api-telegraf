@@ -6,63 +6,94 @@ import menuCommand from "./bot/commands/MenuCommand.js";
 import myLikesCommand from "./bot/commands/MyLikesCommand.js";
 import topCommand from "./bot/commands/TopCommand.js";
 import likeAction from "./bot/actions/LikeAction.js";
-import { likesEvents } from "./database/LikesRepository.js";
+import { buildContainer } from "./di/container.js";
+import { setAppContainer } from "./application/context.js";
 
 import { BotService } from "./bot/BotService.js";
 import { WebServer } from "./web/WebServer.js";
-import { DatabaseService } from "./database/DatabaseService.js";
+import logger from "./utils/logger.js";
+import getPrisma from "./database/prisma/PrismaClient.js";
+
+// Process diagnostics
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "Uncaught exception");
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  logger.fatal({ err: reason }, "Unhandled promise rejection");
+  process.exit(1);
+});
+process.on("exit", (code) => {
+  logger.info({ code }, "Process exit");
+});
 
 class Application {
   constructor() {
-    this.dbService = new DatabaseService();
-    this.botService = new BotService(config, [
-      factCommand,
-      menuCommand,
-      myLikesCommand,
-      topCommand,
-      likeAction,
-    ]);
+    this.config = config;
+    this.container = buildContainer();
+    // Устанавливаем контейнер приложения глобально для use-cases/web
+    setAppContainer(this.container);
+    this.dbService = null; // Prisma is initialized lazily via getPrisma
+    this.botService = new BotService(
+      this.config,
+      [factCommand, menuCommand, myLikesCommand, topCommand, likeAction],
+      this.container
+    );
     this.webServer = null;
 
-    if (config.WebServer) {
-      this.webServer = new WebServer(config, { likesEvents });
+    if (this.config.WEB_ENABLED !== false) {
+      const catService = this.container.resolve("catService");
+      this.webServer = new WebServer(this.config, { catService });
+    } else {
+      logger.info(
+        "Web server is disabled by configuration (WEB_ENABLED=false)"
+      );
     }
   }
 
   async initialize() {
     try {
-      // Инициализация базы данных
-      await this.dbService.initialize();
-
-      // Инициализация веб-сервера если включено в конфиге
+      // Start web server if enabled
       if (this.webServer) {
-        console.log("Запуск веб-сервера...");
+        logger.info("Starting web server...");
         this.webServer.initialize();
         await this.webServer.start();
       }
 
-      // Запуск бота
-      await this.botService.launch();
+      // Launch bot (optional)
+      if (this.config.BOT_ENABLED !== false) {
+        await this.botService.launch();
+      } else {
+        logger.info("Bot is disabled by configuration (BOT_ENABLED=false)");
+      }
 
       this.setupShutdownHandlers();
 
       return true;
     } catch (error) {
-      console.error("Ошибка запуска приложения:", error);
+      logger.error({ err: error }, "Application startup error");
       return false;
     }
   }
 
   setupShutdownHandlers() {
     const shutdown = async () => {
-      console.log("Выключение приложения...");
+      logger.info("Shutting down application...");
       this.botService.stop();
 
       if (this.webServer) {
         await this.webServer.close();
       }
-
-      await this.dbService.close();
+      // Gracefully disconnect Prisma singleton
+      try {
+        const prisma = getPrisma();
+        if (prisma && prisma.$disconnect) {
+          await prisma.$disconnect();
+          logger.info("Prisma client disconnected");
+        }
+      } catch (e) {
+        logger.warn({ err: e }, "Failed to disconnect Prisma client");
+      }
       process.exit(0);
     };
 
@@ -74,6 +105,6 @@ class Application {
 // Запуск приложения
 const app = new Application();
 app.initialize().catch((error) => {
-  console.error("Критическая ошибка при запуске:", error);
+  logger.error({ err: error }, "Critical startup error");
   process.exit(1);
 });

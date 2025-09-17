@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model msg {
+  id              String   @id
+  count           Int      @default(0)
+  breed_name      String?
+  image_url       String?
+  description     String?
+  wikipedia_url   String?
+  breed_id        String?
+  temperament     String?
+  origin          String?
+  life_span       String?
+  weight_imperial String?
+  weight_metric   String?
+  created_at      DateTime @default(now())
+
+  // Relations
+  user_likes user_likes[]
+
+  @@index([count], map: "idx_msg_count")
+}
+
+model user_likes {
+  user_id    String
+  cat_id     String
+  created_at DateTime @default(now())
+
+  // Relations
+  cat msg @relation(fields: [cat_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  // Composite primary key
+  @@id([user_id, cat_id])
+  @@index([cat_id], map: "idx_ul_cat")
+  @@index([user_id], map: "idx_ul_user")
+}

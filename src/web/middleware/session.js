@@ -1,18 +1,47 @@
 import session from "express-session";
-import crypto from "crypto";
+import { createClient as createRedisClient } from "redis";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const connectRedis = require("connect-redis");
 
 export function setupSession(app, config) {
+  // Production requires explicit secret
+  if (process.env.NODE_ENV === "production" && !config.SESSION_SECRET) {
+    throw new Error(
+      "SESSION_SECRET is required in production. Please set it via environment variable."
+    );
+  }
+  const isProd = process.env.NODE_ENV === "production";
+
+  let store;
+  if (isProd) {
+    if (!process.env.REDIS_URL && !config.REDIS_URL) {
+      throw new Error("REDIS_URL is required in production for session store.");
+    }
+    const redisClient = createRedisClient({
+      url: config.REDIS_URL || process.env.REDIS_URL,
+      socket: {
+        reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
+      },
+    });
+    // Lazy connect; errors are handled by redis client
+    redisClient.connect().catch(() => {});
+    const RedisStore = connectRedis(session);
+    store = new RedisStore({ client: redisClient, prefix: "sess:" });
+  }
+
   app.use(
     session({
-      secret: config.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
+      secret: config.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: isProd,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
         httpOnly: true,
         sameSite: "lax",
       },
+      store,
     })
   );
 }

@@ -1,6 +1,7 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
-import catService from "../../services/CatService.js";
+import { getLeaderboard } from "../../application/use-cases/index.js";
+import logger from "../../utils/logger.js";
 
 export class TopCommand extends BaseCommand {
   constructor() {
@@ -11,7 +12,8 @@ export class TopCommand extends BaseCommand {
   register() {
     this.composer.command(this.name, async (ctx) => {
       try {
-        const topCats = await catService.getLeaderboard(10); // получаем топ-10 пород
+        const appCtx = this.createAppContext();
+        const topCats = await getLeaderboard(appCtx, { limit: 10 }); // получаем топ-10 пород
 
         if (!topCats || topCats.length === 0) {
           await ctx.reply("Пока нет популярных пород в рейтинге 😿");
@@ -53,7 +55,10 @@ export class TopCommand extends BaseCommand {
           }
         );
       } catch (error) {
-        console.error("Ошибка при получении топа:", error);
+        logger.error(
+          { err: error, userId: ctx.from?.id },
+          "TopCommand: failed to fetch leaderboard"
+        );
         await ctx.reply(
           "Извините, произошла ошибка при получении рейтинга популярных пород"
         );

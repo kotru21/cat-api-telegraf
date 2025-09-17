@@ -1,10 +1,30 @@
 import { Composer, Markup } from "telegraf";
-import catService from "../../services/CatService.js";
+import { likeCat, getLikesForCat } from "../../application/use-cases/index.js";
+import logger from "../../utils/logger.js";
 
 class LikeAction {
   constructor() {
     this.composer = new Composer();
+    this.container = null;
+  }
+
+  setContainer(container) {
+    this.container = container;
     this.register();
+  }
+
+  createAppContext() {
+    if (!this.container) {
+      throw new Error(
+        "LikeAction: container is not set. Call setContainer() first."
+      );
+    }
+    return {
+      catService: this.container.resolve("catService"),
+      likeService: this.container.resolve("likeService"),
+      leaderboardService: this.container.resolve("leaderboardService"),
+      catInfoService: this.container.resolve("catInfoService"),
+    };
   }
 
   register() {
@@ -14,8 +34,9 @@ class LikeAction {
         const userId = ctx.from.id.toString();
         const message = ctx.update.callback_query.message;
 
-        // лайк с проверкой пользователя
-        const likeAdded = await catService.addLikeToCat(catId, userId);
+        const appCtx = this.createAppContext();
+        // like via use-case
+        const likeAdded = await likeCat(appCtx, { catId, userId });
 
         if (!likeAdded) {
           // Если лайк уже был поставлен этим пользователем
@@ -23,7 +44,7 @@ class LikeAction {
           return;
         }
 
-        const [likes] = await catService.getLikesForCat(catId);
+        const [likes] = await getLikesForCat(appCtx, { catId });
 
         // Обновляем клавиатуру с новым числом лайков
         await ctx.editMessageReplyMarkup({
@@ -40,7 +61,10 @@ class LikeAction {
 
         await ctx.answerCbQuery("Лайк засчитан!");
       } catch (error) {
-        console.error("Ошибка при обработке лайка:", error);
+        logger.error(
+          { err: error, userId: ctx.from?.id },
+          "LikeAction: error handling like"
+        );
         await ctx.answerCbQuery("Произошла ошибка");
       }
     });

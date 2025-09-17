@@ -1,184 +1,129 @@
-import database from "./Database.js";
 import { LikesRepositoryInterface } from "./interfaces/LikesRepositoryInterface.js";
-
-// Добавим систему событий для оповещения об изменениях
-import { EventEmitter } from "events";
-
-export const likesEvents = new EventEmitter();
+import logger from "../utils/logger.js";
+import getPrisma from "./prisma/PrismaClient.js";
+import AppEvents, { EVENTS } from "../application/events.js";
 
 export class LikesRepository extends LikesRepositoryInterface {
-  constructor() {
+  constructor({ prisma = getPrisma() } = {}) {
     super();
-    this.dbPromise = database.get();
+    this.prisma = prisma;
   }
 
-  // Проверка, ставил ли пользователь лайк данному коту
   async hasUserLiked(userId, catId) {
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT 1 FROM user_likes WHERE user_id = ? AND cat_id = ?`,
-        [userId, catId],
-        (err, row) => {
-          if (err) {
-            console.error("Ошибка при проверке лайка:", err);
-            reject(err);
-          } else {
-            resolve(!!row); // true если запись найдена, false если нет
-          }
-        }
-      );
-    });
+    try {
+      const liked = await this.prisma.user_likes.findFirst({
+        where: { user_id: userId, cat_id: catId },
+        select: { user_id: true },
+      });
+      return !!liked;
+    } catch (err) {
+      logger.error({ err }, "Error checking like existence (Prisma)");
+      throw err;
+    }
   }
 
-  // Добавление записи о лайке пользователя и увеличение счетчика
   async addLike(catId, userId) {
-    const db = await this.dbPromise;
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Пытаемся вставить лайк; составной PK не даст дубликат
+        await tx.user_likes.create({
+          data: { user_id: userId, cat_id: catId },
+        });
 
-    // Проверяем, ставил ли уже пользователь лайк
-    const hasLiked = await this.hasUserLiked(userId, catId);
-    if (hasLiked) {
-      return false; // Лайк уже поставлен
-    }
+        // Увеличиваем счётчик у кота; если записи нет, ничего не делаем
+        await tx.msg.updateMany({
+          where: { id: catId },
+          data: { count: { increment: 1 } },
+        });
 
-    return new Promise((resolve, reject) => {
-      // Начинаем транзакцию для гарантии целостности данных
-      db.serialize(() => {
-        db.run("BEGIN TRANSACTION");
-
-        // Добавляем запись о лайке пользователя
-        db.run(
-          `INSERT INTO user_likes (user_id, cat_id) VALUES (?, ?)`,
-          [userId, catId],
-          (err) => {
-            if (err) {
-              db.run("ROLLBACK");
-              console.error("Ошибка добавления лайка пользователя:", err);
-              reject(err);
-              return;
-            }
-
-            // Увеличиваем счетчик лайков для кота
-            db.run(
-              `UPDATE msg SET count = count + 1 WHERE id = ?`,
-              [catId],
-              (err) => {
-                if (err) {
-                  db.run("ROLLBACK");
-                  console.error("Ошибка обновления счетчика лайков:", err);
-                  reject(err);
-                  return;
-                }
-
-                db.run("COMMIT");
-
-                // Генерируем событие обновления рейтинга
-                likesEvents.emit("leaderboardChanged");
-
-                resolve(true); // Лайк успешно добавлен
-              }
-            );
-          }
-        );
+        return true;
       });
-    });
+
+      // Уведомим подписчиков о смене лидерборда
+      AppEvents.emit(EVENTS.LEADERBOARD_CHANGED);
+      return result;
+    } catch (err) {
+      // Уникальный дубликат (лайк уже есть)
+      if (err && err.code === "P2002") {
+        return false;
+      }
+      logger.error({ err }, "Failed to add like (Prisma)");
+      throw err;
+    }
   }
 
-  // Удаление лайка
   async removeLike(catId, userId) {
-    const db = await this.dbPromise;
-
-    console.log(
-      `LikesRepository: removeLike вызван с catId=${catId}, userId=${userId}`
+    logger.debug(
+      { catId, userId },
+      "LikesRepository (Prisma): removeLike called"
     );
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const deleted = await tx.user_likes.deleteMany({
+          where: { user_id: userId, cat_id: catId },
+        });
 
-    // Проверяем, ставил ли пользователь лайк
-    const hasLiked = await this.hasUserLiked(userId, catId);
-    console.log(
-      `LikesRepository: пользователь ${userId} ставил лайк коту ${catId}: ${hasLiked}`
-    );
+        if (deleted.count === 0) {
+          return false;
+        }
 
-    if (!hasLiked) {
-      console.log("LikesRepository: лайк не найден, возвращаем false");
-      return false; // Лайк не был поставлен
-    }
-
-    return new Promise((resolve, reject) => {
-      // Начинаем транзакцию для гарантии целостности данных
-      db.serialize(() => {
-        db.run("BEGIN TRANSACTION");
-
-        // Удаляем запись о лайке пользователя
-        db.run(
-          `DELETE FROM user_likes WHERE user_id = ? AND cat_id = ?`,
-          [userId, catId],
-          (err) => {
-            if (err) {
-              db.run("ROLLBACK");
-              console.error("Ошибка удаления лайка пользователя:", err);
-              reject(err);
-              return;
-            }
-
-            // Уменьшаем счетчик лайков для кота
-            db.run(
-              `UPDATE msg SET count = count - 1 WHERE id = ? AND count > 0`,
-              [catId],
-              (err) => {
-                if (err) {
-                  db.run("ROLLBACK");
-                  console.error("Ошибка обновления счетчика лайков:", err);
-                  reject(err);
-                  return;
-                }
-
-                db.run("COMMIT");
-                console.log(
-                  `LikesRepository: лайк успешно удален для кота ${catId}`
-                );
-
-                // Генерируем событие обновления рейтинга
-                likesEvents.emit("leaderboardChanged");
-
-                resolve(true); // Лайк успешно удален
-              }
-            );
-          }
-        );
+        await tx.msg.updateMany({
+          where: { id: catId, count: { gt: 0 } },
+          data: { count: { decrement: 1 } },
+        });
+        return true;
       });
-    });
+
+      if (result) {
+        AppEvents.emit(EVENTS.LEADERBOARD_CHANGED);
+      }
+      return result;
+    } catch (err) {
+      logger.error({ err }, "Failed to remove like (Prisma)");
+      throw err;
+    }
   }
 
   async getLikes(catId) {
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      db.all(`SELECT count FROM msg WHERE id = ?`, [catId], (err, rows) =>
-        err ? reject(err) : resolve(rows)
-      );
-    });
+    try {
+      const row = await this.prisma.msg.findUnique({
+        where: { id: catId },
+        select: { count: true },
+      });
+      return row ? [{ count: row.count || 0 }] : [];
+    } catch (err) {
+      logger.error({ err }, "Error fetching likes for cat (Prisma)");
+      throw err;
+    }
   }
 
   async getUserLikes(userId) {
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT ul.cat_id, m.breed_name, m.id, m.image_url, m.count as likes_count
-         FROM user_likes ul
-         JOIN msg m ON ul.cat_id = m.id
-         WHERE ul.user_id = ?
-         ORDER BY ul.created_at DESC`,
-        [userId],
-        (err, rows) => {
-          if (err) {
-            console.error("Ошибка при получении лайков пользователя:", err);
-            reject(err);
-          } else {
-            resolve(rows || []);
-          }
-        }
-      );
-    });
+    try {
+      const rows = await this.prisma.user_likes.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: "desc" },
+        include: {
+          cat: {
+            select: {
+              id: true,
+              breed_name: true,
+              image_url: true,
+              count: true,
+            },
+          },
+        },
+      });
+      // Приводим к прежней форме данных
+      return rows.map((r) => ({
+        cat_id: r.cat_id,
+        id: r.cat?.id,
+        breed_name: r.cat?.breed_name,
+        image_url: r.cat?.image_url,
+        likes_count: r.cat?.count ?? 0,
+      }));
+    } catch (err) {
+      logger.error({ err }, "Error fetching user likes (Prisma)");
+      throw err;
+    }
   }
 }
-
-export default new LikesRepository();

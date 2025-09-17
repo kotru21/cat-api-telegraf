@@ -1,8 +1,9 @@
-import likesRepository from "../database/LikesRepository.js";
+import logger from "../utils/logger.js";
 
 export class LikeService {
-  constructor(repository = likesRepository) {
-    this.repository = repository;
+  // объектная инъекция через awilix PROXY
+  constructor({ likesRepository }) {
+    this.repository = likesRepository;
   }
 
   async getLikesForCat(catId) {
@@ -15,22 +16,18 @@ export class LikeService {
 
   async removeLikeFromCat(catId, userId) {
     try {
-      console.log(
-        `LikeService: removeLikeFromCat вызван с catId=${catId}, userId=${userId}`
-      );
+      logger.debug({ catId, userId }, "LikeService: removeLikeFromCat called");
       // Проверим, что передаваемые параметры корректны
       if (!catId || !userId) {
-        console.error(
-          "LikeService: removeLikeFromCat получил неверные параметры"
-        );
+        logger.warn("LikeService: removeLikeFromCat received invalid params");
         return false;
       }
 
       const result = await this.repository.removeLike(catId, userId);
-      console.log(`LikeService: результат удаления лайка: ${result}`);
+      logger.debug({ result }, "LikeService: unlike result");
       return result;
     } catch (error) {
-      console.error("LikeService: ошибка при удалении лайка:", error);
+      logger.error({ err: error }, "LikeService: error while removing like");
       throw error;
     }
   }
@@ -44,10 +41,8 @@ export class LikeService {
       const userLikes = await this.repository.getUserLikes(userId);
       return userLikes ? userLikes.length : 0;
     } catch (error) {
-      console.error("Ошибка при получении статистики лайков:", error);
+      logger.error({ err: error }, "Error getting likes count for user");
       return 0;
     }
   }
 }
-
-export default new LikeService();

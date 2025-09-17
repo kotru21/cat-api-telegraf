@@ -73,12 +73,7 @@ export function setupSecurity(app) {
 
   app.use(helmet(helmetOpts));
 
-  app.use(
-    cors({
-      origin: true,
-      credentials: true,
-    })
-  );
+  app.use(cors({ origin: true, credentials: true }));
 
   app.use(express.json());
 }

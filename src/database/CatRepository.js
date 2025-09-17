@@ -1,58 +1,58 @@
-import database from "./Database.js";
 import { CatRepositoryInterface } from "./interfaces/CatRepositoryInterface.js";
-import { SearchStrategyFactory } from "./strategies/SearchStrategyFactory.js";
+import logger from "../utils/logger.js";
+import getPrisma from "./prisma/PrismaClient.js";
 
 export class CatRepository extends CatRepositoryInterface {
-  constructor() {
+  constructor({ prisma = getPrisma() } = {}) {
     super();
-    this.dbPromise = database.get();
+    this.prisma = prisma;
   }
 
   async saveCatDetails(catData) {
     if (!catData?.breeds?.[0]) {
-      throw new Error("Нет данных о породе кота");
+      throw new Error("No breed data provided for the cat");
     }
 
     const breed = catData.breeds[0];
-    const db = await this.dbPromise;
 
-    return new Promise((resolve, reject) => {
-      db.run(
-        `INSERT OR REPLACE INTO msg (
-          id, breed_name, image_url, description, wikipedia_url, count,
-          breed_id, temperament, origin, life_span, 
-          weight_imperial, weight_metric
-        ) VALUES (?, ?, ?, ?, ?, COALESCE((SELECT count FROM msg WHERE id = ?), 0),
-          ?, ?, ?, ?, ?, ?)`,
-
-        [
-          catData.id,
-          breed.name,
-          catData.url,
-          breed.description,
-          breed.wikipedia_url,
-          catData.id,
-          breed.id,
-          breed.temperament,
-          breed.origin,
-          breed.life_span,
-          breed.weight?.imperial,
-          breed.weight?.metric,
-        ],
-        (err) => {
-          if (err) {
-            console.error("Ошибка сохранения данных:", err);
-            reject(err);
-          } else {
-            resolve();
-          }
-        }
-      );
-    });
+    try {
+      await this.prisma.msg.upsert({
+        where: { id: catData.id },
+        create: {
+          id: catData.id,
+          breed_name: breed.name,
+          image_url: catData.url,
+          description: breed.description,
+          wikipedia_url: breed.wikipedia_url,
+          breed_id: breed.id,
+          temperament: breed.temperament,
+          origin: breed.origin,
+          life_span: breed.life_span,
+          weight_imperial: breed.weight?.imperial,
+          weight_metric: breed.weight?.metric,
+          count: 0,
+        },
+        update: {
+          // Обновляет метаданные, count не трогает, чтобы сохранить существующие лайки
+          breed_name: breed.name,
+          image_url: catData.url,
+          description: breed.description,
+          wikipedia_url: breed.wikipedia_url,
+          breed_id: breed.id,
+          temperament: breed.temperament,
+          origin: breed.origin,
+          life_span: breed.life_span,
+          weight_imperial: breed.weight?.imperial,
+          weight_metric: breed.weight?.metric,
+        },
+      });
+    } catch (err) {
+      logger.error({ err }, "Error saving cat data (Prisma)");
+      throw err;
+    }
   }
 
   async getCatById(catId) {
-    // Валидация входного параметра
     if (
       !catId ||
       typeof catId !== "string" ||
@@ -60,45 +60,41 @@ export class CatRepository extends CatRepositoryInterface {
     ) {
       throw new Error("Invalid cat ID format");
     }
-
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      db.get(
-        `SELECT id, breed_name, image_url, description, wikipedia_url, count,
-                temperament, origin, life_span, weight_imperial, weight_metric
-         FROM msg 
-         WHERE id = ?`,
-        [catId],
-        (err, row) => {
-          if (err) {
-            console.error("Ошибка при получении данных кота:", err);
-            reject(err);
-          }
-          resolve(row);
-        }
-      );
-    });
+    try {
+      return await this.prisma.msg.findUnique({
+        where: { id: catId },
+        select: {
+          id: true,
+          breed_name: true,
+          image_url: true,
+          description: true,
+          wikipedia_url: true,
+          count: true,
+          temperament: true,
+          origin: true,
+          life_span: true,
+          weight_imperial: true,
+          weight_metric: true,
+        },
+      });
+    } catch (err) {
+      logger.error({ err }, "Error fetching cat by id (Prisma)");
+      throw err;
+    }
   }
 
   async getLeaderboard(limit = 10) {
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT id, count, breed_name, image_url
-         FROM msg 
-         WHERE count > 0
-         ORDER BY count DESC 
-         LIMIT ?`,
-        [limit],
-        (err, rows) => {
-          if (err) {
-            console.error("Ошибка при получении таблицы лидеров:", err);
-            reject(err);
-          }
-          resolve(rows);
-        }
-      );
-    });
+    try {
+      return await this.prisma.msg.findMany({
+        where: { count: { gt: 0 } },
+        orderBy: { count: "desc" },
+        take: limit,
+        select: { id: true, count: true, breed_name: true, image_url: true },
+      });
+    } catch (err) {
+      logger.error({ err }, "Error fetching leaderboard (Prisma)");
+      throw err;
+    }
   }
 
   async getCatsByFeature(feature, value) {
@@ -106,53 +102,165 @@ export class CatRepository extends CatRepositoryInterface {
       throw new Error("Feature and value are required");
     }
 
-    const db = await this.dbPromise;
-
-    // Используем фабрику для получения нужной стратегии
-    const searchStrategy = SearchStrategyFactory.createStrategy(feature);
-
-    // Получаем SQL-запрос от стратегии
-    const { query, params } = searchStrategy.createQuery(feature, value);
-
-    return new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
-        if (err) {
-          console.error(`Ошибка при поиске котов по ${feature}:`, err);
-          reject(err);
+    try {
+      // Попытка фильтрации на уровне БД для популярных полей
+      const where = (() => {
+        const v = String(value);
+        if (feature === "origin") {
+          // точное совпадение по origin
+          return { origin: v };
         }
+        if (feature === "temperament") {
+          // строка темперамента может содержать список через запятую — ищем подстроку
+          return { temperament: { contains: v } };
+        }
+        return null;
+      })();
 
-        // Применяем дополнительную фильтрацию, если это необходимо
-        const filteredRows = searchStrategy.filterResults(rows, feature, value);
+      if (where) {
+        const rows = await this.prisma.msg.findMany({
+          where,
+          select: {
+            id: true,
+            breed_name: true,
+            image_url: true,
+            description: true,
+            wikipedia_url: true,
+            count: true,
+            temperament: true,
+            origin: true,
+            life_span: true,
+            weight_imperial: true,
+            weight_metric: true,
+          },
+        });
+        logger.debug(
+          { feature, value, count: rows?.length || 0 },
+          "Cats found by feature (DB filter)"
+        );
+        return rows || [];
+      }
 
-        console.log(
-          `Найдено котов по ${feature}=${value}:`,
-          filteredRows?.length || 0
+      // Диапазонные поля: фильтрует ORM + JS-стратегия
+      const rangeFeatures = new Set([
+        "life_span",
+        "weight_imperial",
+        "weight_metric",
+      ]);
+      if (rangeFeatures.has(feature)) {
+        const whereAnd = [
+          { [feature]: { not: null } },
+          { [feature]: { not: "" } },
+          { [feature]: { contains: "-" } },
+        ];
+
+        const rows = await this.prisma.msg.findMany({
+          where: { AND: whereAnd },
+          select: {
+            id: true,
+            breed_name: true,
+            image_url: true,
+            description: true,
+            wikipedia_url: true,
+            count: true,
+            temperament: true,
+            origin: true,
+            life_span: true,
+            weight_imperial: true,
+            weight_metric: true,
+          },
+          orderBy: { count: "desc" },
+        });
+
+        const filtered = this.filterRangeResults(rows, feature, value);
+        logger.debug(
+          { feature, value, count: filtered?.length || 0 },
+          "Cats found by feature (ORM + JS range)"
+        );
+        return filtered || [];
+      }
+      // Остальные поля: не используются, но оставляем для совместимости
+      logger.debug({ feature, value }, "Feature not supported for filtering");
+      return [];
+    } catch (err) {
+      logger.error({ err, feature, value }, "Error searching cats by feature");
+      throw err;
+    }
+  }
+
+  /**
+   * Фильтрует результаты по диапазонным значениям (life_span, weight_*)
+   * @param {Array} rows - результаты из БД
+   * @param {string} feature - название поля
+   * @param {string|number} value - искомое значение
+   * @returns {Array} отфильтрованные результаты
+   */
+  filterRangeResults(rows, feature, value) {
+    if (!rows) return [];
+
+    const numValue = parseFloat(String(value).replace(",", "."));
+    if (isNaN(numValue)) return [];
+
+    return rows.filter((row) => {
+      try {
+        const rangeStr = (row[feature] ?? "").toString();
+        if (!rangeStr) return false;
+
+        // Парсинг диапазона (например "12 - 15" или "3 - 6")
+        const cleaned = rangeStr.replace(/[–—−]/g, "-"); // заменяем длинные тире на обычное
+        const match = cleaned.match(
+          /^\s*(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*$/
         );
 
-        resolve(filteredRows || []);
-      });
+        if (!match) return false;
+
+        const min = parseFloat(match[1]);
+        const max = parseFloat(match[2]);
+
+        if (isNaN(min) || isNaN(max)) return false;
+
+        return numValue >= min && numValue <= max;
+      } catch (error) {
+        logger.debug(
+          { err: error, row, feature, value },
+          "Range parsing error"
+        );
+        return false;
+      }
     });
   }
 
   async getRandomImages(count = 3) {
-    const db = await this.dbPromise;
-    return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT image_url FROM msg 
-         WHERE image_url IS NOT NULL 
-         ORDER BY RANDOM() 
-         LIMIT ?`,
-        [count],
-        (err, rows) => {
-          if (err) {
-            console.error("Ошибка при получении случайных изображений:", err);
-            reject(err);
-          }
-          resolve(rows || []);
-        }
+    try {
+      // Используем Prisma для случайной выборки
+      // Для SQLite используем orderBy: { id: "asc" } с skip случайного количества записей
+      // Это более эффективно чем RANDOM() для больших таблиц
+      const totalCount = await this.prisma.msg.count({
+        where: { image_url: { not: null } },
+      });
+
+      if (totalCount === 0) {
+        return [];
+      }
+
+      const randomOffset = Math.floor(
+        Math.random() * Math.max(1, totalCount - count)
       );
-    });
+
+      const rows = await this.prisma.msg.findMany({
+        where: {
+          image_url: { not: null },
+          image_url: { not: "" },
+        },
+        select: { image_url: true },
+        skip: randomOffset,
+        take: count,
+      });
+
+      return rows || [];
+    } catch (err) {
+      logger.error({ err }, "Error fetching random images (Prisma)");
+      throw err;
+    }
   }
 }
-
-export default new CatRepository();

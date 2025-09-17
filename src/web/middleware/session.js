@@ -22,16 +22,20 @@ export function setupSession(app, config) {
       config.REDIS_ALLOW_SELF_SIGNED ||
       process.env.REDIS_ALLOW_SELF_SIGNED === "true";
     const isRediss = redisUrl.startsWith("rediss://");
+    // Поведение redis@5: если URL rediss:// — TLS включается автоматически.
+    // Ошибка "tls socket option is set ... mismatch with protocol" возникает при одновременном указании rediss:// и несовместимых tls опций.
+    // Стратегия:
+    // 1. Если strict TLS (по умолчанию) — НЕ указывать socket.tls вообще.
+    // 2. Если разрешён self-signed — указываем socket.tls = { rejectUnauthorized:false }.
+    const socketOptions = {
+      reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
+    };
+    if (isRediss && allowSelfSigned) {
+      socketOptions.tls = { rejectUnauthorized: false };
+    }
     const redisClient = createRedisClient({
       url: redisUrl,
-      socket: {
-        reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
-        tls: isRediss
-          ? {
-              rejectUnauthorized: !allowSelfSigned,
-            }
-          : undefined,
-      },
+      socket: socketOptions,
     });
     // Lazy connect; errors are handled by redis client
     redisClient.connect().catch(() => {});

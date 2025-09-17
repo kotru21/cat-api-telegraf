@@ -29,35 +29,19 @@ export function setupSession(app, config) {
     // 2. Если разрешён self-signed — указываем socket.tls = { rejectUnauthorized:false }.
     const socketOptions = { reconnectStrategy: (r) => Math.min(r * 50, 2000) };
 
-    // Настраиваем Redis клиент в зависимости от типа URL и настроек
-    let clientConfig;
-
-    if (isRediss) {
-      // Для rediss:// используем URL напрямую, но добавляем TLS опции если нужно
-      if (allowSelfSigned) {
-        // Если разрешены самоподписанные сертификаты, используем redis:// с явным TLS
-        const redisHttpUrl = redisUrl.replace("rediss://", "redis://");
-        clientConfig = {
-          url: redisHttpUrl,
-          socket: {
-            ...socketOptions,
-            tls: { rejectUnauthorized: false },
-          },
-        };
-      } else {
-        // Стандартный rediss:// URL с дефолтными TLS настройками
-        clientConfig = {
-          url: redisUrl,
-          socket: socketOptions,
-        };
-      }
-    } else {
-      // Обычный redis:// URL без TLS
-      clientConfig = {
-        url: redisUrl,
-        socket: socketOptions,
-      };
+    // Если разрешены самоподписанные сертификаты, отключаем проверку TLS глобально
+    if (allowSelfSigned && isRediss) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      logger.warn(
+        "TLS certificate verification disabled globally for Redis connection. This should only be used temporarily."
+      );
     }
+
+    // Простая конфигурация без TLS опций в socket
+    const clientConfig = {
+      url: redisUrl,
+      socket: socketOptions,
+    };
 
     const redisClient = createRedisClient(clientConfig);
     // Lazy connect; errors are handled by redis client

@@ -29,16 +29,22 @@ export function setupSession(app, config) {
     // 2. Если разрешён self-signed — указываем socket.tls = { rejectUnauthorized:false }.
     const socketOptions = { reconnectStrategy: (r) => Math.min(r * 50, 2000) };
 
-    // Если это rediss:// URL и разрешены самоподписанные сертификаты
-    if (isRediss && allowSelfSigned) {
-      socketOptions.tls = {
-        rejectUnauthorized: false,
+    // Для rediss:// URL настраиваем TLS отдельно
+    let clientConfig = { url: redisUrl, socket: socketOptions };
+
+    if (isRediss) {
+      // Конвертируем rediss:// в redis:// и настраиваем TLS отдельно
+      const redisHttpUrl = redisUrl.replace("rediss://", "redis://");
+      clientConfig = {
+        url: redisHttpUrl,
+        socket: {
+          ...socketOptions,
+          tls: allowSelfSigned ? { rejectUnauthorized: false } : true,
+        },
       };
     }
-    const redisClient = createRedisClient({
-      url: redisUrl,
-      socket: socketOptions,
-    });
+
+    const redisClient = createRedisClient(clientConfig);
     // Lazy connect; errors are handled by redis client
     redisClient.connect().catch(() => {});
     // Логи Redis клиента

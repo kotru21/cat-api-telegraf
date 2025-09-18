@@ -43,11 +43,6 @@ function initStatsWebSocket({
         const updateCounter = () => {
           const uptimeData = formatUptime(startDate);
 
-          const compactEl = timeEl.querySelector(".uptime-compact");
-          if (compactEl) {
-            compactEl.textContent = uptimeData.formatted;
-          }
-
           const daysEl = document.getElementById("uptime-days");
           const hoursEl = document.getElementById("uptime-hours");
           const minutesEl = document.getElementById("uptime-minutes");

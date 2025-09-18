@@ -80,23 +80,5 @@ export function formatUptime(startDate) {
     hours: { value: hours, label: "ч." },
     minutes: { value: minutes, label: "мин." },
     seconds: { value: seconds, label: "сек." },
-    formatted: formatUptimeCompact(days, hours, minutes, seconds),
   };
-}
-
-function formatUptimeCompact(days, hours, minutes, seconds) {
-  const parts = [];
-
-  if (days > 0) {
-    parts.push(`${days}д`);
-  }
-  if (hours > 0 || days > 0) {
-    parts.push(`${hours}ч`);
-  }
-  if (minutes > 0 || hours > 0 || days > 0) {
-    parts.push(`${minutes}м`);
-  }
-  parts.push(`${seconds}с`);
-
-  return parts.join(" ");
 }

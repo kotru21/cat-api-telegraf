@@ -8,143 +8,9 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <style>
-      :root {
-        --primary-color: #4f46e5;
-        --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
-      }
-
-      body {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
-      }
-
-      .card {
-        background-color: var(--card-bg);
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease-in-out;
-      }
-
-      .card:hover {
-        transform: translateY(-5px);
-      }
-
-      .stat-card {
-        background-color: rgba(31, 41, 55, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        border: 1px solid rgba(75, 85, 99, 0.3);
-        transition: all 0.3s ease;
-      }
-
-      .stat-card:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-2px);
-      }
-
-      .cat-image-container {
-        position: relative;
-        aspect-ratio: 4/3;
-        overflow: hidden;
-        border-radius: 0.75rem;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      }
-
-      .cat-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s ease;
-      }
-
-      .cat-image:hover {
-        transform: scale(1.03);
-      }
-
-      .like-button {
-        position: absolute;
-        bottom: 1rem;
-        right: 1rem;
-        background-color: rgba(31, 41, 55, 0.7);
-        backdrop-filter: blur(4px);
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid rgba(75, 85, 99, 0.3);
-      }
-
-      .like-button:hover {
-        background-color: var(--primary-color);
-      }
-
-      /* Стили для скелетона */
-      .skeleton-title {
-        height: 2.5rem;
-        width: 60%;
-        margin-bottom: 1.5rem;
-      }
-
-      .skeleton-image {
-        height: 400px;
-        width: 100%;
-        border-radius: 0.75rem;
-      }
-
-      .skeleton-text {
-        height: 1.25rem;
-        width: 80%;
-        margin: 0.75rem 0;
-      }
-
-      .skeleton-short {
-        width: 40%;
-      }
-
-      #cat-content {
-        display: none;
-      }
-
-      #skeleton-content {
-        display: block;
-      }
-
-      /* Анимации */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .fade-in {
-        animation: fadeIn 0.5s ease-out forwards;
-      }
-
-      /* Адаптивный хедер */
-      .header {
-        backdrop-filter: blur(8px);
-        background-color: rgba(17, 24, 39, 0.8);
-      }
-    </style>
+    <!-- Стиль перенесен в utility-классы Tailwind -->
   </head>
-  <body>
+  <body class="bg-gray-900 text-gray-100 font-inter">
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Основной контент -->
@@ -176,7 +42,9 @@
       </div>
 
       <!-- Реальный контент -->
-      <div id="cat-content" class="max-w-4xl mx-auto fade-in">
+      <div
+        id="cat-content"
+        class="max-w-4xl mx-auto opacity-0 transition-opacity duration-500 hidden animate-fade-in">
         <h1
           id="breed-name"
           class="text-4xl font-bold mb-8 text-center md:text-left">
@@ -186,18 +54,22 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Изображение и основная информация -->
           <div class="md:col-span-2">
-            <div class="cat-image-container">
+            <div
+              class="relative aspect-[4/3] overflow-hidden rounded-xl shadow-2xl">
               <img
                 id="cat-image"
-                class="cat-image"
+                class="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.03]"
                 src=""
                 alt="Cat image"
                 onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Available'" />
 
-              <div class="like-button" id="likeBtn">
+              <button
+                id="likeBtn"
+                type="button"
+                class="absolute bottom-4 right-4 bg-gray-800/70 backdrop-blur-sm px-3 py-2 rounded-full flex items-center gap-2 cursor-pointer transition-all duration-200 border border-gray-600/60 hover:bg-indigo-600">
                 <i class="fas fa-heart text-red-500"></i>
                 <span id="likes-count">0</span>
-              </div>
+              </button>
             </div>
 
             <div class="mt-6">
@@ -211,7 +83,7 @@
           <div class="md:col-span-1">
             <div class="space-y-4">
               <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
+                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
                 data-feature="origin">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Происхождение
@@ -223,7 +95,7 @@
               </div>
 
               <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
+                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
                 data-feature="temperament">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Темперамент
@@ -235,7 +107,7 @@
               </div>
 
               <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
+                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
                 data-feature="life_span">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Продолжительность жизни (лет)
@@ -247,7 +119,7 @@
               </div>
 
               <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
+                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
                 data-feature="weight_metric">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Вес
@@ -262,7 +134,7 @@
                 id="wiki-link"
                 href=""
                 target="_blank"
-                class="stat-card block hover:bg-indigo-600 text-center font-medium">
+                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 block text-center font-medium">
                 <i class="fab fa-wikipedia-w mr-2"></i> Узнать больше на
                 Википедии
               </a>

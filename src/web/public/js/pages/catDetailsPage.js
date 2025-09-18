@@ -78,15 +78,20 @@ async function loadCatDetails(catId) {
     const elapsed = Date.now() - startTime;
     const remain = Math.max(0, minLoadTime - elapsed);
     setTimeout(() => {
-      skeletonContent.style.display = "none";
-      catContent.style.display = "block";
+      skeletonContent.classList.add("hidden");
+      catContent.classList.remove("hidden");
+      requestAnimationFrame(() => {
+        catContent.classList.remove("opacity-0");
+        catContent.classList.add("opacity-100");
+      });
     }, remain);
   } catch (err) {
     console.error("Cat details load error:", err);
     document.getElementById("breed-name").textContent =
       "Ошибка загрузки информации о коте";
-    skeletonContent.style.display = "none";
-    catContent.style.display = "block";
+    skeletonContent.classList.add("hidden");
+    catContent.classList.remove("hidden", "opacity-0");
+    catContent.classList.add("opacity-100");
   }
 }
 
@@ -124,8 +129,9 @@ function showMissingId() {
   const skeletonContent = document.getElementById("skeleton-content");
   const catContent = document.getElementById("cat-content");
   document.getElementById("breed-name").textContent = "ID кота не указан";
-  skeletonContent.style.display = "none";
-  catContent.style.display = "block";
+  skeletonContent.classList.add("hidden");
+  catContent.classList.remove("hidden", "opacity-0");
+  catContent.classList.add("opacity-100");
 }
 
 function init() {

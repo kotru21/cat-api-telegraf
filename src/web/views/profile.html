@@ -1,21 +1,35 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark">
+<html lang="ru">
   <head>
     <title>Мой профиль | CatBot</title>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-      };
-    </script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
     <style>
-      /* Кастомные стили для анимаций */
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      .header {
+        backdrop-filter: blur(8px);
+        background-color: rgba(17, 24, 39, 0.8);
+      }
+
       .profile-header {
         background: linear-gradient(
           to bottom,
@@ -253,8 +267,7 @@
       }
     </style>
   </head>
-  <body
-    class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+  <body>
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Содержимое страницы -->
@@ -268,7 +281,7 @@
             <div class="avatar-container">
               <img
                 id="user-avatar"
-                class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-indigo-600 object-cover bg-gray-200 dark:bg-gray-700"
+                class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-indigo-600 object-cover bg-gray-700"
                 src=""
                 alt="Профиль"
                 data-fallback="/media/catface.svg" />
@@ -347,33 +360,30 @@
             id="likes-skeleton"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="cat-card">
-              <div
-                class="bg-gray-300 dark:bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
-                  class="bg-gray-300 dark:bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="bg-gray-300 dark:bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
               </div>
             </div>
             <div class="cat-card">
-              <div
-                class="bg-gray-300 dark:bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
-                  class="bg-gray-300 dark:bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="bg-gray-300 dark:bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
               </div>
             </div>
             <div class="cat-card">
-              <div
-                class="bg-gray-300 dark:bg-gray-700 animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
-                  class="bg-gray-300 dark:bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="bg-gray-300 dark:bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
               </div>
             </div>
           </div>
@@ -391,7 +401,7 @@
             class="empty-state text-center py-16 rounded-2xl"
             style="display: none">
             <div
-              class="inline-flex items-center justify-center w-20 h-20 bg-gray-200 dark:bg-gray-800 rounded-full mb-6">
+              class="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-6">
               <i class="fas fa-heart-broken text-3xl text-red-400"></i>
             </div>
             <h3 class="text-xl font-semibold mb-3">У вас пока нет лайков</h3>
@@ -423,7 +433,7 @@
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
       style="display: none">
       <div
-        class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+        class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all">
         <div class="text-center mb-6">
           <div
             class="w-16 h-16 bg-red-900 bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -438,7 +448,7 @@
         <div class="flex gap-3">
           <button
             id="modal-cancel"
-            class="flex-1 py-2 px-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
+            class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
             Отмена
           </button>
           <button
@@ -454,7 +464,6 @@
     <div
       id="toast-container"
       class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
-    <script src="/js/themeToggle.js"></script>
     <script src="/js/navigation.js" defer></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

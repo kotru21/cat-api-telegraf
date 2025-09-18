@@ -21,10 +21,10 @@ function initStatsWebSocket({
 
   function showContent() {
     [msgLoader, timeLoaderEl].forEach((l) => {
-      if (l) l.style.display = "none";
+      if (l) l.classList.add("hidden");
     });
-    msgEl.style.display = "block";
-    timeEl.style.display = "block";
+    msgEl.classList.remove("hidden");
+    timeEl.classList.remove("hidden");
   }
 
   ws.onopen = () => {

@@ -10,10 +10,18 @@ if (window.navigationInitialized) {
   const handleScrollHeader = () => {
     const header = document.querySelector(".header");
     if (!header) return;
+    const activeClasses = [
+      "bg-gray-900/85",
+      "shadow-lg",
+      "shadow-black/40",
+      "backdrop-saturate-150",
+      "border-b",
+      "border-gray-800/60",
+    ];
     if (window.scrollY > 10) {
-      header.classList.add("scrolled");
+      header.classList.add(...activeClasses);
     } else {
-      header.classList.remove("scrolled");
+      header.classList.remove(...activeClasses);
     }
   };
 

@@ -9,275 +9,11 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <style>
-      :root {
-        --primary-color: #4f46e5;
-        --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
-      }
-
-      body {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
-      }
-
-      .card {
-        background-color: var(--card-bg);
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease-in-out;
-      }
-
-      .card:hover {
-        transform: translateY(-5px);
-      }
-
-      .stat-card {
-        background-color: rgba(31, 41, 55, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        border: 1px solid rgba(75, 85, 99, 0.3);
-        transition: all 0.3s ease;
-      }
-
-      .stat-card:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-2px);
-      }
-
-      /* Стили для скелетонов */
-      .skeleton-text {
-        height: 1.25rem;
-        width: 80%;
-        border-radius: 0.25rem;
-        margin: 0.5rem 0;
-      }
-
-      .skeleton-content {
-        display: block;
-      }
-
-      .real-content {
-        display: none;
-      }
-
-      /* Анимации */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .fade-in {
-        animation: fadeIn 0.5s ease-out forwards;
-      }
-
-      /* Адаптивный хедер */
-      .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 50;
-        backdrop-filter: blur(8px);
-        transition: background-color 0.4s ease, box-shadow 0.4s ease,
-          backdrop-filter 0.4s ease;
-        background-color: transparent;
-        min-height: 88px;
-      }
-
-      .header.scrolled {
-        background-color: rgba(17, 24, 39, 0.85);
-        box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(10px) saturate(140%);
-      }
-
-      /* Стили для таблицы */
-      .leaderboard-table {
-        width: 100%;
-        border-spacing: 0;
-        border-collapse: separate;
-        border-radius: 0.75rem;
-        overflow: hidden;
-      }
-
-      .leaderboard-table th {
-        padding: 1rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        background-color: rgba(31, 41, 55, 0.9);
-        color: var(--text-gray);
-      }
-
-      .leaderboard-table tbody tr {
-        background-color: rgba(31, 41, 55, 0.6);
-        transition: background-color 0.2s ease;
-      }
-
-      .leaderboard-table tbody tr:hover {
-        background-color: rgba(31, 41, 55, 0.9);
-      }
-
-      .leaderboard-table td {
-        padding: 1rem;
-        border-bottom: 1px solid rgba(75, 85, 99, 0.3);
-      }
-
-      .leaderboard-table img {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease;
-      }
-
-      .leaderboard-table img:hover {
-        transform: scale(1.05);
-      }
-
-      /* Стили для hero секции */
-      .hero-section::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(
-          circle at 90% 10%,
-          rgba(79, 70, 229, 0.15) 0%,
-          transparent 50%
-        );
-        pointer-events: none;
-      }
-
-      .hero-cat-badge {
-        transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      }
-
-      .hero-cat-badge:hover {
-        transform: translateY(-3px) rotate(3deg);
-      }
-
-      /* Стили для правильной предзагрузки изображений */
-      .img-preload {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      .img-loaded {
-        opacity: 1;
-      }
-
-      /* Контейнер для изображения во время загрузки */
-      .img-container {
-        position: relative;
-        overflow: hidden;
-      }
-
-      .img-container .skeleton {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 1;
-        transition: opacity 0.3s ease;
-      }
-
-      .skeleton-hidden {
-        opacity: 0;
-      }
-
-      .img-container img {
-        position: relative;
-        z-index: 2;
-      }
-
-      /* Стили для красивого отображения аптайма */
-      .uptime-display {
-        transition: all 0.3s ease;
-      }
-
-      .uptime-detailed {
-        animation: fadeInUp 0.6s ease-out;
-      }
-
-      .uptime-unit {
-        text-align: center;
-        padding: 0.5rem;
-        background: rgba(75, 85, 99, 0.2);
-        border-radius: 0.5rem;
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        transition: all 0.3s ease;
-      }
-
-      .uptime-unit:hover {
-        background: rgba(99, 102, 241, 0.1);
-        border-color: rgba(99, 102, 241, 0.4);
-        transform: translateY(-1px);
-      }
-
-      .uptime-value {
-        font-size: 1.25rem;
-        font-weight: bold;
-        line-height: 1;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      }
-
-      .uptime-label {
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-        opacity: 0.8;
-      }
-
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Адаптивность для мобильных устройств */
-      @media (max-width: 640px) {
-        .uptime-detailed {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 0.5rem;
-        }
-
-        .uptime-unit {
-          padding: 0.375rem;
-        }
-
-        .uptime-value {
-          font-size: 1rem;
-        }
-
-        .uptime-label {
-          font-size: 0.6875rem;
-        }
-      }
-    </style>
+    <!-- Все стили переведены в Tailwind utilities -->
   </head>
-  <body>
-    <!-- Новый header + hero -->
-    <div class="bg-gray-900 relative">
-      <header class="header">
+  <body class="bg-gray-900 text-gray-100 font-inter antialiased">
+    <div class="relative">
+      <header class="header fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-500 bg-transparent min-h-[88px]">
         <nav
           aria-label="Global"
           class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
@@ -403,25 +139,13 @@
       </header>
 
       <!-- HERO -->
-      <div class="relative isolate px-6 pt-24 pb-16 sm:pt-32 lg:px-8">
-        <div
-          aria-hidden="true"
-          class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-          <div
-            <!-- Инлайновые стили удалены, используется Tailwind -->
-  <body class="bg-gray-900 text-gray-100 font-inter">
-                47.5% 58.3%,
-                45.2% 34.5%,
-                27.5% 76.7%,
-                0.1% 64.9%,
-                17.9% 100%,
-                27.6% 76.8%,
-                76.1% 97.7%,
-                74.1% 44.1%
-              );
-            "
-            class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72rem]"></div>
+      <div class="relative isolate px-6 pt-28 pb-16 sm:pt-36 lg:px-8">
+        <!-- Верхняя фигура -->
+        <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+          <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"></div>
         </div>
+        <!-- Радиальный градиент поверх -->
+        <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_90%_10%,rgba(79,70,229,0.15)_0%,transparent_50%)]"></div>
         <div class="mx-auto max-w-3xl text-center">
           <div
             class="inline-flex items-center mb-6 px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-500/10 text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
@@ -450,19 +174,26 @@
           </div>
 
           <!-- Аватары -->
-          <div
-            class="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-center">
+          <div class="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-center">
             <div class="flex -space-x-2" id="hero-cats-container">
-              <div
-                class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-              <div
-                class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-              <div
-                class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+              <!-- skeleton avatars (3) -->
+              <div class="relative w-10 h-10">
+                <div class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
+              </div>
+              <div class="relative w-10 h-10">
+                <div class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
+              </div>
+              <div class="relative w-10 h-10">
+                <div class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
+              </div>
             </div>
-            <span class="text-sm text-gray-400"
-              >Присоединяйтесь к сообществу котолюбителей</span
-            >
+            <span class="text-sm text-gray-400">Присоединяйтесь к сообществу котолюбителей</span>
           </div>
         </div>
 
@@ -470,72 +201,62 @@
         <div class="mt-16 mx-auto max-w-6xl">
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <!-- Время работы -->
-            <div class="stat-card">
+            <div class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5">
               <h2 class="text-lg font-semibold mb-3 flex items-center">
                 <i class="fas fa-clock text-indigo-400 mr-2"></i>
                 Аптайм бота
               </h2>
-              <div id="timeLoader" class="skeleton-content">
-                <div
-                  class="bg-gray-700 animate-pulse rounded-md h-5 w-3/4 mb-2"></div>
-                <div
-                  class="bg-gray-700 animate-pulse rounded-md h-5 w-1/2"></div>
+              <div id="timeLoader" class="grid grid-cols-4 gap-2 text-sm">
+                <!-- uptime skeleton cells (increased height) -->
+                <div class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
+                <div class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
+                <div class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
+                <div class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
               </div>
-              <div id="timeOutput" class="real-content uptime-display">
-                <div class="uptime-detailed grid grid-cols-4 gap-2 text-sm">
-                  <div class="uptime-unit">
-                    <div
-                      class="uptime-value text-indigo-400 font-bold"
-                      id="uptime-days">
-                      0
-                    </div>
-                    <div class="uptime-label text-gray-400">дн.</div>
+              <div id="timeOutput" class="hidden transition-opacity duration-500">
+                <div class="grid grid-cols-4 gap-2 text-sm animate-fade-in">
+                  <div class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
+                    <div class="text-indigo-400 font-bold text-xl leading-none" id="uptime-days">0</div>
+                    <div class="text-[11px] mt-1 opacity-80">дн.</div>
                   </div>
-                  <div class="uptime-unit">
-                    <div
-                      class="uptime-value text-indigo-400 font-bold"
-                      id="uptime-hours">
-                      0
-                    </div>
-                    <div class="uptime-label text-gray-400">ч.</div>
+                  <div class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
+                    <div class="text-indigo-400 font-bold text-xl leading-none" id="uptime-hours">0</div>
+                    <div class="text-[11px] mt-1 opacity-80">ч.</div>
                   </div>
-                  <div class="uptime-unit">
-                    <div
-                      class="uptime-value text-indigo-400 font-bold"
-                      id="uptime-minutes">
-                      0
-                    </div>
-                    <div class="uptime-label text-gray-400">мин.</div>
+                  <div class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
+                    <div class="text-indigo-400 font-bold text-xl leading-none" id="uptime-minutes">0</div>
+                    <div class="text-[11px] mt-1 opacity-80">мин.</div>
                   </div>
-                  <div class="uptime-unit">
-                    <div
-                      class="uptime-value text-indigo-400 font-bold"
-                      id="uptime-seconds">
-                      0
-                    </div>
-                    <div class="uptime-label text-gray-400">сек.</div>
+                  <div class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
+                    <div class="text-indigo-400 font-bold text-xl leading-none" id="uptime-seconds">0</div>
+                    <div class="text-[11px] mt-1 opacity-80">сек.</div>
                   </div>
                 </div>
               </div>
             </div>
             <!-- Сообщения -->
-            <div class="stat-card">
+            <div class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5">
               <h2 class="text-lg font-semibold mb-1 flex items-center">
                 <i class="fas fa-comment text-indigo-400 mr-2"></i>
                 Сообщений отправлено
               </h2>
-              <div id="messageLoader" class="skeleton-content">
-                <div
-                  class="bg-gray-700 animate-pulse rounded-md h-5 w-1/4"></div>
+              <div id="messageLoader" class="flex items-end h-[56px]">
+                <div class="relative h-10 w-16 rounded-md bg-gray-800 overflow-hidden">
+                  <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                </div>
               </div>
-              <p
-                id="messageOutput"
-                class="text-3xl font-bold text-white real-content">
-                Обновление...
-              </p>
+              <p id="messageOutput" class="hidden text-3xl font-bold text-white">0</p>
             </div>
             <!-- Команды -->
-            <div class="stat-card">
+            <div class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5">
               <h2 class="text-lg font-semibold mb-3 flex items-center">
                 <i class="fas fa-terminal text-indigo-400 mr-2"></i>
                 Команды бота
@@ -562,31 +283,8 @@
           </div>
         </div>
 
-        <div
-          aria-hidden="true"
-          class="pointer-events-none absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-25rem)]">
-          <div
-            style="
-              clip-path: polygon(
-                74.1% 44.1%,
-                100% 61.6%,
-                97.5% 26.9%,
-                85.5% 0.1%,
-                80.7% 2%,
-                72.5% 32.5%,
-                60.2% 62.4%,
-                52.4% 68.1%,
-                47.5% 58.3%,
-                45.2% 34.5%,
-                27.5% 76.7%,
-                0.1% 64.9%,
-                17.9% 100%,
-                27.6% 76.8%,
-                76.1% 97.7%,
-                74.1% 44.1%
-              );
-            "
-            class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72rem]"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-25rem)]">
+          <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"></div>
         </div>
       </div>
     </div>
@@ -602,43 +300,45 @@
           </p>
         </div>
 
-        <div
-          class="overflow-x-auto rounded-xl shadow-2xl border border-gray-800">
-          <table
-            class="leaderboard-table w-full min-w-[600px]"
-            id="leaderboard-table">
+        <div class="overflow-x-auto rounded-xl shadow-2xl border border-gray-800">
+          <table class="w-full min-w-[600px] border-separate border-spacing-0 rounded-xl overflow-hidden" id="leaderboard-table">
             <thead>
               <tr>
-                <th class="text-left">#</th>
-                <th>Изображение</th>
-                <th class="text-left">Порода</th>
-                <th>Лайки</th>
+                <th class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400 text-left">#</th>
+                <th class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400">Изображение</th>
+                <th class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400 text-left">Порода</th>
+                <th class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400">Лайки</th>
               </tr>
             </thead>
             <tbody>
               <!-- Шаблон для скелетон строк -->
               <template id="skeleton-row">
-                <tr>
-                  <td>
-                    <div
-                      class="bg-gray-700 animate-pulse w-6 h-6 rounded-full mx-auto"></div>
+                <tr class="relative overflow-hidden">
+                  <td class="px-4 py-4 border-b border-gray-800 bg-gray-800/50">
+                    <div class="relative w-8 h-8 mx-auto rounded-full overflow-hidden bg-gray-800">
+                      <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700 rounded-full"></div>
+                    </div>
                   </td>
-                  <td class="text-center">
-                    <div
-                      class="bg-gray-700 animate-pulse mx-auto"
-                      style="
-                        width: 96px;
-                        height: 96px;
-                        border-radius: 0.5rem;
-                      "></div>
+                  <td class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-center">
+                    <div class="relative w-24 h-24 mx-auto rounded-lg overflow-hidden bg-gray-800">
+                      <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700 rounded-lg"></div>
+                    </div>
                   </td>
-                  <td>
-                    <div
-                      class="bg-gray-700 animate-pulse h-5 w-full md:w-40 mx-auto rounded-md"></div>
+                  <td class="px-4 py-4 border-b border-gray-800 bg-gray-800/40">
+                    <div class="space-y-2">
+                      <div class="relative h-5 w-40 max-w-full rounded-md overflow-hidden bg-gray-800">
+                        <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                      </div>
+                      <div class="relative h-3 w-24 max-w-full rounded-md overflow-hidden bg-gray-800">
+                        <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                      </div>
+                    </div>
                   </td>
-                  <td>
-                    <div
-                      class="bg-gray-700 animate-pulse h-5 w-12 mx-auto rounded-md"></div>
+                  <td class="px-4 py-4 border-b border-gray-800 bg-gray-800/40">
+                    <div class="relative inline-flex items-center px-3 py-2 rounded-full bg-gray-800 overflow-hidden">
+                      <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                      <div class="h-4 w-8"></div>
+                    </div>
                   </td>
                 </tr>
               </template>

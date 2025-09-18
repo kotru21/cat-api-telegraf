@@ -6,19 +6,21 @@ if (window.navigationInitialized) {
 } else {
   window.navigationInitialized = true;
 
-  // Анимация хедера при скролле
-  window.addEventListener("scroll", function () {
-    const nav = document.querySelector("nav");
-    if (nav) {
-      if (window.scrollY > 10) {
-        nav.classList.add("shadow-md", "bg-gray-900");
-        nav.classList.remove("bg-none");
-      } else {
-        nav.classList.remove("shadow-md", "bg-gray-900");
-        nav.classList.add("bg-none");
-      }
+  // Анимация и появление header при скролле
+  const handleScrollHeader = () => {
+    const header = document.querySelector(".header");
+    if (!header) return;
+    if (window.scrollY > 10) {
+      header.classList.add("scrolled");
+      document.body.classList.add("has-fixed-header");
+    } else {
+      header.classList.remove("scrolled");
+      document.body.classList.remove("has-fixed-header");
     }
-  });
+  };
+
+  window.addEventListener("scroll", handleScrollHeader, { passive: true });
+  window.addEventListener("DOMContentLoaded", handleScrollHeader);
 
   // Мобильное меню
   document.addEventListener("DOMContentLoaded", function () {

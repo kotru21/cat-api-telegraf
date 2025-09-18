@@ -4,6 +4,10 @@
     <title>Cat Details</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = { darkMode: "class" };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -12,25 +16,46 @@
       :root {
         --primary-color: #4f46e5;
         --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
+        --color-bg: #ffffff;
+        --color-surface: #f9fafb;
+        --color-surface-alt: #ffffff;
+        --color-border: #e5e7eb;
+        --color-text: #111827;
+        --color-text-muted: #6b7280;
+        --card-bg: rgba(255, 255, 255, 0.75);
+        --card-border: var(--color-border);
+        --card-hover-bg: rgba(255, 255, 255, 0.9);
       }
-
+      html.dark {
+        --color-bg: #0f172a;
+        --color-surface: #1f2937;
+        --color-surface-alt: #111827;
+        --color-border: #374151;
+        --color-text: #f1f5f9;
+        --color-text-muted: #94a3b8;
+        --card-bg: rgba(31, 41, 55, 0.8);
+        --card-border: rgba(75, 85, 99, 0.3);
+        --card-hover-bg: rgba(55, 65, 81, 0.85);
+      }
       body {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
         font-family: "Inter", system-ui, -apple-system, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
       }
 
       .card {
-        background-color: var(--card-bg);
+        background-color: var(--color-surface);
         border-radius: 1rem;
         overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+          0 4px 6px -2px rgba(0, 0, 0, 0.03);
         transition: transform 0.3s ease-in-out;
+        border: 1px solid var(--color-border);
+      }
+      html.dark .card {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+          0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        border-color: rgba(75, 85, 99, 0.3);
       }
 
       .card:hover {
@@ -38,16 +63,16 @@
       }
 
       .stat-card {
-        background-color: rgba(31, 41, 55, 0.8);
+        background: var(--card-bg);
         backdrop-filter: blur(10px);
         border-radius: 0.75rem;
         padding: 1rem;
-        border: 1px solid rgba(75, 85, 99, 0.3);
+        border: 1px solid var(--card-border);
         transition: all 0.3s ease;
       }
-
       .stat-card:hover {
         border-color: var(--primary-color);
+        background: var(--card-hover-bg);
         transform: translateY(-2px);
       }
 
@@ -74,7 +99,7 @@
         position: absolute;
         bottom: 1rem;
         right: 1rem;
-        background-color: rgba(31, 41, 55, 0.7);
+        background-color: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(4px);
         padding: 0.5rem 1rem;
         border-radius: 9999px;
@@ -83,11 +108,15 @@
         gap: 0.5rem;
         cursor: pointer;
         transition: all 0.2s ease;
-        border: 1px solid rgba(75, 85, 99, 0.3);
+        border: 1px solid var(--color-border);
       }
-
+      html.dark .like-button {
+        background-color: rgba(31, 41, 55, 0.7);
+        border-color: rgba(75, 85, 99, 0.3);
+      }
       .like-button:hover {
         background-color: var(--primary-color);
+        color: #fff;
       }
 
       /* Стили для скелетона */
@@ -140,11 +169,15 @@
       /* Адаптивный хедер */
       .header {
         backdrop-filter: blur(8px);
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+      html.dark .header {
         background-color: rgba(17, 24, 39, 0.8);
       }
     </style>
   </head>
-  <body>
+  <body
+    class="bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-300">
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Основной контент -->
@@ -204,15 +237,15 @@
               <h2 class="text-2xl font-semibold mb-4 flex items-center">
                 <i class="fas fa-info-circle text-indigo-400 mr-2"></i> О породе
               </h2>
-              <p id="description" class="text-gray-300 leading-relaxed"></p>
+              <p
+                id="description"
+                class="text-gray-600 dark:text-gray-300 leading-relaxed"></p>
             </div>
           </div>
 
           <div class="md:col-span-1">
             <div class="space-y-4">
-              <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
-                data-feature="origin">
+              <div class="stat-card cursor-pointer" data-feature="origin">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Происхождение
                 </h3>
@@ -222,9 +255,7 @@
                 </p>
               </div>
 
-              <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
-                data-feature="temperament">
+              <div class="stat-card cursor-pointer" data-feature="temperament">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Темперамент
                 </h3>
@@ -234,9 +265,7 @@
                 </p>
               </div>
 
-              <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
-                data-feature="life_span">
+              <div class="stat-card cursor-pointer" data-feature="life_span">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Продолжительность жизни (лет)
                 </h3>
@@ -247,7 +276,7 @@
               </div>
 
               <div
-                class="stat-card hover:bg-gray-700 cursor-pointer"
+                class="stat-card cursor-pointer"
                 data-feature="weight_metric">
                 <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
                   Вес
@@ -262,7 +291,7 @@
                 id="wiki-link"
                 href=""
                 target="_blank"
-                class="stat-card block hover:bg-indigo-600 text-center font-medium">
+                class="stat-card block text-center font-medium hover:border-indigo-500 hover:shadow-md transition-colors">
                 <i class="fab fa-wikipedia-w mr-2"></i> Узнать больше на
                 Википедии
               </a>
@@ -281,6 +310,7 @@
       </div>
     </div>
 
+    <script src="/js/theme.js" defer></script>
     <script src="/js/navigation.js" defer></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

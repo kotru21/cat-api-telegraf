@@ -4,6 +4,10 @@
     <title>Похожие породы котов</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = { darkMode: "class" };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -12,16 +16,31 @@
       :root {
         --primary-color: #4f46e5;
         --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
+        --color-bg: #ffffff;
+        --color-surface: #f9fafb;
+        --color-card: #ffffff;
+        --color-border: #e5e7eb;
+        --color-text: #111827;
+        --color-text-muted: #6b7280;
+        --cat-card-bg: var(--color-card);
+        --cat-card-border: var(--color-border);
+        --cat-card-hover-bg: #ffffff;
       }
-
+      html.dark {
+        --color-bg: #0f172a;
+        --color-surface: #1f2937;
+        --color-card: #1f2937;
+        --color-border: #374151;
+        --color-text: #f1f5f9;
+        --color-text-muted: #94a3b8;
+        --cat-card-bg: #1f2937;
+        --cat-card-border: rgba(75, 85, 99, 0.3);
+        --cat-card-hover-bg: #273549;
+      }
       body {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
         font-family: "Inter", system-ui, -apple-system, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
       }
 
       /* Удаляем кастомную анимацию pulse */
@@ -29,21 +48,24 @@
       /* Адаптивный хедер */
       .header {
         backdrop-filter: blur(8px);
+        background-color: rgba(255, 255, 255, 0.7);
+      }
+      html.dark .header {
         background-color: rgba(17, 24, 39, 0.8);
       }
 
       /* Карточки котов */
       .cat-card {
-        background-color: var(--card-bg);
+        background: var(--cat-card-bg);
         border-radius: 1rem;
         overflow: hidden;
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: all 0.3s ease;
+        border: 1px solid var(--cat-card-border);
       }
-
       .cat-card:hover {
         transform: translateY(-5px);
         border-color: var(--primary-color);
+        background: var(--cat-card-hover-bg);
       }
 
       .cat-image {
@@ -63,8 +85,12 @@
         border-radius: 9999px;
         font-size: 0.75rem;
         font-weight: 500;
-        background-color: rgba(79, 70, 229, 0.2);
-        color: var(--text-light);
+        background-color: rgba(79, 70, 229, 0.15);
+        color: var(--color-text);
+      }
+      html.dark .cat-likes {
+        background-color: rgba(79, 70, 229, 0.25);
+        color: #f9fafb;
       }
 
       /* Стили для правильной предзагрузки изображений */
@@ -117,7 +143,8 @@
       }
     </style>
   </head>
-  <body>
+  <body
+    class="bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-300">
     <!-- INCLUDE_NAVIGATION -->
     <!-- Основной контент -->
     <div class="container mx-auto px-4 pt-28 pb-16">
@@ -125,7 +152,7 @@
         <!-- Заголовок страницы с информацией о поиске -->
         <div class="text-center mb-12" id="search-header">
           <h1 class="text-3xl font-bold mb-4">Поиск похожих пород...</h1>
-          <p class="text-gray-400">Загрузка результатов</p>
+          <p class="text-gray-600 dark:text-gray-400">Загрузка результатов</p>
         </div>
 
         <!-- Оберните блоки с контентом в общий контейнер -->
@@ -258,7 +285,7 @@
         <div id="no-results" class="text-center py-12" style="display: none">
           <i class="fas fa-search text-4xl text-gray-600 mb-4"></i>
           <h2 class="text-2xl font-semibold mb-2">Ничего не найдено</h2>
-          <p class="text-gray-400 mb-6">
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
             К сожалению, мы не нашли котов с похожими характеристиками
           </p>
           <a
@@ -279,6 +306,7 @@
       </div>
     </div>
 
+    <script src="/js/theme.js" defer></script>
     <script src="/js/navigation.js"></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

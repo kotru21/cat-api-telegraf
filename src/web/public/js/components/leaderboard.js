@@ -91,8 +91,14 @@ export async function initLeaderboard({
     imgContainer.style.height = "96px";
 
     const skeleton = document.createElement("div");
-    skeleton.className =
-      "skeleton bg-gray-700 animate-pulse rounded-lg w-full h-full opacity-100 transition-opacity duration-300";
+    skeleton.className = [
+      "skeleton",
+      "rounded-lg w-full h-full opacity-100 transition-opacity duration-300",
+      "bg-gray-800",
+      "[background-size:1400px_100%]",
+      "bg-[linear-gradient(110deg,#374151_8%,#4b5563_18%,#374151_33%)]",
+      "animate-shimmer",
+    ].join(" ");
 
     const img = document.createElement("img");
     img.className =

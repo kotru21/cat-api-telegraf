@@ -193,118 +193,146 @@
     </style>
   </head>
   <body>
-    <!-- INCLUDE_NAVIGATION -->
+    <!-- Новый header + hero -->
+    <div class="bg-gray-900 relative">
+      <header class="absolute inset-x-0 top-0 z-50 header">
+        <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+          <div class="flex lg:flex-1">
+            <a href="/" class="flex items-center -m-1.5 p-1.5 text-white font-semibold tracking-tight">
+              <i class="fas fa-cat text-indigo-500 text-2xl mr-2"></i>
+              <span>CatBot</span>
+            </a>
+          </div>
+          <div class="flex lg:hidden">
+            <button type="button" command="show-modal" commandfor="mobile-menu" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-200">
+              <span class="sr-only">Открыть меню</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
+                <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <div class="hidden lg:flex lg:gap-x-12">
+            <a href="#leaderboard" class="text-sm font-semibold text-white hover:text-indigo-400">Лидерборд</a>
+            <a href="https://t.me/catbotjss_bot" target="_blank" class="text-sm font-semibold text-white hover:text-indigo-400">Telegram</a>
+            <a href="https://github.com/kotru21/cat-api-telegraf" target="_blank" class="text-sm font-semibold text-white hover:text-indigo-400">GitHub</a>
+          </div>
+          <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+            <a href="/login" class="text-sm font-semibold text-white hover:text-indigo-400">Войти <span aria-hidden="true">→</span></a>
+          </div>
+        </nav>
+        <el-dialog>
+          <dialog id="mobile-menu" class="backdrop:bg-transparent lg:hidden">
+            <div tabindex="0" class="fixed inset-0 focus:outline-none"></div>
+            <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
+              <div class="flex items-center justify-between">
+                <a href="/" class="-m-1.5 p-1.5">
+                  <span class="sr-only">CatBot</span>
+                  <i class="fas fa-cat text-indigo-500 text-2xl"></i>
+                </a>
+                <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-200">
+                  <span class="sr-only">Закрыть меню</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-6">
+                    <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <div class="mt-6 flow-root">
+                <div class="-my-6 divide-y divide-white/10">
+                  <div class="space-y-2 py-6">
+                    <a href="#leaderboard" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5">Лидерборд</a>
+                    <a href="https://t.me/catbotjss_bot" target="_blank" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5">Telegram</a>
+                    <a href="https://github.com/kotru21/cat-api-telegraf" target="_blank" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5">GitHub</a>
+                  </div>
+                  <div class="py-6">
+                    <a href="/login" class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-white hover:bg-white/5">Войти</a>
+                  </div>
+                </div>
+              </div>
+            </el-dialog-panel>
+          </dialog>
+        </el-dialog>
+      </header>
 
-    if (result.loaded) imgElement.src = result.data.image_url; else
-    imgElement.src = PLACEHOLDER.SMALL;
-    <div class="space-y-8">
-      <div
-        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
-        imgElement.src = PLACEHOLDER.SMALL; Telegram бот с котиками
-      </div>
-
-      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
-        Узнайте интересные факты о
-        <span class="text-indigo-500">кошках</span>
-      </h1>
-
-      <p class="text-lg text-gray-400 max-w-2xl">
-        Это самый лучший бот в мире. Он может отправлять вам случайных котиков и
-        факты о породах. Узнайте больше о своих любимцах!
-      </p>
-
-      <div class="flex flex-wrap gap-4">
-        <a
-          href="https://t.me/catbotjss_bot"
-          class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
-          <i class="fab fa-telegram-plane mr-2"></i> Открыть в Telegram
-        </a>
-        <a
-          href="#leaderboard"
-          class="inline-flex items-center px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700 font-medium">
-          <i class="fas fa-trophy mr-2"></i> Популярные коты
-        </a>
-      </div>
-
-      <!-- Заменяем этот блок кода -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div class="flex -space-x-2" id="hero-cats-container">
-          <!-- Здесь будут динамически добавленные изображения -->
-          <div
-            class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-          <div
-            class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-          <div
-            class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+      <!-- HERO -->
+      <div class="relative isolate px-6 pt-24 pb-16 sm:pt-32 lg:px-8">
+        <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+          <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72rem]"></div>
         </div>
-        <span class="text-sm text-gray-400"
-          >Присоединяйтесь к сообществу котолюбителей</span
-        >
-      </div>
-    </div>
+        <div class="mx-auto max-w-3xl text-center">
+          <div class="inline-flex items-center mb-6 px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-500/10 text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
+            Telegram бот с котиками
+          </div>
+          <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">
+            Факты, изображения и рейтинг любимых <span class="text-indigo-400">кошек</span>
+          </h1>
+          <p class="mt-6 text-lg leading-8 text-gray-400">
+            Отправляйте себе случайных котиков, узнавайте интересные факты о породах и
+            продвигайте любимцев в топе лайков.
+          </p>
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <a href="https://t.me/catbotjss_bot" target="_blank" class="inline-flex items-center px-6 py-3 rounded-md bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500 transition">
+              <i class="fab fa-telegram-plane mr-2"></i> Открыть в Telegram
+            </a>
+            <a href="#leaderboard" class="inline-flex items-center px-6 py-3 rounded-md bg-gray-800 text-white font-semibold border border-gray-700 hover:bg-gray-700 transition">
+              <i class="fas fa-trophy mr-2"></i> Популярные коты
+            </a>
+          </div>
 
-    <div class="space-y-6">
-      <!-- Карточки со статистикой -->
-      <div class="stat-card">
-        <h2 class="text-xl font-semibold mb-1 flex items-center">
-          <i class="fas fa-clock text-indigo-400 mr-2"></i> Время с момента
-          перезапуска
-        </h2>
-
-        <!-- Скелетон лоадер -->
-        <div id="timeLoader" class="skeleton-content">
-          <div
-            class="bg-gray-700 animate-pulse rounded-md h-6 w-3/4 mb-2"></div>
-          <div class="bg-gray-700 animate-pulse rounded-md h-6 w-1/2"></div>
+          <!-- Аватары -->
+          <div class="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-center">
+            <div class="flex -space-x-2" id="hero-cats-container">
+              <div class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+              <div class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+              <div class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+            </div>
+            <span class="text-sm text-gray-400">Присоединяйтесь к сообществу котолюбителей</span>
+          </div>
         </div>
 
-        <!-- Реальный контент -->
-        <p id="timeOutput" class="text-2xl font-bold text-white real-content">
-          Обновление...
-        </p>
-      </div>
-
-      <div class="stat-card">
-        <h2 class="text-xl font-semibold mb-1 flex items-center">
-          <i class="fas fa-comment text-indigo-400 mr-2"></i> Количество
-          отправленных сообщений
-        </h2>
-
-        <!-- Скелетон лоадер -->
-        <div id="messageLoader" class="skeleton-content">
-          <div class="bg-gray-700 animate-pulse rounded-md h-6 w-1/4"></div>
+        <!-- Интегрированные статистические карточки -->
+        <div class="mt-16 mx-auto max-w-6xl">
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Время работы -->
+            <div class="stat-card">
+              <h2 class="text-lg font-semibold mb-1 flex items-center">
+                <i class="fas fa-clock text-indigo-400 mr-2"></i>
+                Аптайм бота
+              </h2>
+              <div id="timeLoader" class="skeleton-content">
+                <div class="bg-gray-700 animate-pulse rounded-md h-5 w-3/4 mb-2"></div>
+                <div class="bg-gray-700 animate-pulse rounded-md h-5 w-1/2"></div>
+              </div>
+              <p id="timeOutput" class="text-2xl font-bold text-white real-content">Обновление...</p>
+            </div>
+            <!-- Сообщения -->
+            <div class="stat-card">
+              <h2 class="text-lg font-semibold mb-1 flex items-center">
+                <i class="fas fa-comment text-indigo-400 mr-2"></i>
+                Сообщений отправлено
+              </h2>
+              <div id="messageLoader" class="skeleton-content">
+                <div class="bg-gray-700 animate-pulse rounded-md h-5 w-1/4"></div>
+              </div>
+              <p id="messageOutput" class="text-3xl font-bold text-white real-content">Обновление...</p>
+            </div>
+            <!-- Команды -->
+            <div class="stat-card">
+              <h2 class="text-lg font-semibold mb-3 flex items-center">
+                <i class="fas fa-terminal text-indigo-400 mr-2"></i>
+                Команды бота
+              </h2>
+              <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                <div class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"><code class="text-indigo-400">/fact</code></div>
+                <div class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"><code class="text-indigo-400">/menu</code></div>
+                <div class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"><code class="text-indigo-400">/mylikes</code></div>
+                <div class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"><code class="text-indigo-400">/top</code></div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Реальный контент -->
-        <p
-          id="messageOutput"
-          class="text-3xl font-bold text-white real-content">
-          Обновление...
-        </p>
-      </div>
-
-      <div class="stat-card">
-        <h2 class="text-xl font-semibold mb-3 flex items-center">
-          <i class="fas fa-terminal text-indigo-400 mr-2"></i> Команды бота
-        </h2>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div
-            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-            <code class="text-indigo-400">/fact</code>
-          </div>
-          <div
-            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-            <code class="text-indigo-400">/menu</code>
-          </div>
-          <div
-            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-            <code class="text-indigo-400">/mylikes</code>
-          </div>
-          <div
-            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-            <code class="text-indigo-400">/top</code>
-          </div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-25rem)]">
+          <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72rem]"></div>
         </div>
       </div>
     </div>

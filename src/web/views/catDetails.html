@@ -1,48 +1,28 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
   <head>
     <title>Cat Details</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class'
+      }
+    </script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
     <style>
-      :root {
-        --primary-color: #4f46e5;
-        --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
-      }
-
-      body {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
-      }
-
+      /* Кастомные стили для анимаций */
       .card {
-        background-color: var(--card-bg);
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease-in-out;
       }
-
+      
       .card:hover {
         transform: translateY(-5px);
       }
-
-      .stat-card {
-        background-color: rgba(31, 41, 55, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        border: 1px solid rgba(75, 85, 99, 0.3);
+    </style>
         transition: all 0.3s ease;
       }
 
@@ -144,7 +124,7 @@
       }
     </style>
   </head>
-  <body>
+  <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Основной контент -->
@@ -281,6 +261,7 @@
       </div>
     </div>
 
+    <script src="/js/themeToggle.js"></script>
     <script src="/js/navigation.js" defer></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

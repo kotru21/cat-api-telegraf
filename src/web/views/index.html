@@ -1,11 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
   <head>
     <title>CatBot</title>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+              },
+            },
+          },
+        },
+      };
+    </script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
@@ -39,16 +55,10 @@
       }
 
       .stat-card {
-        background-color: rgba(31, 41, 55, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        border: 1px solid rgba(75, 85, 99, 0.3);
         transition: all 0.3s ease;
       }
 
       .stat-card:hover {
-        border-color: var(--primary-color);
         transform: translateY(-2px);
       }
 
@@ -274,9 +284,10 @@
       }
     </style>
   </head>
-  <body>
+  <body
+    class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
     <!-- Новый header + hero -->
-    <div class="bg-gray-900 relative">
+    <div class="bg-gray-100 dark:bg-gray-900 relative">
       <header class="header">
         <nav
           aria-label="Global"
@@ -478,8 +489,10 @@
         <div class="mt-16 mx-auto max-w-6xl">
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <!-- Время работы -->
-            <div class="stat-card">
-              <h2 class="text-lg font-semibold mb-3 flex items-center">
+            <div
+              class="stat-card bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 hover:border-indigo-500/50 transition-all duration-300">
+              <h2
+                class="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
                 <i class="fas fa-clock text-indigo-400 mr-2"></i>
                 Аптайм бота
               </h2>
@@ -527,8 +540,10 @@
               </div>
             </div>
             <!-- Сообщения -->
-            <div class="stat-card">
-              <h2 class="text-lg font-semibold mb-1 flex items-center">
+            <div
+              class="stat-card bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 hover:border-indigo-500/50 transition-all duration-300">
+              <h2
+                class="text-lg font-semibold mb-1 flex items-center text-gray-900 dark:text-white">
                 <i class="fas fa-comment text-indigo-400 mr-2"></i>
                 Сообщений отправлено
               </h2>
@@ -543,27 +558,35 @@
               </p>
             </div>
             <!-- Команды -->
-            <div class="stat-card">
-              <h2 class="text-lg font-semibold mb-3 flex items-center">
+            <div
+              class="stat-card bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 hover:border-indigo-500/50 transition-all duration-300">
+              <h2
+                class="text-lg font-semibold mb-3 flex items-center text-gray-900 dark:text-white">
                 <i class="fas fa-terminal text-indigo-400 mr-2"></i>
                 Команды бота
               </h2>
               <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/fact</code>
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                  <code class="text-indigo-600 dark:text-indigo-400"
+                    >/fact</code
+                  >
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/menu</code>
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                  <code class="text-indigo-600 dark:text-indigo-400"
+                    >/menu</code
+                  >
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/mylikes</code>
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                  <code class="text-indigo-600 dark:text-indigo-400"
+                    >/mylikes</code
+                  >
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/top</code>
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                  <code class="text-indigo-600 dark:text-indigo-400">/top</code>
                 </div>
               </div>
             </div>
@@ -600,7 +623,9 @@
     </div>
 
     <!-- Секция лидерборда -->
-    <section id="leaderboard" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
+    <section
+      id="leaderboard"
+      class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-900">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold mb-4">Популярные породы кошек</h2>
@@ -659,7 +684,7 @@
 
     <!-- Footer -->
     <footer
-      class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-900 border-t border-gray-800">
+      class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-300 dark:border-gray-800">
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="flex items-center mb-4 md:mb-0">
@@ -696,6 +721,7 @@
     </footer>
 
     <!-- Скрипты -->
+    <script src="/js/themeToggle.js"></script>
     <script src="/js/navigation.js" defer></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

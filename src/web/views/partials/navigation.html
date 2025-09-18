@@ -2,25 +2,36 @@
 <nav class="py-4 fixed w-full bg-none header z-50 transition-all duration-300">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center">
-      <a href="/" class="text-xl font-bold text-white flex items-center">
+      <a
+        href="/"
+        class="text-xl font-bold text-gray-900 dark:text-white flex items-center">
         <i class="fas fa-cat mr-2 text-indigo-500"></i>
         <span>CatBot</span>
       </a>
       <!-- Десктопное меню -->
       <div class="hidden md:flex items-center space-x-4">
-        <a href="/" class="text-gray-300 hover:text-white transition-colors">
+        <a
+          href="/"
+          class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
           <i class="fas fa-home mr-1"></i> Главная
         </a>
         <a
           href="/#leaderboard"
-          class="text-gray-300 hover:text-white transition-colors">
+          class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
           <i class="fas fa-trophy mr-1"></i> Топ котов
         </a>
         <a
           href="/profile"
-          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
+          class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors user-auth-link flex items-center">
           <i class="fas fa-user mr-1"></i> Профиль
         </a>
+        <!-- Переключатель темы -->
+        <button
+          id="theme-toggle"
+          onclick="toggleTheme()"
+          class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+          <i class="fas fa-sun"></i>
+        </button>
         <a
           href="https://t.me/catbotjss_bot"
           class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
@@ -28,7 +39,7 @@
         </a>
         <a
           href="/logout"
-          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
+          class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors user-auth-link flex items-center">
           <i class="fas fa-sign-out-alt mr-1"></i> Выйти
         </a>
       </div>

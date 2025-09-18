@@ -70,20 +70,21 @@ export async function initLeaderboard({
   }
 
   function createRow(row, index, imageLoaded = false, preloadedImg = null) {
-    const tr = document.createElement("tr");
+  const tr = document.createElement("tr");
+  tr.className = "relative overflow-hidden";
 
     const rankCell = document.createElement("td");
-    rankCell.className = "text-left";
+    rankCell.className = "px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle";
     rankCell.innerHTML = `
-      <div class="w-8 h-8 rounded-full bg-indigo-900 flex items-center justify-center font-bold ${
-        index < 3 ? "bg-indigo-600" : ""
-      }">
-        ${index + 1}
-      </div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+        index < 3
+          ? "bg-indigo-600 text-white"
+          : "bg-indigo-900 text-indigo-200"
+      }">${index + 1}</div>
     `;
 
     const imgCell = document.createElement("td");
-    imgCell.className = "text-center";
+    imgCell.className = "px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle";
 
     const imgContainer = document.createElement("div");
     imgContainer.className = "img-container mx-auto";
@@ -131,7 +132,7 @@ export async function initLeaderboard({
     imgCell.appendChild(imgContainer);
 
     const nameCell = document.createElement("td");
-    nameCell.className = "text-left";
+  nameCell.className = "px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle";
     const safeName = (row.breed_name || "Unknown Breed").replace(/</g, "&lt;");
     nameCell.innerHTML = `
       <a href="${"/catDetails?id=" + encodeURIComponent(row.id)}" 
@@ -141,6 +142,7 @@ export async function initLeaderboard({
     `;
 
     const likesCell = document.createElement("td");
+    likesCell.className = "px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle";
     likesCell.innerHTML = `
       <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
         <i class="fas fa-heart text-red-500 mr-1.5"></i> ${row.count || 0}

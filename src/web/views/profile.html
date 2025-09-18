@@ -6,19 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
-      (function () {
-        try {
-          const s = localStorage.getItem("theme");
-          if (
-            s === "dark" ||
-            (!s && window.matchMedia("(prefers-color-scheme: dark)").matches)
-          ) {
-            document.documentElement.classList.add("dark");
-          }
-        } catch (e) {}
-      })();
-    </script>
-    <script>
       window.tailwind = window.tailwind || {};
       window.tailwind.config = { darkMode: "class" };
     </script>
@@ -26,8 +13,31 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <link rel="stylesheet" href="/css/theme.css" />
     <style>
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --color-bg: #ffffff;
+        --color-surface: #f9fafb;
+        --color-surface-alt: #ffffff;
+        --color-border: #e5e7eb;
+        --color-text: #111827;
+        --color-text-muted: #6b7280;
+        --cat-card-bg: var(--color-surface);
+        --cat-card-border: var(--color-border);
+        --cat-card-hover-bg: #ffffff;
+      }
+      html.dark {
+        --color-bg: #0f172a;
+        --color-surface: #1f2937;
+        --color-surface-alt: #111827;
+        --color-border: #374151;
+        --color-text: #f1f5f9;
+        --color-text-muted: #94a3b8;
+        --cat-card-bg: #1f2937;
+        --cat-card-border: rgba(75, 85, 99, 0.3);
+        --cat-card-hover-bg: #273549;
+      }
       body {
         font-family: "Inter", system-ui, -apple-system, sans-serif;
         background: var(--color-bg);
@@ -405,30 +415,30 @@
             id="likes-skeleton"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="cat-card">
-              <div class="skeleton-bg animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
-                  class="skeleton-bg animate-pulse h-6 w-3/4 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="skeleton-bg animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
               </div>
             </div>
             <div class="cat-card">
-              <div class="skeleton-bg animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
-                  class="skeleton-bg animate-pulse h-6 w-3/4 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="skeleton-bg animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
               </div>
             </div>
             <div class="cat-card">
-              <div class="skeleton-bg animate-pulse h-48 w-full"></div>
+              <div class="bg-gray-700 animate-pulse h-48 w-full"></div>
               <div class="p-4 space-y-3">
                 <div
-                  class="skeleton-bg animate-pulse h-6 w-3/4 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-6 w-3/4 rounded-md"></div>
                 <div
-                  class="skeleton-bg animate-pulse h-4 w-1/2 rounded-md"></div>
+                  class="bg-gray-700 animate-pulse h-4 w-1/2 rounded-md"></div>
               </div>
             </div>
           </div>

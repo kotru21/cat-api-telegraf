@@ -5,10 +5,6 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script>
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = { darkMode: "class" };
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -17,38 +13,20 @@
       :root {
         --primary-color: #4f46e5;
         --primary-hover: #4338ca;
-        --color-bg: #ffffff;
-        --color-surface: #f9fafb;
-        --color-surface-alt: #ffffff;
-        --color-border: #e5e7eb;
-        --color-text: #111827;
-        --color-text-muted: #6b7280;
-        --cat-card-bg: var(--color-surface);
-        --cat-card-border: var(--color-border);
-        --cat-card-hover-bg: #ffffff;
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
       }
-      html.dark {
-        --color-bg: #0f172a;
-        --color-surface: #1f2937;
-        --color-surface-alt: #111827;
-        --color-border: #374151;
-        --color-text: #f1f5f9;
-        --color-text-muted: #94a3b8;
-        --cat-card-bg: #1f2937;
-        --cat-card-border: rgba(75, 85, 99, 0.3);
-        --cat-card-hover-bg: #273549;
-      }
+
       body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
         font-family: "Inter", system-ui, -apple-system, sans-serif;
-        background: var(--color-bg);
-        color: var(--color-text);
       }
 
       .header {
         backdrop-filter: blur(8px);
-        background-color: rgba(255, 255, 255, 0.7);
-      }
-      html.dark .header {
         background-color: rgba(17, 24, 39, 0.8);
       }
 
@@ -95,24 +73,20 @@
       }
 
       .cat-card {
-        background: var(--cat-card-bg);
+        background-color: var(--card-bg);
         border-radius: 1rem;
         overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
-          0 4px 6px -2px rgba(0, 0, 0, 0.03);
-        border: 1px solid var(--cat-card-border);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(75, 85, 99, 0.3);
         transition: all 0.3s ease;
       }
-      html.dark .cat-card {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
-          0 4px 6px -2px rgba(0, 0, 0, 0.3);
-      }
+
       .cat-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.18),
-          0 10px 10px -5px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2),
+          0 10px 10px -5px rgba(0, 0, 0, 0.1);
         border-color: rgba(79, 70, 229, 0.5);
-        background: var(--cat-card-hover-bg);
       }
 
       .cat-image {
@@ -127,14 +101,10 @@
       }
 
       .stat-badge {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(4px);
-        border: 1px solid var(--color-border);
-        transition: all 0.2s ease;
-      }
-      html.dark .stat-badge {
         background: rgba(31, 41, 55, 0.8);
+        backdrop-filter: blur(4px);
         border: 1px solid rgba(75, 85, 99, 0.5);
+        transition: all 0.2s ease;
       }
 
       .stat-badge:hover {
@@ -158,14 +128,10 @@
       }
 
       .search-bar {
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(4px);
-        border: 1px solid var(--color-border);
-        transition: all 0.3s ease;
-      }
-      html.dark .search-bar {
         background: rgba(31, 41, 55, 0.6);
-        border-color: rgba(75, 85, 99, 0.3);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        transition: all 0.3s ease;
       }
 
       .search-bar:focus-within {
@@ -175,12 +141,12 @@
 
       /* Стили для dropdown select */
       .sort-select {
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(31, 41, 55, 0.8);
         backdrop-filter: blur(10px);
-        border: 1px solid var(--color-border);
+        border: 1px solid rgba(75, 85, 99, 0.3);
         border-radius: 0.75rem;
         padding: 0.75rem 1rem;
-        color: var(--color-text);
+        color: white;
         font-size: 0.875rem;
         outline: none;
         cursor: pointer;
@@ -193,37 +159,24 @@
         padding-right: 2.5rem;
         min-width: 200px;
       }
-      html.dark .sort-select {
-        background: rgba(31, 41, 55, 0.8);
-        border-color: rgba(75, 85, 99, 0.3);
-        color: #f1f5f9;
-      }
 
       .sort-select:hover {
         border-color: rgba(99, 102, 241, 0.5);
-        background: rgba(255, 255, 255, 0.95);
-        transform: translateY(-1px);
-      }
-      html.dark .sort-select:hover {
         background: rgba(31, 41, 55, 0.9);
+        transform: translateY(-1px);
       }
 
       .sort-select:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-        background: rgba(255, 255, 255, 0.98);
-      }
-      html.dark .sort-select:focus {
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         background: rgba(31, 41, 55, 0.95);
       }
 
       .sort-select option {
-        background: #ffffff;
-        color: #111827;
-      }
-      html.dark .sort-select option {
         background: rgba(17, 24, 39, 0.95);
-        color: #f1f5f9;
+        color: white;
+        padding: 0.5rem;
+        border: none;
       }
 
       .sort-select option:hover {
@@ -258,17 +211,10 @@
       .empty-state {
         background: linear-gradient(
           135deg,
-          rgba(255, 255, 255, 0.8),
-          rgba(249, 250, 251, 0.8)
-        );
-        border: 1px dashed rgba(79, 70, 229, 0.3);
-      }
-      html.dark .empty-state {
-        background: linear-gradient(
-          135deg,
           rgba(31, 41, 55, 0.8),
           rgba(17, 24, 39, 0.8)
         );
+        border: 1px dashed rgba(79, 70, 229, 0.3);
       }
 
       /* Стили для правильной предзагрузки изображений */
@@ -321,8 +267,7 @@
       }
     </style>
   </head>
-  <body
-    class="bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-300">
+  <body>
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Содержимое страницы -->
@@ -347,7 +292,7 @@
               <h1 class="text-3xl font-bold mb-1" id="user-name">
                 Загрузка...
               </h1>
-              <p class="text-gray-600 dark:text-gray-400 mb-4">
+              <p class="text-gray-400 mb-4">
                 <i class="fab fa-telegram text-indigo-400 mr-1"></i>
                 <span id="user-username">@username</span>
               </p>
@@ -385,7 +330,7 @@
 
         <div class="mb-8">
           <h2
-            class="text-2xl font-bold flex items-center border-b border-gray-200 dark:border-gray-800 pb-3">
+            class="text-2xl font-bold flex items-center border-b border-gray-800 pb-3">
             <i class="fas fa-heart text-red-500 mr-2"></i> Мои лайки
           </h2>
         </div>
@@ -393,12 +338,12 @@
         <!-- Поиск и фильтры -->
         <div class="mb-6 flex flex-col sm:flex-row gap-4 items-center">
           <div class="search-bar rounded-xl flex items-center flex-1 px-4 py-2">
-            <i class="fas fa-search text-gray-500 dark:text-gray-400 mr-3"></i>
+            <i class="fas fa-search text-gray-400 mr-3"></i>
             <input
               type="text"
               id="search-input"
               placeholder="Найти по породе..."
-              class="bg-transparent border-none outline-none w-full text-gray-800 dark:text-white placeholder:text-gray-400" />
+              class="bg-transparent border-none outline-none w-full text-white" />
           </div>
 
           <select id="sort-select" class="sort-select">
@@ -460,7 +405,7 @@
               <i class="fas fa-heart-broken text-3xl text-red-400"></i>
             </div>
             <h3 class="text-xl font-semibold mb-3">У вас пока нет лайков</h3>
-            <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8">
+            <p class="text-gray-400 max-w-md mx-auto mb-8">
               Используйте бота в Telegram, чтобы поставить лайки интересным
               породам котов и они появятся здесь
             </p>
@@ -495,7 +440,7 @@
             <i class="fas fa-heart-broken text-red-500 text-2xl"></i>
           </div>
           <h3 class="text-xl font-bold mb-2">Удалить лайк?</h3>
-          <p class="text-gray-600 dark:text-gray-400">
+          <p class="text-gray-400">
             Вы действительно хотите удалить лайк для
             <span id="modal-breed-name" class="text-white">этой породы</span>?
           </p>
@@ -519,7 +464,6 @@
     <div
       id="toast-container"
       class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
-    <script src="/js/theme.js" defer></script>
     <script src="/js/navigation.js" defer></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

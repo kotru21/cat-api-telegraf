@@ -5,13 +5,6 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script>
-      // Tailwind config with dark mode class strategy before CDN script loads
-      window.tailwind = window.tailwind || {};
-      window.tailwind.config = {
-        darkMode: "class",
-      };
-    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -20,43 +13,15 @@
       :root {
         --primary-color: #4f46e5;
         --primary-hover: #4338ca;
-        --color-bg: #ffffff; /* light background */
-        --color-surface: #f9fafb; /* light surface */
-        --color-border: #e5e7eb; /* light border */
-        --color-text: #111827; /* light text */
-        --color-text-muted: #6b7280; /* light muted */
-        --uptime-bg: rgba(0, 0, 0, 0.04); /* subtle light bg */
-        --uptime-border: rgba(99, 102, 241, 0.25);
-        --uptime-bg-hover: rgba(99, 102, 241, 0.08);
-        --uptime-border-hover: rgba(99, 102, 241, 0.45);
-        /* cards + table */
-        --card-bg: rgba(255, 255, 255, 0.75);
-        --card-border: var(--color-border);
-        --card-hover-bg: rgba(255, 255, 255, 0.9);
-        --table-head-bg: var(--color-surface);
-        --table-row-bg: rgba(255, 255, 255, 0.6);
-        --table-row-hover-bg: rgba(255, 255, 255, 0.85);
-        --table-border-color: rgba(75, 85, 99, 0.25);
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
       }
-      html.dark {
-        --color-bg: #0f172a; /* dark background */
-        --color-surface: #1f2937; /* dark surface */
-        --color-border: #374151; /* dark border */
-        --color-text: #f1f5f9; /* dark text */
-        --color-text-muted: #94a3b8; /* dark muted */
-        --uptime-bg: rgba(75, 85, 99, 0.25);
-        --uptime-border: rgba(99, 102, 241, 0.25);
-        --uptime-bg-hover: rgba(99, 102, 241, 0.18);
-        --uptime-border-hover: rgba(99, 102, 241, 0.5);
-        --card-bg: rgba(31, 41, 55, 0.8);
-        --card-border: rgba(75, 85, 99, 0.3);
-        --card-hover-bg: rgba(55, 65, 81, 0.85);
-        --table-head-bg: rgba(31, 41, 55, 0.9);
-        --table-row-bg: rgba(31, 41, 55, 0.6);
-        --table-row-hover-bg: rgba(31, 41, 55, 0.9);
-        --table-border-color: rgba(75, 85, 99, 0.35);
-      }
+
       body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
         font-family: "Inter", system-ui, -apple-system, sans-serif;
       }
 
@@ -74,17 +39,16 @@
       }
 
       .stat-card {
-        background-color: var(--card-bg);
+        background-color: rgba(31, 41, 55, 0.8);
         backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
         border-radius: 0.75rem;
         padding: 1.5rem;
-        border: 1px solid var(--card-border);
+        border: 1px solid rgba(75, 85, 99, 0.3);
         transition: all 0.3s ease;
       }
+
       .stat-card:hover {
         border-color: var(--primary-color);
-        background: var(--card-hover-bg);
         transform: translateY(-2px);
       }
 
@@ -155,20 +119,22 @@
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0.05em;
-        background-color: var(--table-head-bg);
-        color: var(--color-text-muted);
-        transition: background 0.25s ease;
+        background-color: rgba(31, 41, 55, 0.9);
+        color: var(--text-gray);
       }
+
       .leaderboard-table tbody tr {
-        background-color: var(--table-row-bg);
-        transition: background-color 0.25s ease;
+        background-color: rgba(31, 41, 55, 0.6);
+        transition: background-color 0.2s ease;
       }
+
       .leaderboard-table tbody tr:hover {
-        background-color: var(--table-row-hover-bg);
+        background-color: rgba(31, 41, 55, 0.9);
       }
+
       .leaderboard-table td {
         padding: 1rem;
-        border-bottom: 1px solid var(--table-border-color);
+        border-bottom: 1px solid rgba(75, 85, 99, 0.3);
       }
 
       .leaderboard-table img {
@@ -251,15 +217,15 @@
       .uptime-unit {
         text-align: center;
         padding: 0.5rem;
-        background: var(--uptime-bg);
+        background: rgba(75, 85, 99, 0.2);
         border-radius: 0.5rem;
-        border: 1px solid var(--uptime-border);
-        transition: all 0.3s ease, background 0.2s, border-color 0.2s;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        transition: all 0.3s ease;
       }
 
       .uptime-unit:hover {
-        background: var(--uptime-bg-hover);
-        border-color: var(--uptime-border-hover);
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.4);
         transform: translateY(-1px);
       }
 
@@ -308,11 +274,9 @@
       }
     </style>
   </head>
-  <body
-    class="bg-[var(--color-bg)] text-[var(--color-text)] transition-colors duration-300">
+  <body>
     <!-- Новый header + hero -->
-    <div
-      class="relative bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-900">
+    <div class="bg-gray-900 relative">
       <header class="header">
         <nav
           aria-label="Global"
@@ -320,7 +284,7 @@
           <div class="flex lg:flex-1">
             <a
               href="/"
-              class="flex items-center -m-1.5 p-1.5 font-semibold tracking-tight text-gray-900 dark:text-white">
+              class="flex items-center -m-1.5 p-1.5 text-white font-semibold tracking-tight">
               <i class="fas fa-cat text-indigo-500 text-2xl mr-2"></i>
               <span>CatBot</span>
             </a>
@@ -349,26 +313,26 @@
           <div class="hidden lg:flex lg:gap-x-12">
             <a
               href="#leaderboard"
-              class="text-sm font-semibold text-gray-700 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-indigo-400"
+              class="text-sm font-semibold text-white hover:text-indigo-400"
               >Лидерборд</a
             >
             <a
               href="https://t.me/catbotjss_bot"
               target="_blank"
-              class="text-sm font-semibold text-gray-700 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-indigo-400"
+              class="text-sm font-semibold text-white hover:text-indigo-400"
               >Telegram</a
             >
             <a
               href="https://github.com/kotru21/cat-api-telegraf"
               target="_blank"
-              class="text-sm font-semibold text-gray-700 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-indigo-400"
+              class="text-sm font-semibold text-white hover:text-indigo-400"
               >GitHub</a
             >
           </div>
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
             <a
               href="/login"
-              class="text-sm font-semibold text-gray-700 hover:text-indigo-600 dark:text-gray-200 dark:hover:text-indigo-400"
+              class="text-sm font-semibold text-white hover:text-indigo-400"
               >Войти <span aria-hidden="true">→</span></a
             >
           </div>
@@ -377,7 +341,7 @@
           <dialog id="mobile-menu" class="backdrop:bg-transparent lg:hidden">
             <div tabindex="0" class="fixed inset-0 focus:outline-none"></div>
             <el-dialog-panel
-              class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-gray-100/10 transition-colors">
+              class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
               <div class="flex items-center justify-between">
                 <a href="/" class="-m-1.5 p-1.5">
                   <span class="sr-only">CatBot</span>
@@ -408,26 +372,26 @@
                   <div class="space-y-2 py-6">
                     <a
                       href="#leaderboard"
-                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-white/5 transition-colors"
+                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
                       >Лидерборд</a
                     >
                     <a
                       href="https://t.me/catbotjss_bot"
                       target="_blank"
-                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-white/5 transition-colors"
+                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
                       >Telegram</a
                     >
                     <a
                       href="https://github.com/kotru21/cat-api-telegraf"
                       target="_blank"
-                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-white/5 transition-colors"
+                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
                       >GitHub</a
                     >
                   </div>
                   <div class="py-6">
                     <a
                       href="/login"
-                      class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-white/5 transition-colors"
+                      class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-white hover:bg-white/5"
                       >Войти</a
                     >
                   </div>
@@ -471,12 +435,11 @@
             class="inline-flex items-center mb-6 px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-500/10 text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
             Telegram бот с котиками
           </div>
-          <h1
-            class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+          <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">
             Факты, изображения и рейтинг любимых
             <span class="text-indigo-400">кошек</span>
           </h1>
-          <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
+          <p class="mt-6 text-lg leading-8 text-gray-400">
             Отправляйте себе случайных котиков, узнавайте интересные факты о
             породах и продвигайте любимцев в топе лайков.
           </p>
@@ -489,7 +452,7 @@
             </a>
             <a
               href="#leaderboard"
-              class="inline-flex items-center px-6 py-3 rounded-md bg-white text-gray-800 font-semibold border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 transition">
+              class="inline-flex items-center px-6 py-3 rounded-md bg-gray-800 text-white font-semibold border border-gray-700 hover:bg-gray-700 transition">
               <i class="fas fa-trophy mr-2"></i> Популярные коты
             </a>
           </div>
@@ -499,13 +462,13 @@
             class="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-center">
             <div class="flex -space-x-2" id="hero-cats-container">
               <div
-                class="animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 bg-gray-200 dark:bg-gray-700"></div>
+                class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
               <div
-                class="animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 bg-gray-200 dark:bg-gray-700"></div>
+                class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
               <div
-                class="animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 bg-gray-200 dark:bg-gray-700"></div>
+                class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
             </div>
-            <span class="text-sm text-gray-600 dark:text-gray-400"
+            <span class="text-sm text-gray-400"
               >Присоединяйтесь к сообществу котолюбителей</span
             >
           </div>
@@ -522,9 +485,9 @@
               </h2>
               <div id="timeLoader" class="skeleton-content">
                 <div
-                  class="animate-pulse rounded-md h-5 w-3/4 mb-2 bg-gray-200 dark:bg-gray-700"></div>
+                  class="bg-gray-700 animate-pulse rounded-md h-5 w-3/4 mb-2"></div>
                 <div
-                  class="animate-pulse rounded-md h-5 w-1/2 bg-gray-200 dark:bg-gray-700"></div>
+                  class="bg-gray-700 animate-pulse rounded-md h-5 w-1/2"></div>
               </div>
               <div id="timeOutput" class="real-content uptime-display">
                 <div class="uptime-detailed grid grid-cols-4 gap-2 text-sm">
@@ -534,9 +497,7 @@
                       id="uptime-days">
                       0
                     </div>
-                    <div class="uptime-label text-gray-500 dark:text-gray-400">
-                      дн.
-                    </div>
+                    <div class="uptime-label text-gray-400">дн.</div>
                   </div>
                   <div class="uptime-unit">
                     <div
@@ -544,9 +505,7 @@
                       id="uptime-hours">
                       0
                     </div>
-                    <div class="uptime-label text-gray-500 dark:text-gray-400">
-                      ч.
-                    </div>
+                    <div class="uptime-label text-gray-400">ч.</div>
                   </div>
                   <div class="uptime-unit">
                     <div
@@ -554,9 +513,7 @@
                       id="uptime-minutes">
                       0
                     </div>
-                    <div class="uptime-label text-gray-500 dark:text-gray-400">
-                      мин.
-                    </div>
+                    <div class="uptime-label text-gray-400">мин.</div>
                   </div>
                   <div class="uptime-unit">
                     <div
@@ -564,9 +521,7 @@
                       id="uptime-seconds">
                       0
                     </div>
-                    <div class="uptime-label text-gray-500 dark:text-gray-400">
-                      сек.
-                    </div>
+                    <div class="uptime-label text-gray-400">сек.</div>
                   </div>
                 </div>
               </div>
@@ -579,11 +534,11 @@
               </h2>
               <div id="messageLoader" class="skeleton-content">
                 <div
-                  class="animate-pulse rounded-md h-5 w-1/4 bg-gray-200 dark:bg-gray-700"></div>
+                  class="bg-gray-700 animate-pulse rounded-md h-5 w-1/4"></div>
               </div>
               <p
                 id="messageOutput"
-                class="text-3xl font-bold text-gray-900 dark:text-white real-content transition-colors">
+                class="text-3xl font-bold text-white real-content">
                 Обновление...
               </p>
             </div>
@@ -595,32 +550,20 @@
               </h2>
               <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 transition-colors">
-                  <code
-                    class="text-indigo-600 dark:text-indigo-400 font-mono text-sm"
-                    >/fact</code
-                  >
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/fact</code>
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 transition-colors">
-                  <code
-                    class="text-indigo-600 dark:text-indigo-400 font-mono text-sm"
-                    >/menu</code
-                  >
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/menu</code>
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 transition-colors">
-                  <code
-                    class="text-indigo-600 dark:text-indigo-400 font-mono text-sm"
-                    >/mylikes</code
-                  >
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/mylikes</code>
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 transition-colors">
-                  <code
-                    class="text-indigo-600 dark:text-indigo-400 font-mono text-sm"
-                    >/top</code
-                  >
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  <code class="text-indigo-400">/top</code>
                 </div>
               </div>
             </div>
@@ -657,20 +600,18 @@
     </div>
 
     <!-- Секция лидерборда -->
-    <section
-      id="leaderboard"
-      class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-colors">
+    <section id="leaderboard" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold mb-4">Популярные породы кошек</h2>
-          <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p class="text-gray-400 max-w-2xl mx-auto">
             Рейтинг самых популярных пород кошек на основе количества лайков от
             пользователей.
           </p>
         </div>
 
         <div
-          class="overflow-x-auto rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 bg-white/70 dark:bg-gray-900/60 backdrop-blur">
+          class="overflow-x-auto rounded-xl shadow-2xl border border-gray-800">
           <table
             class="leaderboard-table w-full min-w-[600px]"
             id="leaderboard-table">
@@ -688,11 +629,11 @@
                 <tr>
                   <td>
                     <div
-                      class="animate-pulse w-6 h-6 rounded-full mx-auto bg-gray-200 dark:bg-gray-700"></div>
+                      class="bg-gray-700 animate-pulse w-6 h-6 rounded-full mx-auto"></div>
                   </td>
                   <td class="text-center">
                     <div
-                      class="animate-pulse mx-auto bg-gray-200 dark:bg-gray-700"
+                      class="bg-gray-700 animate-pulse mx-auto"
                       style="
                         width: 96px;
                         height: 96px;
@@ -701,11 +642,11 @@
                   </td>
                   <td>
                     <div
-                      class="animate-pulse h-5 w-full md:w-40 mx-auto rounded-md bg-gray-200 dark:bg-gray-700"></div>
+                      class="bg-gray-700 animate-pulse h-5 w-full md:w-40 mx-auto rounded-md"></div>
                   </td>
                   <td>
                     <div
-                      class="animate-pulse h-5 w-12 mx-auto rounded-md bg-gray-200 dark:bg-gray-700"></div>
+                      class="bg-gray-700 animate-pulse h-5 w-12 mx-auto rounded-md"></div>
                   </td>
                 </tr>
               </template>
@@ -718,7 +659,7 @@
 
     <!-- Footer -->
     <footer
-      class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 transition-colors">
+      class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-900 border-t border-gray-800">
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="flex items-center mb-4 md:mb-0">
@@ -730,35 +671,31 @@
             <a
               href="https://github.com/kotru21/cat-api-telegraf"
               target="_blank"
-              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
+              class="text-gray-400 hover:text-white transition-colors">
               <i class="fab fa-github text-xl"></i>
             </a>
             <a
               href="https://t.me/catbotjss_bot"
               target="_blank"
-              class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
+              class="text-gray-400 hover:text-white transition-colors">
               <i class="fab fa-telegram text-xl"></i>
             </a>
           </div>
         </div>
 
         <div
-          class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-400 text-sm transition-colors">
-          <p>
-            © 2025 CatBot · Автор:
-            <a
-              href="https://github.com/kotru21"
-              target="_blank"
-              class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
-              >Arsenij Kotikov</a
-            >
-          </p>
+          class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
+          © 2025 Copyright:
+          <a
+            href="https://kotikov.is-a.dev/"
+            class="text-indigo-400 hover:text-indigo-300"
+            >Arsenij Kotikov</a
+          >
         </div>
       </div>
     </footer>
 
     <!-- Скрипты -->
-    <script src="/js/theme.js" defer></script>
     <script src="/js/navigation.js" defer></script>
     <script type="module" src="/js/api.js"></script>
     <script type="module" src="/js/utils.js"></script>

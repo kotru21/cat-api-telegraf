@@ -41,7 +41,22 @@ function initStatsWebSocket({
       if (uptimeDateObject) {
         const startDate = new Date(uptimeDateObject);
         const updateCounter = () => {
-          timeEl.textContent = formatUptime(startDate);
+          const uptimeData = formatUptime(startDate);
+
+          const compactEl = timeEl.querySelector(".uptime-compact");
+          if (compactEl) {
+            compactEl.textContent = uptimeData.formatted;
+          }
+
+          const daysEl = document.getElementById("uptime-days");
+          const hoursEl = document.getElementById("uptime-hours");
+          const minutesEl = document.getElementById("uptime-minutes");
+          const secondsEl = document.getElementById("uptime-seconds");
+
+          if (daysEl) daysEl.textContent = uptimeData.days.value;
+          if (hoursEl) hoursEl.textContent = uptimeData.hours.value;
+          if (minutesEl) minutesEl.textContent = uptimeData.minutes.value;
+          if (secondsEl) secondsEl.textContent = uptimeData.seconds.value;
         };
         updateCounter();
         setInterval(updateCounter, 1000);

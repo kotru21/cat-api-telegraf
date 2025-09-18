@@ -74,5 +74,29 @@ export function formatUptime(startDate) {
   const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
   const seconds = Math.floor((timeDifference / 1000) % 60);
-  return `${days} дней, ${hours} час(ов), ${minutes} минут(ы), ${seconds} секунд(ы)`;
+
+  return {
+    days: { value: days, label: "дн." },
+    hours: { value: hours, label: "ч." },
+    minutes: { value: minutes, label: "мин." },
+    seconds: { value: seconds, label: "сек." },
+    formatted: formatUptimeCompact(days, hours, minutes, seconds),
+  };
+}
+
+function formatUptimeCompact(days, hours, minutes, seconds) {
+  const parts = [];
+
+  if (days > 0) {
+    parts.push(`${days}д`);
+  }
+  if (hours > 0 || days > 0) {
+    parts.push(`${hours}ч`);
+  }
+  if (minutes > 0 || hours > 0 || days > 0) {
+    parts.push(`${minutes}м`);
+  }
+  parts.push(`${seconds}с`);
+
+  return parts.join(" ");
 }

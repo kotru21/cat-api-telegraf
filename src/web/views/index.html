@@ -204,6 +204,79 @@
         position: relative;
         z-index: 2;
       }
+
+      /* Стили для красивого отображения аптайма */
+      .uptime-display {
+        transition: all 0.3s ease;
+      }
+
+      .uptime-compact {
+        font-family: "Courier New", monospace;
+        letter-spacing: 1px;
+      }
+
+      .uptime-detailed {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      .uptime-unit {
+        text-align: center;
+        padding: 0.5rem;
+        background: rgba(75, 85, 99, 0.2);
+        border-radius: 0.5rem;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .uptime-unit:hover {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.4);
+        transform: translateY(-1px);
+      }
+
+      .uptime-value {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .uptime-label {
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        opacity: 0.8;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Адаптивность для мобильных устройств */
+      @media (max-width: 640px) {
+        .uptime-detailed {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+        }
+
+        .uptime-unit {
+          padding: 0.375rem;
+        }
+
+        .uptime-value {
+          font-size: 1rem;
+        }
+
+        .uptime-label {
+          font-size: 0.6875rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -411,7 +484,7 @@
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <!-- Время работы -->
             <div class="stat-card">
-              <h2 class="text-lg font-semibold mb-1 flex items-center">
+              <h2 class="text-lg font-semibold mb-3 flex items-center">
                 <i class="fas fa-clock text-indigo-400 mr-2"></i>
                 Аптайм бота
               </h2>
@@ -421,11 +494,45 @@
                 <div
                   class="bg-gray-700 animate-pulse rounded-md h-5 w-1/2"></div>
               </div>
-              <p
-                id="timeOutput"
-                class="text-2xl font-bold text-white real-content">
-                Обновление...
-              </p>
+              <div id="timeOutput" class="real-content uptime-display">
+                <div class="uptime-compact text-2xl font-bold text-white mb-2">
+                  Обновление...
+                </div>
+                <div class="uptime-detailed grid grid-cols-4 gap-2 text-sm">
+                  <div class="uptime-unit">
+                    <div
+                      class="uptime-value text-indigo-400 font-bold"
+                      id="uptime-days">
+                      0
+                    </div>
+                    <div class="uptime-label text-gray-400">дн.</div>
+                  </div>
+                  <div class="uptime-unit">
+                    <div
+                      class="uptime-value text-indigo-400 font-bold"
+                      id="uptime-hours">
+                      0
+                    </div>
+                    <div class="uptime-label text-gray-400">ч.</div>
+                  </div>
+                  <div class="uptime-unit">
+                    <div
+                      class="uptime-value text-indigo-400 font-bold"
+                      id="uptime-minutes">
+                      0
+                    </div>
+                    <div class="uptime-label text-gray-400">мин.</div>
+                  </div>
+                  <div class="uptime-unit">
+                    <div
+                      class="uptime-value text-indigo-400 font-bold"
+                      id="uptime-seconds">
+                      0
+                    </div>
+                    <div class="uptime-label text-gray-400">сек.</div>
+                  </div>
+                </div>
+              </div>
             </div>
             <!-- Сообщения -->
             <div class="stat-card">

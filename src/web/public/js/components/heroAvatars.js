@@ -1,5 +1,6 @@
 import { getRandomImages } from "/js/api.js";
 import { PLACEHOLDER } from "/js/utils.js";
+import { overlayImageWithSkeleton } from "/js/components/overlayImage.js";
 
 export async function initHeroAvatars({
   containerSelector = "#hero-cats-container",
@@ -29,36 +30,18 @@ export async function initHeroAvatars({
 
     container.innerHTML = "";
     results.forEach((result) => {
-      const wrap = document.createElement("div");
-      wrap.className = "img-container";
-      wrap.style.width = "40px";
-      wrap.style.height = "40px";
-
-      const skeleton = document.createElement("div");
-      skeleton.className =
-        "skeleton bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 opacity-100 transition-opacity duration-300";
-
-      const imgEl = document.createElement("img");
-      imgEl.alt = "Cat";
-      imgEl.className =
-        "hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover img-preload opacity-0 transition-opacity duration-300";
-      imgEl.src = result.loaded ? result.src : PLACEHOLDER.SMALL;
-      imgEl.onerror = () => {
-        imgEl.src = PLACEHOLDER.SMALL;
-        imgEl.classList.add("img-loaded", "opacity-100");
-      };
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          imgEl.classList.add("img-loaded", "opacity-100");
-          skeleton.classList.add("skeleton-hidden", "opacity-0");
-          setTimeout(() => skeleton.remove(), 400);
-        }, 50);
+      const { wrapper } = overlayImageWithSkeleton({
+        src: result.loaded ? result.src : PLACEHOLDER.SMALL,
+        alt: "Cat",
+        width: 40,
+        height: 40,
+        shape: "circle",
+        borderClass: "border-2 border-indigo-600",
+        wrapperClass: "mr-[-0.5rem] first:ml-0", // для наложения (-space-x)
+        alreadyLoaded: result.loaded,
+        placeholder: PLACEHOLDER.SMALL,
       });
-
-      wrap.appendChild(skeleton);
-      wrap.appendChild(imgEl);
-      container.appendChild(wrap);
+      container.appendChild(wrapper);
     });
   } catch (err) {
     console.error("Ошибка при загрузке аватаров котов:", err);

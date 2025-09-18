@@ -1,4 +1,5 @@
 import { preloadImages, sanitize, PLACEHOLDER } from "/js/utils.js";
+import { overlayImageWithSkeleton } from "/js/components/overlayImage.js";
 
 // Renders liked cats grid
 export async function renderLikesGrid({
@@ -42,45 +43,21 @@ export async function renderLikesGrid({
     const card = document.createElement("div");
     card.className = "cat-card fade-in";
 
-  const imgContainer = document.createElement("div");
-  imgContainer.className = "img-container relative overflow-hidden";
-  imgContainer.style.height = "200px";
-  imgContainer.style.position = "relative";
+    const imgContainer = document.createElement("div");
+    imgContainer.className = "img-container relative overflow-hidden";
+    imgContainer.style.height = "200px";
 
-    const sk = document.createElement("div");
-    sk.className = "skeleton bg-gray-700 animate-pulse opacity-100 transition-opacity duration-300";
-    Object.assign(sk.style, {
+    const { wrapper: overlayWrap } = overlayImageWithSkeleton({
+      src: preloadedImage?.img?.src || cat.image_url || PLACEHOLDER.MEDIUM,
+      alt: breedName,
       width: "100%",
       height: "100%",
-      position: "absolute",
-      inset: 0,
-      zIndex: 5,
+      shape: "rect",
+      wrapperClass: "w-full h-full",
+      placeholder: PLACEHOLDER.MEDIUM,
+      alreadyLoaded: !!(preloadedImage && preloadedImage.img),
+      borderClass: "",
     });
-
-    const img = document.createElement("img");
-    img.alt = breedName;
-    img.className = "cat-image w-full img-preload";
-    img.src = preloadedImage?.img?.src || cat.image_url || PLACEHOLDER.MEDIUM;
-
-    const hideSkeleton = () => {
-      requestAnimationFrame(() => {
-        img.classList.add("img-loaded", "opacity-100");
-        sk.classList.add("opacity-0");
-        setTimeout(() => sk.remove(), 350);
-      });
-    };
-
-    img.onload = hideSkeleton;
-    img.onerror = () => {
-      img.src = PLACEHOLDER.MEDIUM;
-      hideSkeleton();
-    };
-
-    if (preloadedImage && preloadedImage.img) {
-      requestAnimationFrame(() => {
-        setTimeout(hideSkeleton, 50);
-      });
-    }
 
     const likeBadge = document.createElement("div");
     likeBadge.className = "absolute top-2 right-2";
@@ -88,10 +65,8 @@ export async function renderLikesGrid({
       <span class="likes-badge px-3 py-1 bg-indigo-900 bg-opacity-80 text-white rounded-full inline-flex items-center backdrop-blur-sm">
         <i class="fas fa-heart text-red-500 mr-1.5"></i> ${likesCount}
       </span>`;
-
-    imgContainer.appendChild(sk);
-    imgContainer.appendChild(img);
-    imgContainer.appendChild(likeBadge);
+    overlayWrap.appendChild(likeBadge);
+    imgContainer.appendChild(overlayWrap);
 
     const infoDiv = document.createElement("div");
     infoDiv.className = "p-5";

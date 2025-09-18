@@ -1,4 +1,5 @@
 import { preloadImages, PLACEHOLDER, sanitize } from "/js/utils.js";
+import { overlayImageWithSkeleton } from "/js/components/overlayImage.js";
 
 /**
  * Рендер сетки похожих котов со скелетоном и предзагрузкой.
@@ -45,43 +46,20 @@ export default async function renderSimilarGrid({
     imgContainer.className = "img-container overflow-hidden";
     imgContainer.style.aspectRatio = "3/2";
 
-    const skeleton = document.createElement("div");
-    skeleton.className = "skeleton bg-gray-700 animate-pulse";
-    skeleton.style.width = "100%";
-    skeleton.style.height = "100%";
-
-    const img = document.createElement("img");
-    img.className = "cat-image w-full img-preload";
-    img.alt = cat.breed_name || "Cat";
-    img.src =
-      preloaded && preloaded.img
-        ? preloaded.img.src
-        : cat.image_url || PLACEHOLDER.MEDIUM;
-
-    img.onload = () =>
-      requestAnimationFrame(() => {
-        img.classList.add("img-loaded");
-        skeleton.classList.add("skeleton-hidden");
-      });
-    img.onerror = () => {
-      img.src = PLACEHOLDER.MEDIUM;
-      requestAnimationFrame(() => {
-        img.classList.add("img-loaded");
-        skeleton.classList.add("skeleton-hidden");
-      });
-    };
-
-    if (preloaded && preloaded.img) {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          img.classList.add("img-loaded");
-          skeleton.classList.add("skeleton-hidden");
-        }, 50);
-      });
-    }
-
-    imgContainer.appendChild(skeleton);
-    imgContainer.appendChild(img);
+    const { wrapper: overlayWrap } = overlayImageWithSkeleton({
+      src:
+        preloaded && preloaded.img
+          ? preloaded.img.src
+          : cat.image_url || PLACEHOLDER.MEDIUM,
+      alt: cat.breed_name || "Cat",
+      width: "100%",
+      height: "100%",
+      shape: "rect",
+      wrapperClass: "w-full h-full",
+      placeholder: PLACEHOLDER.MEDIUM,
+      alreadyLoaded: !!(preloaded && preloaded.img),
+    });
+    imgContainer.appendChild(overlayWrap);
 
     const info = document.createElement("div");
     info.className = "p-5";

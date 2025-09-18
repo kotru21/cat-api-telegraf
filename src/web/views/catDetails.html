@@ -5,6 +5,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
+      (function () {
+        try {
+          const s = localStorage.getItem("theme");
+          if (
+            s === "dark" ||
+            (!s && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          ) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
       window.tailwind = window.tailwind || {};
       window.tailwind.config = { darkMode: "class" };
     </script>
@@ -12,31 +25,8 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
     <style>
-      :root {
-        --primary-color: #4f46e5;
-        --primary-hover: #4338ca;
-        --color-bg: #ffffff;
-        --color-surface: #f9fafb;
-        --color-surface-alt: #ffffff;
-        --color-border: #e5e7eb;
-        --color-text: #111827;
-        --color-text-muted: #6b7280;
-        --card-bg: rgba(255, 255, 255, 0.75);
-        --card-border: var(--color-border);
-        --card-hover-bg: rgba(255, 255, 255, 0.9);
-      }
-      html.dark {
-        --color-bg: #0f172a;
-        --color-surface: #1f2937;
-        --color-surface-alt: #111827;
-        --color-border: #374151;
-        --color-text: #f1f5f9;
-        --color-text-muted: #94a3b8;
-        --card-bg: rgba(31, 41, 55, 0.8);
-        --card-border: rgba(75, 85, 99, 0.3);
-        --card-hover-bg: rgba(55, 65, 81, 0.85);
-      }
       body {
         font-family: "Inter", system-ui, -apple-system, sans-serif;
         background: var(--color-bg);
@@ -185,24 +175,24 @@
       <!-- Скелетон контент -->
       <div id="skeleton-content" class="max-w-4xl mx-auto">
         <div
-          class="bg-gray-700 animate-pulse rounded-lg h-10 w-3/5 mx-auto md:mx-0 mb-6"></div>
+          class="skeleton-bg animate-pulse rounded-lg h-10 w-3/5 mx-auto md:mx-0 mb-6"></div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
           <div class="md:col-span-2">
-            <div class="bg-gray-700 animate-pulse rounded-lg h-96 w-full"></div>
+            <div class="skeleton-bg animate-pulse rounded-lg h-96 w-full"></div>
           </div>
 
           <div class="md:col-span-1">
             <div class="space-y-4">
-              <div class="bg-gray-700 animate-pulse rounded-lg h-6 w-2/5"></div>
+              <div class="skeleton-bg animate-pulse rounded-lg h-6 w-2/5"></div>
               <div
-                class="bg-gray-700 animate-pulse rounded-lg h-6 w-full"></div>
+                class="skeleton-bg animate-pulse rounded-lg h-6 w-full"></div>
               <div
-                class="bg-gray-700 animate-pulse rounded-lg h-6 w-full"></div>
-              <div class="bg-gray-700 animate-pulse rounded-lg h-6 w-3/5"></div>
+                class="skeleton-bg animate-pulse rounded-lg h-6 w-full"></div>
+              <div class="skeleton-bg animate-pulse rounded-lg h-6 w-3/5"></div>
               <div
-                class="bg-gray-700 animate-pulse rounded-lg h-6 w-full"></div>
-              <div class="bg-gray-700 animate-pulse rounded-lg h-6 w-2/5"></div>
+                class="skeleton-bg animate-pulse rounded-lg h-6 w-full"></div>
+              <div class="skeleton-bg animate-pulse rounded-lg h-6 w-2/5"></div>
             </div>
           </div>
         </div>

@@ -6,6 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
+      (function () {
+        try {
+          const s = localStorage.getItem("theme");
+          if (
+            s === "dark" ||
+            (!s && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          ) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
       window.tailwind = window.tailwind || {};
       window.tailwind.config = { darkMode: "class" };
     </script>
@@ -13,21 +26,8 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
     <style>
-      :root {
-        --color-bg: #ffffff;
-        --color-surface: #ffffff;
-        --color-border: #e5e7eb;
-        --color-text: #111827;
-        --color-text-muted: #6b7280;
-      }
-      html.dark {
-        --color-bg: #0f172a;
-        --color-surface: #1f2937;
-        --color-border: #374151;
-        --color-text: #f1f5f9;
-        --color-text-muted: #94a3b8;
-      }
       body {
         font-family: "Inter", system-ui, -apple-system, sans-serif;
       }

@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
     <style>
       :root {
         --primary-color: #4f46e5;
@@ -133,11 +133,6 @@
       }
 
       /* Стили для hero секции */
-      .hero-section {
-        position: relative;
-        overflow: hidden;
-      }
-
       .hero-section::after {
         content: "";
         position: absolute;
@@ -200,131 +195,119 @@
   <body>
     <!-- INCLUDE_NAVIGATION -->
 
-    <!-- Hero секция -->
-    <section class="hero-section pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div class="space-y-8">
-            <div
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
-              <span class="flex h-2 w-2 rounded-full bg-indigo-500 mr-2"></span>
-              Telegram бот с котиками
-            </div>
+    if (result.loaded) imgElement.src = result.data.image_url; else
+    imgElement.src = PLACEHOLDER.SMALL;
+    <div class="space-y-8">
+      <div
+        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300">
+        imgElement.src = PLACEHOLDER.SMALL; Telegram бот с котиками
+      </div>
 
-            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
-              Узнайте интересные факты о
-              <span class="text-indigo-500">кошках</span>
-            </h1>
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
+        Узнайте интересные факты о
+        <span class="text-indigo-500">кошках</span>
+      </h1>
 
-            <p class="text-lg text-gray-400 max-w-2xl">
-              Это самый лучший бот в мире. Он может отправлять вам случайных
-              котиков и факты о породах. Узнайте больше о своих любимцах!
-            </p>
+      <p class="text-lg text-gray-400 max-w-2xl">
+        Это самый лучший бот в мире. Он может отправлять вам случайных котиков и
+        факты о породах. Узнайте больше о своих любимцах!
+      </p>
 
-            <div class="flex flex-wrap gap-4">
-              <a
-                href="https://t.me/catbotjss_bot"
-                class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
-                <i class="fab fa-telegram-plane mr-2"></i> Открыть в Telegram
-              </a>
-              <a
-                href="#leaderboard"
-                class="inline-flex items-center px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700 font-medium">
-                <i class="fas fa-trophy mr-2"></i> Популярные коты
-              </a>
-            </div>
+      <div class="flex flex-wrap gap-4">
+        <a
+          href="https://t.me/catbotjss_bot"
+          class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
+          <i class="fab fa-telegram-plane mr-2"></i> Открыть в Telegram
+        </a>
+        <a
+          href="#leaderboard"
+          class="inline-flex items-center px-5 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors border border-gray-700 font-medium">
+          <i class="fas fa-trophy mr-2"></i> Популярные коты
+        </a>
+      </div>
 
-            <!-- Заменяем этот блок кода -->
-            <div
-              class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div class="flex -space-x-2" id="hero-cats-container">
-                <!-- Здесь будут динамически добавленные изображения -->
-                <div
-                  class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-                <div
-                  class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-                <div
-                  class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
-              </div>
-              <span class="text-sm text-gray-400"
-                >Присоединяйтесь к сообществу котолюбителей</span
-              >
-            </div>
+      <!-- Заменяем этот блок кода -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div class="flex -space-x-2" id="hero-cats-container">
+          <!-- Здесь будут динамически добавленные изображения -->
+          <div
+            class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+          <div
+            class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+          <div
+            class="bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600"></div>
+        </div>
+        <span class="text-sm text-gray-400"
+          >Присоединяйтесь к сообществу котолюбителей</span
+        >
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Карточки со статистикой -->
+      <div class="stat-card">
+        <h2 class="text-xl font-semibold mb-1 flex items-center">
+          <i class="fas fa-clock text-indigo-400 mr-2"></i> Время с момента
+          перезапуска
+        </h2>
+
+        <!-- Скелетон лоадер -->
+        <div id="timeLoader" class="skeleton-content">
+          <div
+            class="bg-gray-700 animate-pulse rounded-md h-6 w-3/4 mb-2"></div>
+          <div class="bg-gray-700 animate-pulse rounded-md h-6 w-1/2"></div>
+        </div>
+
+        <!-- Реальный контент -->
+        <p id="timeOutput" class="text-2xl font-bold text-white real-content">
+          Обновление...
+        </p>
+      </div>
+
+      <div class="stat-card">
+        <h2 class="text-xl font-semibold mb-1 flex items-center">
+          <i class="fas fa-comment text-indigo-400 mr-2"></i> Количество
+          отправленных сообщений
+        </h2>
+
+        <!-- Скелетон лоадер -->
+        <div id="messageLoader" class="skeleton-content">
+          <div class="bg-gray-700 animate-pulse rounded-md h-6 w-1/4"></div>
+        </div>
+
+        <!-- Реальный контент -->
+        <p
+          id="messageOutput"
+          class="text-3xl font-bold text-white real-content">
+          Обновление...
+        </p>
+      </div>
+
+      <div class="stat-card">
+        <h2 class="text-xl font-semibold mb-3 flex items-center">
+          <i class="fas fa-terminal text-indigo-400 mr-2"></i> Команды бота
+        </h2>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div
+            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+            <code class="text-indigo-400">/fact</code>
           </div>
-
-          <div class="space-y-6">
-            <!-- Карточки со статистикой -->
-            <div class="stat-card">
-              <h2 class="text-xl font-semibold mb-1 flex items-center">
-                <i class="fas fa-clock text-indigo-400 mr-2"></i> Время с
-                момента перезапуска
-              </h2>
-
-              <!-- Скелетон лоадер -->
-              <div id="timeLoader" class="skeleton-content">
-                <div
-                  class="bg-gray-700 animate-pulse rounded-md h-6 w-3/4 mb-2"></div>
-                <div
-                  class="bg-gray-700 animate-pulse rounded-md h-6 w-1/2"></div>
-              </div>
-
-              <!-- Реальный контент -->
-              <p
-                id="timeOutput"
-                class="text-2xl font-bold text-white real-content">
-                Обновление...
-              </p>
-            </div>
-
-            <div class="stat-card">
-              <h2 class="text-xl font-semibold mb-1 flex items-center">
-                <i class="fas fa-comment text-indigo-400 mr-2"></i> Количество
-                отправленных сообщений
-              </h2>
-
-              <!-- Скелетон лоадер -->
-              <div id="messageLoader" class="skeleton-content">
-                <div
-                  class="bg-gray-700 animate-pulse rounded-md h-6 w-1/4"></div>
-              </div>
-
-              <!-- Реальный контент -->
-              <p
-                id="messageOutput"
-                class="text-3xl font-bold text-white real-content">
-                Обновление...
-              </p>
-            </div>
-
-            <div class="stat-card">
-              <h2 class="text-xl font-semibold mb-3 flex items-center">
-                <i class="fas fa-terminal text-indigo-400 mr-2"></i> Команды
-                бота
-              </h2>
-
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div
-                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/fact</code>
-                </div>
-                <div
-                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/menu</code>
-                </div>
-                <div
-                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/mylikes</code>
-                </div>
-                <div
-                  class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
-                  <code class="text-indigo-400">/top</code>
-                </div>
-              </div>
-            </div>
+          <div
+            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+            <code class="text-indigo-400">/menu</code>
+          </div>
+          <div
+            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+            <code class="text-indigo-400">/mylikes</code>
+          </div>
+          <div
+            class="flex items-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+            <code class="text-indigo-400">/top</code>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- Секция лидерборда -->
     <section id="leaderboard" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
@@ -423,509 +406,9 @@
     </footer>
 
     <!-- Скрипты -->
-    <script src="/js/navigation.js"></script>
-    <script>
-      // Анимация хедера при скролле
-      window.addEventListener("scroll", function () {
-        const nav = document.querySelector("nav");
-        if (window.scrollY > 10) {
-          nav.classList.add("shadow-md");
-          nav.classList.add("bg-gray-900");
-          nav.classList.remove("bg-none");
-        } else {
-          nav.classList.remove("shadow-md");
-          nav.classList.remove("bg-gray-900");
-          nav.classList.add("bg-none");
-        }
-      });
-
-      // Мобильное меню - исправленная версия
-      document.addEventListener("DOMContentLoaded", function () {
-        const menuButton = document.getElementById("menuButton");
-        const mobileMenu = document.getElementById("mobileMenu");
-
-        if (!menuButton || !mobileMenu) {
-          console.error("Элементы меню не найдены");
-          return;
-        }
-
-        // Добавляем флаг для отслеживания состояния меню
-        let menuOpen = false;
-
-        // Обработчик для переключения меню
-        menuButton.addEventListener("click", function (event) {
-          // Останавливаем распространение события
-          event.stopPropagation();
-
-          console.log("Кнопка меню нажата"); // Отладочный вывод
-
-          menuOpen = !menuOpen;
-
-          if (menuOpen) {
-            mobileMenu.classList.remove("hidden");
-            menuButton.innerHTML = '<i class="fas fa-times text-xl"></i>';
-          } else {
-            mobileMenu.classList.add("hidden");
-            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-          }
-        });
-
-        // Закрытие меню при клике по пунктам меню
-        mobileMenu.querySelectorAll("a").forEach((link) => {
-          link.addEventListener("click", function () {
-            mobileMenu.classList.add("hidden");
-            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-            menuOpen = false;
-          });
-        });
-
-        // Закрытие меню при клике вне меню, но не на кнопке меню
-        document.addEventListener("click", function (event) {
-          if (
-            !menuButton.contains(event.target) &&
-            !mobileMenu.contains(event.target) &&
-            menuOpen
-          ) {
-            mobileMenu.classList.add("hidden");
-            menuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
-            menuOpen = false;
-          }
-        });
-      });
-    </script>
-
-    <script type="module">
-      const tableBody = document.querySelector("#leaderboard-table tbody");
-      const skeletonTemplate = document.querySelector("#skeleton-row");
-
-      // Функция для показа скелетон-лоадеров
-      function showSkeletons(count = 5) {
-        tableBody.innerHTML = "";
-        for (let i = 0; i < count; i++) {
-          const clone = document.importNode(skeletonTemplate.content, true);
-          tableBody.appendChild(clone);
-        }
-      }
-
-      // Показываем скелетоны сразу
-      showSkeletons();
-
-      // Функция загрузки данных лидерборда
-      const fetchLeaderboard = async () => {
-        try {
-          const response = await fetch(
-            `${window.location.origin}/api/leaderboard`
-          );
-          if (!response.ok) throw new Error("Failed to fetch leaderboard");
-          const leaderboard = await response.json();
-
-          if (leaderboard.length === 0) {
-            tableBody.innerHTML =
-              '<tr><td colspan="4" class="text-center py-8 text-gray-400">Нет данных для отображения</td></tr>';
-            return;
-          }
-
-          // Массив для хранения результатов предзагрузки
-          let preloadResults = [];
-          let hasTimeout = false;
-
-          try {
-            // Предзагрузка изображений
-            const preloadPromises = leaderboard.map((row, index) => {
-              return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve({ success: true, row, img, index });
-                img.onerror = () => resolve({ success: false, row, index });
-                img.src = row.image_url;
-
-                // Проверка для уже кэшированных изображений
-                if (img.complete) {
-                  resolve({ success: true, row, img, index });
-                }
-              });
-            });
-
-            // Устанавливаем таймаут для загрузки
-            const timeoutPromise = new Promise((resolve) => {
-              setTimeout(() => {
-                hasTimeout = true;
-                resolve();
-              }, 3000);
-            });
-
-            // Ждем либо загрузку всех изображений, либо таймаут
-            await Promise.race([
-              Promise.all(preloadPromises).then((results) => {
-                preloadResults = results;
-              }),
-              timeoutPromise,
-            ]);
-
-            // Добавляем минимальную задержку для плавности UI
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          } catch (err) {
-            console.error("Ошибка предзагрузки изображений:", err);
-          }
-
-          // Очищаем таблицу
-          tableBody.innerHTML = "";
-
-          // Если произошел таймаут и не все изображения загружены,
-          // создаем строки таблицы без предзагруженных изображений
-          if (hasTimeout && preloadResults.length < leaderboard.length) {
-            leaderboard.forEach((row, index) => {
-              createTableRow(row, index, false);
-            });
-          } else {
-            // Сортируем результаты по исходному индексу
-            preloadResults.sort((a, b) => a.index - b.index);
-
-            // Создаем строки с предзагруженными изображениями
-            preloadResults.forEach((result) => {
-              createTableRow(
-                result.row,
-                result.index,
-                result.success,
-                result.img
-              );
-            });
-          }
-        } catch (err) {
-          console.error("Ошибка загрузки данных лидерборда:", err);
-          tableBody.innerHTML =
-            '<tr><td colspan="4" class="text-center py-8 text-gray-400">Ошибка загрузки. Пожалуйста, попробуйте позже.</td></tr>';
-        }
-      };
-
-      // Функция для создания строки таблицы
-      function createTableRow(
-        row,
-        index,
-        imageLoaded = false,
-        preloadedImg = null
-      ) {
-        const tr = document.createElement("tr");
-        tr.className = "";
-
-        const rankCell = document.createElement("td");
-        rankCell.className = "text-left";
-        rankCell.innerHTML = `
-          <div class="w-8 h-8 rounded-full bg-indigo-900 flex items-center justify-center font-bold ${
-            index < 3 ? "bg-indigo-600" : ""
-          }">
-            ${index + 1}
-          </div>
-        `;
-
-        const imgCell = document.createElement("td");
-        imgCell.className = "text-center";
-
-        // Контейнер для изображения и скелетона
-        const imgContainer = document.createElement("div");
-        imgContainer.className = "img-container mx-auto";
-        imgContainer.style.width = "96px";
-        imgContainer.style.height = "96px";
-
-        // скелетон, который будет под изображением
-        const skeleton = document.createElement("div");
-        skeleton.className = "skeleton bg-gray-700 animate-pulse rounded-lg";
-        skeleton.style.width = "100%";
-        skeleton.style.height = "100%";
-
-        const img = document.createElement("img");
-        img.className = "w-24 h-24 object-cover rounded-lg mx-auto img-preload";
-        img.alt = row.breed_name || "Cat breed";
-
-        if (imageLoaded && preloadedImg) {
-          img.src = preloadedImg.src;
-        } else {
-          img.src = row.image_url || "";
-        }
-
-        // Обработчики событий для изображения
-        img.onload = function () {
-          requestAnimationFrame(() => {
-            img.classList.add("img-loaded");
-
-            skeleton.classList.add("skeleton-hidden");
-          });
-        };
-
-        img.onerror = function () {
-          img.src = "https://via.placeholder.com/96?text=No+Image";
-          requestAnimationFrame(() => {
-            img.classList.add("img-loaded");
-            skeleton.classList.add("skeleton-hidden");
-          });
-        };
-
-        if (imageLoaded && preloadedImg) {
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              img.classList.add("img-loaded");
-              skeleton.classList.add("skeleton-hidden");
-            }, 50);
-          });
-        }
-
-        imgContainer.appendChild(skeleton);
-        imgContainer.appendChild(img);
-        imgCell.appendChild(imgContainer);
-
-        // ячейка с названием породы
-        const nameCell = document.createElement("td");
-        nameCell.className = "text-left";
-        nameCell.innerHTML = `
-          <a href="${"/catDetails?id=" + row.id}" 
-             class="text-indigo-400 hover:text-indigo-300 transition-colors">
-            ${row.breed_name || "Unknown Breed"}
-          </a>
-        `;
-
-        // ячейка с количеством лайков
-        const likesCell = document.createElement("td");
-        likesCell.innerHTML = `
-          <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
-            <i class="fas fa-heart text-red-500 mr-1.5"></i> ${row.count || 0}
-          </div>
-        `;
-
-        tr.appendChild(rankCell);
-        tr.appendChild(imgCell);
-        tr.appendChild(nameCell);
-        tr.appendChild(likesCell);
-
-        tableBody.appendChild(tr);
-      }
-
-      fetchLeaderboard();
-
-      // Настройка WebSocket для обновления по требованию
-      document.addEventListener("DOMContentLoaded", function () {
-        const wsProtocol =
-          window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsUrl = `${wsProtocol}//${window.location.host}/wss`;
-        const ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-          console.log("WebSocket connected for leaderboard updates");
-        };
-
-        ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-
-          if (data.leaderboardChanged) {
-            console.log("Leaderboard changed, updating data...");
-            fetchLeaderboard();
-          }
-        };
-
-        ws.onerror = (error) => {
-          console.error("WebSocket error:", error);
-          // В случае ошибки WebSocket ппереключение на http polling
-          console.log("Switching to HTTP polling for leaderboard updates...");
-          setInterval(fetchLeaderboard, 30000); // раз в 30 секунд
-        };
-      });
-    </script>
-
-    <script type="module">
-      const messageOutputDiv = document.getElementById("messageOutput");
-      const timeOutputDiv = document.getElementById("timeOutput");
-      const messageLoader = document.getElementById("messageLoader");
-      const timeLoader = document.getElementById("timeLoader");
-
-      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${wsProtocol}//${window.location.host}/wss`;
-      const ws = new WebSocket(wsUrl);
-
-      // Гарантируем, что лоадеры видны при загрузке страницы
-      messageLoader.classList.add("skeleton-content");
-      timeLoader.classList.add("skeleton-content");
-      messageOutputDiv.classList.add("real-content");
-      timeOutputDiv.classList.add("real-content");
-
-      // Ожидаем минимум 1.5 секунды для отображения скелетонов
-      let dataReceived = false;
-      setTimeout(() => {
-        if (dataReceived) {
-          showContent();
-        }
-      }, 1500);
-
-      function showContent() {
-        // Скрываем лоадеры и показываем контент
-        messageLoader.classList.remove("skeleton-content");
-        timeLoader.classList.remove("skeleton-content");
-        messageLoader.style.display = "none";
-        timeLoader.style.display = "none";
-
-        messageOutputDiv.classList.remove("real-content");
-        timeOutputDiv.classList.remove("real-content");
-        messageOutputDiv.style.display = "block";
-        timeOutputDiv.style.display = "block";
-      }
-
-      ws.onopen = () => {
-        console.log("Connected to server");
-      };
-
-      ws.onmessage = (event) => {
-        dataReceived = true;
-        const { messageCount, uptimeDateObject } = JSON.parse(event.data);
-        const startDate = new Date(uptimeDateObject);
-
-        messageOutputDiv.textContent = messageCount;
-
-        const formatTimeDifference = (startDate) => {
-          const currentDate = new Date();
-          const timeDifference = currentDate - startDate;
-          const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-          const seconds = Math.floor((timeDifference / 1000) % 60);
-          return `${days} дней, ${hours} час(ов), ${minutes} минут(ы), ${seconds} секунд(ы)`;
-        };
-
-        const updateCounter = () => {
-          timeOutputDiv.textContent = formatTimeDifference(startDate);
-        };
-
-        updateCounter();
-        setInterval(updateCounter, 1000);
-
-        // Показываем контент с задержкой для лучшего UX
-        setTimeout(showContent, 500);
-      };
-
-      ws.onclose = () => {
-        console.log("Disconnected from server");
-        showContent();
-        messageOutputDiv.textContent = "Соединение с сервером потеряно";
-        timeOutputDiv.textContent = "Соединение с сервером потеряно";
-      };
-
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        showContent();
-        messageOutputDiv.textContent = "Ошибка подключения к серверу";
-        timeOutputDiv.textContent = "Ошибка подключения к серверу";
-      };
-    </script>
-
-    <script type="module">
-      const loadRandomHeroCats = async () => {
-        try {
-          const container = document.getElementById("hero-cats-container");
-          const skeletonHTML = container.innerHTML;
-
-          const response = await fetch(
-            `${window.location.origin}/api/random-images?count=3`
-          );
-          if (!response.ok) throw new Error("Failed to fetch random images");
-          const images = await response.json();
-
-          const preloadPromises = images.map((img, index) => {
-            return new Promise((resolve) => {
-              const imgElement = new Image();
-              imgElement.onload = () => {
-                resolve({
-                  loaded: true,
-                  index: index,
-                  element: imgElement,
-                  data: img,
-                });
-              };
-              imgElement.onerror = () => {
-                resolve({
-                  loaded: false,
-                  index: index,
-                  data: img,
-                });
-              };
-              imgElement.src = img.image_url;
-
-              // Проверяем, если изображение уже закешировано и загружено
-              if (imgElement.complete) {
-                resolve({
-                  loaded: true,
-                  index: index,
-                  element: imgElement,
-                  data: img,
-                });
-              }
-            });
-          });
-
-          Promise.all(preloadPromises)
-            .then((results) => {
-              results.sort((a, b) => a.index - b.index);
-
-              // Сохраняем старые элементы, чтобы заменить их плавно
-              const oldElements = [];
-              while (container.firstChild) {
-                oldElements.push(container.firstChild);
-                container.removeChild(container.firstChild);
-              }
-
-              // Создаем новые элементы
-              results.forEach((result) => {
-                const imgWrap = document.createElement("div");
-                imgWrap.className = "img-container";
-                imgWrap.style.width = "40px";
-                imgWrap.style.height = "40px";
-
-                // Добавляем скелетон
-                const skeleton = document.createElement("div");
-                skeleton.className =
-                  "bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 skeleton";
-
-                // Создаем изображение
-                const imgElement = document.createElement("img");
-                imgElement.alt = "Cat";
-                imgElement.className =
-                  "hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover img-preload";
-
-                if (result.loaded) {
-                  imgElement.src = result.data.image_url;
-                } else {
-                  imgElement.src = "https://via.placeholder.com/40?text=Cat";
-                }
-
-                // Добавляем бэкап на случай ошибки
-                imgElement.onerror = () => {
-                  imgElement.src = "https://via.placeholder.com/40?text=Cat";
-                  imgElement.classList.add("img-loaded");
-                };
-
-                // Добавляем обработчик для плавного появления
-                requestAnimationFrame(() => {
-                  setTimeout(() => {
-                    imgElement.classList.add("img-loaded");
-                    // Плавно скрываем скелетон вместо установки display: none
-                    skeleton.classList.add("skeleton-hidden");
-                  }, 50);
-                });
-
-                // Собираем элемент
-                imgWrap.appendChild(skeleton);
-                imgWrap.appendChild(imgElement);
-                container.appendChild(imgWrap);
-              });
-            })
-            .catch((err) => {
-              console.error("Ошибка при обработке изображений:", err);
-              container.innerHTML = skeletonHTML;
-            });
-        } catch (err) {
-          console.error("Ошибка загрузки изображений:", err);
-        }
-      };
-
-      // Загружаем изображения только при загрузке страницы
-      document.addEventListener("DOMContentLoaded", loadRandomHeroCats);
-    </script>
-
-    <script src="/js/navigation.js"></script>
+    <script src="/js/navigation.js" defer></script>
+    <script type="module" src="/js/api.js"></script>
+    <script type="module" src="/js/utils.js"></script>
+    <script type="module" src="/js/pages/indexPage.js"></script>
   </body>
 </html>

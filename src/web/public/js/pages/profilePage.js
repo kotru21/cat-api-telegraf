@@ -50,12 +50,34 @@ async function loadCounts() {
 }
 
 async function loadLikes(modal, searchModule = null) {
-  const likesData = await getUserLikes();
-  const { cards } = await renderLikesGrid({ data: likesData });
-  if (searchModule) {
-    attachRemoveHandlers(cards, modal, searchModule);
+  const skeleton = document.getElementById("likes-skeleton");
+  try {
+    const likesData = await getUserLikes();
+    const { cards } = await renderLikesGrid({ data: likesData });
+    if (searchModule) {
+      attachRemoveHandlers(cards, modal, searchModule);
+    }
+    return cards;
+  } catch (err) {
+    console.error("Ошибка загрузки лайков профиля:", err);
+    showToast(
+      err.status === 401
+        ? "Сессия истекла. Перенаправление..."
+        : "Не удалось загрузить лайки",
+      "error"
+    );
+    if (err.status === 401) {
+      setTimeout(() => (window.location.href = "/login"), 1200);
+    }
+    // Скрываем скелетон даже при ошибке
+    if (skeleton) {
+      skeleton.style.opacity = "0";
+      setTimeout(() => (skeleton.style.display = "none"), 400);
+    }
+    const noLikes = document.getElementById("no-likes");
+    if (noLikes) noLikes.style.display = "block";
+    return [];
   }
-  return cards;
 }
 
 function attachRemoveHandlers(cards, modal, searchModule) {
@@ -125,7 +147,7 @@ async function init() {
   if (!profile) return; // redirected
   await loadCounts();
   const modal = initConfirmationModal({});
-  await loadLikes(modal, null); // сначала загружаем данные
+  await loadLikes(modal, null); // сначала загружаем данные (без search)
   const searchModule = initSearchAndSort({}); // затем инициализируем фильтры
   // Обновляем обработчики удаления с новым searchModule
   const container = document.getElementById("user-likes");

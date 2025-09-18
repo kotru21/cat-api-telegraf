@@ -7,21 +7,32 @@ if (window.navigationInitialized) {
   window.navigationInitialized = true;
 
   // Анимация и появление header при скролле
+  let headerState = null; // null | "scrolled" | "top"
   const handleScrollHeader = () => {
     const header = document.querySelector(".header");
     if (!header) return;
-    const activeClasses = [
-      "bg-gray-900/85",
-      "shadow-lg",
-      "shadow-black/40",
-      "backdrop-saturate-150",
-      "border-b",
-      "border-gray-800/60",
-    ];
-    if (window.scrollY > 10) {
-      header.classList.add(...activeClasses);
-    } else {
-      header.classList.remove(...activeClasses);
+    const scrolled = window.scrollY > 10;
+    if (scrolled && headerState !== "scrolled") {
+      headerState = "scrolled";
+      header.classList.add(
+        "bg-gray-900/85",
+        "shadow-lg",
+        "shadow-black/40",
+        "backdrop-saturate-150"
+      );
+      header.classList.remove("bg-transparent");
+      header.classList.remove("border-transparent");
+      header.classList.add("border-gray-800/60");
+    } else if (!scrolled && headerState !== "top") {
+      headerState = "top";
+      header.classList.remove(
+        "bg-gray-900/85",
+        "shadow-lg",
+        "shadow-black/40",
+        "backdrop-saturate-150",
+        "border-gray-800/60"
+      );
+      header.classList.add("bg-transparent", "border-transparent");
     }
   };
 

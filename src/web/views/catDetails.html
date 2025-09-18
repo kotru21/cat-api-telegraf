@@ -4,53 +4,16 @@
     <title>Cat Details</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <style>
-      :root {
-        --primary-color: #4f46e5;
-        --primary-hover: #4338ca;
-        --bg-dark: #111827;
-        --card-bg: #1f2937;
-        --text-light: #f9fafb;
-        --text-gray: #9ca3af;
-      }
-
-      body {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
-        font-family: "Inter", system-ui, -apple-system, sans-serif;
-      }
-
-      .card {
-        background-color: var(--card-bg);
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease-in-out;
-      }
-
-      .card:hover {
-        transform: translateY(-5px);
-      }
-
-      .stat-card {
-        background-color: rgba(31, 41, 55, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 0.75rem;
-        padding: 1rem;
-        border: 1px solid rgba(75, 85, 99, 0.3);
-        transition: all 0.3s ease;
-      }
-
-      .stat-card:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-2px);
-      }
-
+    <script>
+      (function(){
+        const t = localStorage.getItem('theme');
+        if(t){ if(t==='dark') document.documentElement.classList.add('dark'); }
+        else if(window.matchMedia('(prefers-color-scheme: dark)').matches){ document.documentElement.classList.add('dark'); }
+      })();
+    </script>
+    <link rel="stylesheet" href="/public/css/theme.css" />
+    <link rel="stylesheet" href="/public/css/tw.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
       .cat-image-container {
         position: relative;
         aspect-ratio: 4/3;

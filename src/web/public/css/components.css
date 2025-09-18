@@ -1,0 +1,259 @@
+/* Общие компонентные стили, не покрытые Tailwind утилитами напрямую */
+/* Если позже внедрите локальную сборку Tailwind - можно конвертировать часть через @apply */
+
+/* Карточки (частично уже заменены утилитами, оставляем для обратной совместимости) */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card {
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  transition: all 0.3s ease;
+}
+.stat-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+/* Header (position + scrolled state) */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  min-height: 88px;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.4s, box-shadow 0.4s, backdrop-filter 0.4s;
+}
+.header.scrolled {
+  background-color: rgba(17, 24, 39, 0.85);
+  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px) saturate(140%);
+}
+
+/* Таблица лидерборда */
+.leaderboard-table {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: separate;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.leaderboard-table th {
+  padding: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  background: rgba(31, 41, 55, 0.9);
+  color: var(--text-gray);
+}
+.leaderboard-table tbody tr {
+  background: rgba(31, 41, 55, 0.6);
+  transition: background-color 0.2s ease;
+}
+.leaderboard-table tbody tr:hover {
+  background: rgba(31, 41, 55, 0.9);
+}
+.leaderboard-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+}
+.leaderboard-table img {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+.leaderboard-table img:hover {
+  transform: scale(1.05);
+}
+
+/* Hero overlay */
+.hero-section {
+  position: relative;
+}
+.hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 90% 10%,
+    rgba(79, 70, 229, 0.15) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.hero-cat-badge {
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.hero-cat-badge:hover {
+  transform: translateY(-3px) rotate(3deg);
+}
+
+/* Image preload helpers */
+.img-preload {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.img-loaded {
+  opacity: 1;
+}
+.img-container {
+  position: relative;
+  overflow: hidden;
+}
+.img-container .skeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+.skeleton-hidden {
+  opacity: 0;
+}
+
+/* Uptime widgets */
+.uptime-display {
+  transition: all 0.3s ease;
+}
+.uptime-detailed {
+  animation: fadeInUp 0.6s ease-out;
+}
+.uptime-unit {
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(75, 85, 99, 0.2);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+}
+.uptime-unit:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+.uptime-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.uptime-label {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  opacity: 0.8;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Адаптивность для uptime блока */
+@media (max-width: 640px) {
+  .uptime-detailed {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .uptime-unit {
+    padding: 0.375rem;
+  }
+  .uptime-value {
+    font-size: 1rem;
+  }
+  .uptime-label {
+    font-size: 0.6875rem;
+  }
+}
+
+/* Профиль / карточки котов */
+.cat-card {
+  background: var(--color-surface);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+.cat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15),
+    0 10px 10px -5px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-primary);
+}
+.cat-image {
+  height: 200px;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.cat-card:hover .cat-image {
+  transform: scale(1.08);
+}
+.stat-badge {
+  background: var(--color-surface-alt);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+.stat-badge:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+}
+
+/* Similar page */
+.cat-likes {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(79, 70, 229, 0.15);
+  color: var(--color-text);
+}
+
+/* Мелкие служебные классы (оставлены для JS) */
+.skeleton-content {
+  display: block;
+}
+.real-content {
+  display: none;
+}

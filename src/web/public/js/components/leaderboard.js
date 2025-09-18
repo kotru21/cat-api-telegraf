@@ -90,13 +90,11 @@ export async function initLeaderboard({
     imgContainer.style.width = "96px";
     imgContainer.style.height = "96px";
 
-    const skeleton = document.createElement("div");
-    skeleton.className = "skeleton bg-gray-700 animate-pulse rounded-lg";
-    skeleton.style.width = "100%";
-    skeleton.style.height = "100%";
+  const skeleton = document.createElement("div");
+  skeleton.className = "skeleton bg-gray-700 animate-pulse rounded-lg w-full h-full opacity-100 transition-opacity duration-300";
 
     const img = document.createElement("img");
-    img.className = "w-24 h-24 object-cover rounded-lg mx-auto img-preload";
+  img.className = "w-24 h-24 object-cover rounded-lg mx-auto img-preload opacity-0 transition-opacity duration-300";
     img.alt = row.breed_name || "Cat breed";
     if (imageLoaded && preloadedImg) img.src = preloadedImg.src;
     else img.src = row.image_url || "";
@@ -104,23 +102,26 @@ export async function initLeaderboard({
 
     img.onload = () => {
       requestAnimationFrame(() => {
-        img.classList.add("img-loaded");
-        skeleton.classList.add("skeleton-hidden");
+        img.classList.add("img-loaded", "opacity-100");
+        skeleton.classList.add("skeleton-hidden", "opacity-0");
+        setTimeout(() => skeleton.remove(), 400);
       });
     };
     img.onerror = () => {
       img.src = PLACEHOLDER.SMALL;
       requestAnimationFrame(() => {
-        img.classList.add("img-loaded");
-        skeleton.classList.add("skeleton-hidden");
+        img.classList.add("img-loaded", "opacity-100");
+        skeleton.classList.add("skeleton-hidden", "opacity-0");
+        setTimeout(() => skeleton.remove(), 400);
       });
     };
 
     if (imageLoaded && preloadedImg) {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          img.classList.add("img-loaded");
-          skeleton.classList.add("skeleton-hidden");
+          img.classList.add("img-loaded", "opacity-100");
+          skeleton.classList.add("skeleton-hidden", "opacity-0");
+          setTimeout(() => skeleton.remove(), 400);
         }, 50);
       });
     }

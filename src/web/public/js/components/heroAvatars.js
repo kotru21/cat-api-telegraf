@@ -36,22 +36,23 @@ export async function initHeroAvatars({
 
       const skeleton = document.createElement("div");
       skeleton.className =
-        "bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 skeleton";
+        "skeleton bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 opacity-100 transition-opacity duration-300";
 
       const imgEl = document.createElement("img");
       imgEl.alt = "Cat";
       imgEl.className =
-        "hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover img-preload";
+        "hero-cat-badge w-10 h-10 rounded-full border-2 border-indigo-600 object-cover img-preload opacity-0 transition-opacity duration-300";
       imgEl.src = result.loaded ? result.src : PLACEHOLDER.SMALL;
       imgEl.onerror = () => {
         imgEl.src = PLACEHOLDER.SMALL;
-        imgEl.classList.add("img-loaded");
+        imgEl.classList.add("img-loaded", "opacity-100");
       };
 
       requestAnimationFrame(() => {
         setTimeout(() => {
-          imgEl.classList.add("img-loaded");
-          skeleton.classList.add("skeleton-hidden");
+          imgEl.classList.add("img-loaded", "opacity-100");
+          skeleton.classList.add("skeleton-hidden", "opacity-0");
+          setTimeout(() => skeleton.remove(), 400);
         }, 50);
       });
 

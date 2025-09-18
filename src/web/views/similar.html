@@ -4,21 +4,118 @@
     <title>Похожие породы котов</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script>
-      (function () {
-        const t = localStorage.getItem("theme");
-        if (t) {
-          if (t === "dark") document.documentElement.classList.add("dark");
-        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-          document.documentElement.classList.add("dark");
-        }
-      })();
-    </script>
-    <link rel="stylesheet" href="/public/css/theme.css" />
-    <link rel="stylesheet" href="/public/css/tw.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <style>
+      :root {
+        --primary-color: #4f46e5;
+        --primary-hover: #4338ca;
+        --bg-dark: #111827;
+        --card-bg: #1f2937;
+        --text-light: #f9fafb;
+        --text-gray: #9ca3af;
+      }
+
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      /* Удаляем кастомную анимацию pulse */
+
+      /* Адаптивный хедер */
+      .header {
+        backdrop-filter: blur(8px);
+        background-color: rgba(17, 24, 39, 0.8);
+      }
+
+      /* Карточки котов */
+      .cat-card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(75, 85, 99, 0.3);
+      }
+
+      .cat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+      }
+
+      .cat-image {
+        aspect-ratio: 3/2;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .cat-card:hover .cat-image {
+        transform: scale(1.05);
+      }
+
+      .cat-likes {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background-color: rgba(79, 70, 229, 0.2);
+        color: var(--text-light);
+      }
+
+      /* Стили для правильной предзагрузки изображений */
+      .img-preload {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .img-loaded {
+        opacity: 1;
+      }
+
+      /* Контейнер для изображения во время загрузки */
+      .img-container {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .img-container .skeleton {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+
+      .skeleton-hidden {
+        opacity: 0;
+      }
+
+      .img-container img {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* Стили для контейнеров с контентом */
+      .content-container {
+        position: relative;
+      }
+
+      #skeleton-content {
+        transition: opacity 0.5s ease;
+      }
+
+      #results-content {
+        transition: opacity 0.5s ease;
+        opacity: 0;
+      }
+    </style>
   </head>
   <body>
     <!-- INCLUDE_NAVIGATION -->

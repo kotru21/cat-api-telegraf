@@ -8,19 +8,17 @@
       </a>
       <!-- Десктопное меню -->
       <div class="hidden md:flex items-center space-x-4">
-        <a
-          href="/"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+        <a href="/" class="text-gray-300 hover:text-white transition-colors">
           <i class="fas fa-home mr-1"></i> Главная
         </a>
         <a
           href="/#leaderboard"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+          class="text-gray-300 hover:text-white transition-colors">
           <i class="fas fa-trophy mr-1"></i> Топ котов
         </a>
         <a
           href="/profile"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors user-auth-link flex items-center">
+          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
           <i class="fas fa-user mr-1"></i> Профиль
         </a>
         <a
@@ -30,101 +28,46 @@
         </a>
         <a
           href="/logout"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors user-auth-link flex items-center">
+          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
           <i class="fas fa-sign-out-alt mr-1"></i> Выйти
         </a>
-        <button
-          id="themeToggle"
-          class="ml-2 w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 text-yellow-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          title="Переключить тему">
-          <span class="sr-only">Сменить тему</span>
-          <i class="fas fa-sun hidden dark:inline text-lg"></i>
-          <i class="fas fa-moon inline dark:hidden text-lg"></i>
-        </button>
       </div>
-      <!-- Мобильная кнопка меню + тема -->
-      <div class="md:hidden flex items-center space-x-3">
-        <button
-          id="themeToggleMobile"
-          class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 text-yellow-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          title="Переключить тему">
-          <span class="sr-only">Сменить тему</span>
-          <i class="fas fa-sun hidden dark:inline text-lg"></i>
-          <i class="fas fa-moon inline dark:hidden text-lg"></i>
-        </button>
-        <button
-          id="menuButton"
-          class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-          <i class="fas fa-bars text-xl"></i>
-        </button>
-      </div>
+      <!-- Мобильная кнопка меню -->
+      <button id="menuButton" class="md:hidden text-gray-300 hover:text-white">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
     </div>
 
     <!-- Мобильное меню (скрыто по умолчанию) -->
     <div id="mobileMenu" class="md:hidden hidden">
       <div
-        class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-white dark:bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg border border-gray-200 dark:border-gray-700">
+        class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg">
         <a
           href="/"
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
           <i class="fas fa-home mr-1"></i> Главная
         </a>
         <a
           href="/#leaderboard"
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
           <i class="fas fa-trophy mr-1"></i> Топ котов
         </a>
         <a
           href="/profile"
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 user-auth-link flex items-center">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 user-auth-link flex items-center">
           <i class="fas fa-user mr-1"></i> Профиль
         </a>
         <a
           href="https://t.me/catbotjss_bot"
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
           <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
         </a>
         <a
           href="/logout"
-          class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 user-auth-link flex items-center">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 user-auth-link flex items-center">
           <i class="fas fa-sign-out-alt mr-1"></i> Выйти
         </a>
       </div>
     </div>
   </div>
 </nav>
-<script>
-  (function () {
-    const STORAGE_KEY = "theme";
-    const root = document.documentElement;
-    function applyTheme(theme) {
-      if (theme === "dark") root.classList.add("dark");
-      else root.classList.remove("dark");
-    }
-    function toggle() {
-      const next = root.classList.contains("dark") ? "light" : "dark";
-      localStorage.setItem(STORAGE_KEY, next);
-      applyTheme(next);
-      updateButtons();
-    }
-    function current() {
-      return (
-        localStorage.getItem(STORAGE_KEY) ||
-        (window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light")
-      );
-    }
-    function updateButtons() {
-      // Иконки обновляются за счёт hidden/dark:hidden классов
-    }
-    applyTheme(current());
-    document.addEventListener("DOMContentLoaded", function () {
-      const btns = [
-        document.getElementById("themeToggle"),
-        document.getElementById("themeToggleMobile"),
-      ].filter(Boolean);
-      btns.forEach((b) => b.addEventListener("click", toggle));
-    });
-  })();
-</script>

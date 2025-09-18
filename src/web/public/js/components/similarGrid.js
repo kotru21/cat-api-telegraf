@@ -46,15 +46,9 @@ export default async function renderSimilarGrid({
     imgContainer.style.aspectRatio = "3/2";
 
     const skeleton = document.createElement("div");
-    skeleton.className = [
-      "skeleton",
-      "w-full h-full rounded-none",
-      "bg-gray-800",
-      "[background-size:1400px_100%]",
-      "bg-[linear-gradient(110deg,#374151_8%,#4b5563_18%,#374151_33%)]",
-      "animate-shimmer",
-      "opacity-100 transition-opacity duration-300",
-    ].join(" ");
+    skeleton.className = "skeleton bg-gray-700 animate-pulse";
+    skeleton.style.width = "100%";
+    skeleton.style.height = "100%";
 
     const img = document.createElement("img");
     img.className = "cat-image w-full img-preload";
@@ -64,30 +58,26 @@ export default async function renderSimilarGrid({
         ? preloaded.img.src
         : cat.image_url || PLACEHOLDER.MEDIUM;
 
-    const finalize = () => {
-      img.classList.add("img-loaded");
-      skeleton.classList.add("skeleton-hidden", "opacity-0");
-    };
-    skeleton.addEventListener(
-      "transitionend",
-      (e) => {
-        if (
-          e.propertyName === "opacity" &&
-          skeleton.classList.contains("skeleton-hidden")
-        ) {
-          skeleton.remove();
-        }
-      },
-      { once: true }
-    );
-    img.onload = () => requestAnimationFrame(finalize);
+    img.onload = () =>
+      requestAnimationFrame(() => {
+        img.classList.add("img-loaded");
+        skeleton.classList.add("skeleton-hidden");
+      });
     img.onerror = () => {
       img.src = PLACEHOLDER.MEDIUM;
-      requestAnimationFrame(finalize);
+      requestAnimationFrame(() => {
+        img.classList.add("img-loaded");
+        skeleton.classList.add("skeleton-hidden");
+      });
     };
 
     if (preloaded && preloaded.img) {
-      requestAnimationFrame(finalize);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          img.classList.add("img-loaded");
+          skeleton.classList.add("skeleton-hidden");
+        }, 50);
+      });
     }
 
     imgContainer.appendChild(skeleton);

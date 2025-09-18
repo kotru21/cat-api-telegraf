@@ -35,15 +35,8 @@ export async function initHeroAvatars({
       wrap.style.height = "40px";
 
       const skeleton = document.createElement("div");
-      skeleton.className = [
-        "skeleton",
-        "w-10 h-10 rounded-full border-2 border-indigo-600",
-        "opacity-100 transition-opacity duration-300",
-        "bg-gray-800",
-        "[background-size:1400px_100%]",
-        "bg-[linear-gradient(110deg,#374151_8%,#4b5563_18%,#374151_33%)]",
-        "animate-shimmer",
-      ].join(" ");
+      skeleton.className =
+        "skeleton bg-gray-700 animate-pulse w-10 h-10 rounded-full border-2 border-indigo-600 opacity-100 transition-opacity duration-300";
 
       const imgEl = document.createElement("img");
       imgEl.alt = "Cat";
@@ -55,11 +48,10 @@ export async function initHeroAvatars({
         imgEl.classList.add("img-loaded", "opacity-100");
       };
 
-      const finalize = () => {
+      requestAnimationFrame(() => {
         imgEl.classList.add("img-loaded", "opacity-100");
         skeleton.classList.add("skeleton-hidden", "opacity-0");
-      };
-      requestAnimationFrame(finalize);
+      });
       skeleton.addEventListener(
         "transitionend",
         (e) => {

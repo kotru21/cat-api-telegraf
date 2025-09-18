@@ -47,45 +47,36 @@ export async function renderLikesGrid({
     imgContainer.style.height = "200px";
 
     const sk = document.createElement("div");
-    sk.className = [
-      "skeleton",
-      "w-full h-full",
-      "bg-gray-800",
-      "[background-size:1400px_100%]",
-      "bg-[linear-gradient(110deg,#374151_8%,#4b5563_18%,#374151_33%)]",
-      "animate-shimmer",
-      "opacity-100 transition-opacity duration-300",
-    ].join(" ");
+    sk.className = "skeleton bg-gray-700 animate-pulse";
+    sk.style.width = "100%";
+    sk.style.height = "100%";
 
     const img = document.createElement("img");
     img.alt = breedName;
     img.className = "cat-image w-full img-preload";
     img.src = preloadedImage?.img?.src || cat.image_url || PLACEHOLDER.MEDIUM;
 
-    const finalize = () => {
-      img.classList.add("img-loaded");
-      sk.classList.add("skeleton-hidden", "opacity-0");
+    img.onload = () => {
+      requestAnimationFrame(() => {
+        img.classList.add("img-loaded");
+        sk.classList.add("skeleton-hidden");
+      });
     };
-    sk.addEventListener(
-      "transitionend",
-      (e) => {
-        if (
-          e.propertyName === "opacity" &&
-          sk.classList.contains("skeleton-hidden")
-        ) {
-          sk.remove();
-        }
-      },
-      { once: true }
-    );
-    img.onload = () => requestAnimationFrame(finalize);
     img.onerror = () => {
       img.src = PLACEHOLDER.MEDIUM;
-      requestAnimationFrame(finalize);
+      requestAnimationFrame(() => {
+        img.classList.add("img-loaded");
+        sk.classList.add("skeleton-hidden");
+      });
     };
 
     if (preloadedImage && preloadedImage.img) {
-      requestAnimationFrame(finalize);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          img.classList.add("img-loaded");
+          sk.classList.add("skeleton-hidden");
+        }, 50);
+      });
     }
 
     const likeBadge = document.createElement("div");

@@ -90,40 +90,43 @@ export async function initLeaderboard({
     imgContainer.style.width = "96px";
     imgContainer.style.height = "96px";
 
-  const skeleton = document.createElement("div");
-  skeleton.className = "skeleton bg-gray-700 animate-pulse rounded-lg w-full h-full opacity-100 transition-opacity duration-300";
+    const skeleton = document.createElement("div");
+    skeleton.className =
+      "skeleton bg-gray-700 animate-pulse rounded-lg w-full h-full opacity-100 transition-opacity duration-300";
 
     const img = document.createElement("img");
-  img.className = "w-24 h-24 object-cover rounded-lg mx-auto img-preload opacity-0 transition-opacity duration-300";
+    img.className =
+      "w-24 h-24 object-cover rounded-lg mx-auto img-preload opacity-0 transition-opacity duration-300";
     img.alt = row.breed_name || "Cat breed";
     if (imageLoaded && preloadedImg) img.src = preloadedImg.src;
     else img.src = row.image_url || "";
     img.setAttribute("loading", "lazy");
 
-    img.onload = () => {
-      requestAnimationFrame(() => {
-        img.classList.add("img-loaded", "opacity-100");
-        skeleton.classList.add("skeleton-hidden", "opacity-0");
-        setTimeout(() => skeleton.remove(), 400);
-      });
+    const finalize = () => {
+      img.classList.add("img-loaded", "opacity-100");
+      skeleton.classList.add("skeleton-hidden", "opacity-0");
     };
+    skeleton.addEventListener(
+      "transitionend",
+      (e) => {
+        if (
+          e.propertyName === "opacity" &&
+          skeleton.classList.contains("skeleton-hidden")
+        ) {
+          skeleton.remove();
+        }
+      },
+      { once: true }
+    );
+
+    img.onload = () => requestAnimationFrame(finalize);
     img.onerror = () => {
       img.src = PLACEHOLDER.SMALL;
-      requestAnimationFrame(() => {
-        img.classList.add("img-loaded", "opacity-100");
-        skeleton.classList.add("skeleton-hidden", "opacity-0");
-        setTimeout(() => skeleton.remove(), 400);
-      });
+      requestAnimationFrame(finalize);
     };
 
     if (imageLoaded && preloadedImg) {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          img.classList.add("img-loaded", "opacity-100");
-          skeleton.classList.add("skeleton-hidden", "opacity-0");
-          setTimeout(() => skeleton.remove(), 400);
-        }, 50);
-      });
+      requestAnimationFrame(finalize);
     }
 
     imgContainer.appendChild(skeleton);

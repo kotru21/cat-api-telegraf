@@ -1,33 +1,42 @@
 <!-- Навигационная панель -->
-<nav class="py-4 fixed w-full header z-50 transition-all duration-300">
+<nav class="py-4 fixed w-full bg-none header z-50 transition-all duration-300">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center">
-      <a href="/" class="text-xl brand-link flex items-center gap-2">
-        <i class="fas fa-cat text-indigo-500"></i>
+      <a href="/" class="text-xl font-bold text-white flex items-center">
+        <i class="fas fa-cat mr-2 text-indigo-500"></i>
         <span>CatBot</span>
       </a>
       <!-- Десктопное меню -->
-      <div class="hidden md:flex items-center space-x-5">
-        <a href="/" class="nav-link"
-          ><i class="fas fa-home"></i> <span>Главная</span></a
-        >
-        <a href="/#leaderboard" class="nav-link"
-          ><i class="fas fa-trophy"></i> <span>Топ котов</span></a
-        >
-        <a href="/profile" class="nav-link user-auth-link"
-          ><i class="fas fa-user"></i> <span>Профиль</span></a
-        >
-        <a href="https://t.me/catbotjss_bot" class="nav-cta"
-          ><i class="fab fa-telegram-plane"></i> <span>Открыть бота</span></a
-        >
-        <a href="/logout" class="nav-link user-auth-link"
-          ><i class="fas fa-sign-out-alt"></i> <span>Выйти</span></a
-        >
+      <div class="hidden md:flex items-center space-x-4">
+        <a href="/" class="text-gray-300 hover:text-white transition-colors">
+          <i class="fas fa-home mr-1"></i> Главная
+        </a>
+        <a
+          href="/#leaderboard"
+          class="text-gray-300 hover:text-white transition-colors">
+          <i class="fas fa-trophy mr-1"></i> Топ котов
+        </a>
+        <a
+          href="/profile"
+          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
+          <i class="fas fa-user mr-1"></i> Профиль
+        </a>
+        <a
+          href="https://t.me/catbotjss_bot"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
+          <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+        </a>
+        <a
+          href="/logout"
+          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
+          <i class="fas fa-sign-out-alt mr-1"></i> Выйти
+        </a>
+        <!-- Переключатель темы -->
         <button
           id="themeToggle"
-          aria-label="Переключатель темы"
-          aria-pressed="false"
-          class="theme-toggle-btn">
+          aria-label="Переключить тему"
+          class="ml-2 p-2 rounded-full border border-gray-500/40 text-gray-300 hover:text-white hover:bg-gray-700/60 dark:hover:bg-gray-600/60 transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <!-- Светлая иконка (показана в тёмной теме для возврата к светлой) -->
           <svg
             data-icon="sun"
             xmlns="http://www.w3.org/2000/svg"
@@ -40,6 +49,7 @@
               d="M10 1a1 1 0 011 1v1a1 1 0 11-2 0V2a1 1 0 011-1zm0 14a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm9-5a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm11.657-6.657a1 1 0 010 1.414L15.243 5.17a1 1 0 11-1.414-1.414l.414-.413a1 1 0 011.414 0zM6.17 15.243a1 1 0 011.414 0l.413.414A1 1 0 016.586 17.07l-.414-.414a1 1 0 010-1.414zm9.07 1.414a1 1 0 010-1.414l.413-.414A1 1 0 0117.07 15.9l-.414.414a1 1 0 01-1.414 0zM6.586 2.757A1 1 0 105.172 4.17l.414.413A1 1 0 107.001 3.17l-.415-.414z"
               clip-rule="evenodd" />
           </svg>
+          <!-- Тёмная иконка (показана в светлой теме для перехода в тёмную) -->
           <svg
             data-icon="moon"
             xmlns="http://www.w3.org/2000/svg"
@@ -52,34 +62,44 @@
         </button>
       </div>
       <!-- Мобильная кнопка меню -->
-      <button id="menuButton" class="md:hidden theme-toggle-btn p-2">
-        <i class="fas fa-bars text-lg"></i>
+      <button id="menuButton" class="md:hidden text-gray-300 hover:text-white">
+        <i class="fas fa-bars text-xl"></i>
       </button>
     </div>
 
     <!-- Мобильное меню (скрыто по умолчанию) -->
     <div id="mobileMenu" class="md:hidden hidden">
-      <div class="px-2 pt-2 pb-3 space-y-1 mt-2 mobile-menu-panel rounded-lg">
-        <a href="/" class="nav-link-block"
-          ><i class="fas fa-home"></i> <span>Главная</span></a
-        >
-        <a href="/#leaderboard" class="nav-link-block"
-          ><i class="fas fa-trophy"></i> <span>Топ котов</span></a
-        >
-        <a href="/profile" class="nav-link-block user-auth-link"
-          ><i class="fas fa-user"></i> <span>Профиль</span></a
-        >
-        <a href="https://t.me/catbotjss_bot" class="nav-link-block primary"
-          ><i class="fab fa-telegram-plane"></i> <span>Открыть бота</span></a
-        >
-        <a href="/logout" class="nav-link-block user-auth-link"
-          ><i class="fas fa-sign-out-alt"></i> <span>Выйти</span></a
-        >
+      <div
+        class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg">
+        <a
+          href="/"
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+          <i class="fas fa-home mr-1"></i> Главная
+        </a>
+        <a
+          href="/#leaderboard"
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+          <i class="fas fa-trophy mr-1"></i> Топ котов
+        </a>
+        <a
+          href="/profile"
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 user-auth-link flex items-center">
+          <i class="fas fa-user mr-1"></i> Профиль
+        </a>
+        <a
+          href="https://t.me/catbotjss_bot"
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+          <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
+        </a>
+        <a
+          href="/logout"
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 user-auth-link flex items-center">
+          <i class="fas fa-sign-out-alt mr-1"></i> Выйти
+        </a>
         <button
           id="themeToggleMobile"
-          aria-label="Переключатель темы"
-          aria-pressed="false"
-          class="nav-link-block mobile-theme-toggle gap-2 mt-1">
+          aria-label="Переключить тему"
+          class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 mt-2 border border-gray-600/40">
           <svg
             data-icon="sun"
             xmlns="http://www.w3.org/2000/svg"

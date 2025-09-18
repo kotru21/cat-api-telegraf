@@ -12,10 +12,13 @@
     return mq.matches ? "dark" : "light";
   }
 
-  function applyTheme(theme, { skipIconUpdate = false } = {}) {
-    const isDark = theme === "dark";
-    root.classList.toggle("dark", isDark);
-    if (!skipIconUpdate) updateToggleIcons(theme);
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    updateToggleIcons(theme);
   }
 
   function toggleTheme() {
@@ -26,7 +29,6 @@
   }
 
   function updateToggleIcons(theme) {
-    const isDark = theme === "dark";
     const toggles = document.querySelectorAll(
       "#themeToggle, #themeToggleMobile"
     );
@@ -34,26 +36,20 @@
       const sun = btn.querySelector('[data-icon="sun"]');
       const moon = btn.querySelector('[data-icon="moon"]');
       if (!sun || !moon) return;
-      if (isDark) {
+      if (theme === "dark") {
+        // show sun (so user can go back to light)
         sun.classList.remove("hidden");
         moon.classList.add("hidden");
       } else {
         sun.classList.add("hidden");
         moon.classList.remove("hidden");
       }
-      btn.setAttribute("aria-pressed", String(isDark));
-      btn.setAttribute(
-        "aria-label",
-        isDark ? "Переключить на светлую тему" : "Переключить на тёмную тему"
-      );
     });
   }
 
   // Initialize early after DOM ready (script loaded defer at end typical)
   document.addEventListener("DOMContentLoaded", () => {
-    // Первичное применение темы без мерцаний иконок (они обновятся один раз)
-    applyTheme(getPreferredTheme(), { skipIconUpdate: true });
-    updateToggleIcons(root.classList.contains("dark") ? "dark" : "light");
+    applyTheme(getPreferredTheme());
     const toggleDesktop = document.getElementById("themeToggle");
     const toggleMobile = document.getElementById("themeToggleMobile");
     [toggleDesktop, toggleMobile].forEach(

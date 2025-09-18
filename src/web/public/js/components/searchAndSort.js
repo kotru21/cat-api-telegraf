@@ -30,6 +30,7 @@ export function initSearchAndSort({
           card.querySelector(".likes-badge")?.textContent.split(" ")[0]
         ) || 0,
     }));
+    console.log(`Snapshot: found ${allCats.length} cats`); // для отладки
   }
 
   function filterCats(items, term) {

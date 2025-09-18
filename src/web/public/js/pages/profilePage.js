@@ -49,10 +49,13 @@ async function loadCounts() {
   } catch (_) {}
 }
 
-async function loadLikes(modal, searchModule) {
+async function loadLikes(modal, searchModule = null) {
   const likesData = await getUserLikes();
   const { cards } = await renderLikesGrid({ data: likesData });
-  attachRemoveHandlers(cards, modal, searchModule);
+  if (searchModule) {
+    attachRemoveHandlers(cards, modal, searchModule);
+  }
+  return cards;
 }
 
 function attachRemoveHandlers(cards, modal, searchModule) {
@@ -121,9 +124,17 @@ async function init() {
   const profile = await loadProfile();
   if (!profile) return; // redirected
   await loadCounts();
-  const searchModule = initSearchAndSort({});
   const modal = initConfirmationModal({});
-  await loadLikes(modal, searchModule);
+  await loadLikes(modal, null); // сначала загружаем данные
+  const searchModule = initSearchAndSort({}); // затем инициализируем фильтры
+  // Обновляем обработчики удаления с новым searchModule
+  const container = document.getElementById("user-likes");
+  if (container) {
+    const cards = Array.from(container.children).filter((el) =>
+      el.classList.contains("cat-card")
+    );
+    attachRemoveHandlers(cards, modal, searchModule);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

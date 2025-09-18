@@ -91,12 +91,12 @@ export class WebServer {
   }
 
   setupStaticFiles() {
-    this.app.use("/static", express.static(path.join(__dirname, "../public")));
-    this.app.use("/js", express.static(path.join(__dirname, "public/js")));
-    this.app.use(
-      "/media",
-      express.static(path.join(__dirname, "public/media"))
-    );
+    // Корректная раздача фронтенд ассетов из src/web/public
+    const pubDir = path.join(__dirname, "public");
+    this.app.use("/public", express.static(pubDir));
+    // Backward compatibility aliases (если где-то остались старые пути)
+    this.app.use("/js", express.static(path.join(pubDir, "js")));
+    this.app.use("/media", express.static(path.join(pubDir, "media")));
   }
 
   setupLeaderboardEvents() {

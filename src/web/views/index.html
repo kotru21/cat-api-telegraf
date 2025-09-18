@@ -94,18 +94,14 @@
         backdrop-filter: blur(8px);
         transition: background-color 0.4s ease, box-shadow 0.4s ease,
           backdrop-filter 0.4s ease;
-        background-color: transparent; /* изначально прозрачный */
+        background-color: transparent;
+        min-height: 88px;
       }
 
       .header.scrolled {
         background-color: rgba(17, 24, 39, 0.85);
         box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(10px) saturate(140%);
-      }
-
-      /* Чтобы контент не прыгал под фиксированным header */
-      body.has-fixed-header {
-        padding-top: 88px; /* высота навбара приблизительно */
       }
 
       /* Стили для таблицы */

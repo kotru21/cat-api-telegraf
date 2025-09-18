@@ -12,10 +12,8 @@ if (window.navigationInitialized) {
     if (!header) return;
     if (window.scrollY > 10) {
       header.classList.add("scrolled");
-      document.body.classList.add("has-fixed-header");
     } else {
       header.classList.remove("scrolled");
-      document.body.classList.remove("has-fixed-header");
     }
   };
 

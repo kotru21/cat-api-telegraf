@@ -49,16 +49,12 @@ export async function initHeroAvatars({
       };
 
       requestAnimationFrame(() => {
-        imgEl.classList.add("img-loaded", "opacity-100");
-        skeleton.classList.add("skeleton-hidden", "opacity-0");
+        setTimeout(() => {
+          imgEl.classList.add("img-loaded", "opacity-100");
+          skeleton.classList.add("skeleton-hidden", "opacity-0");
+          setTimeout(() => skeleton.remove(), 400);
+        }, 50);
       });
-      skeleton.addEventListener(
-        "transitionend",
-        (e) => {
-          if (e.propertyName === "opacity") skeleton.remove();
-        },
-        { once: true }
-      );
 
       wrap.appendChild(skeleton);
       wrap.appendChild(imgEl);

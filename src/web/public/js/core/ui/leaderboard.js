@@ -35,7 +35,7 @@ export function createLeaderboardRow(row, index) {
   const name = document.createElement("td");
   name.className =
     "px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle";
-  const targetId = row.breedId || '';
+  const targetId = row.breedId || "";
   name.innerHTML = `<a href="/catDetails?id=${encodeURIComponent(
     targetId
   )}" class="text-indigo-400 hover:text-indigo-300 transition-colors">${row.breedName.replace(

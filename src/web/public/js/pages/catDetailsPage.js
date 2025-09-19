@@ -1,5 +1,13 @@
-import { getCatDetails } from "/js/api.js";
-import { sanitize, PLACEHOLDER, preloadImages } from "/js/utils.js";
+import { sanitize, preloadImages } from "/js/utils.js";
+import store, { subscribe } from "/js/core/state/store.js";
+import { loadCatDetails } from "/js/core/services/CatDetailsService.js";
+import {
+  applyCatDetails,
+  revealContent,
+  showErrorState,
+} from "/js/core/ui/catDetails.js";
+import { notifyError } from "/js/core/errors/notify.js";
+import { registerCleanup } from "/js/core/state/lifecycle.js";
 
 // Simple like state (no backend mutation yet) to avoid double increments quickly
 let likeLocked = false;
@@ -35,63 +43,28 @@ function navigateSimilar(feature, rawValue) {
   window.location.href = url;
 }
 
-async function loadCatDetails(catId) {
+async function runCatDetails(catId) {
   const skeletonContent = document.getElementById("skeleton-content");
   const catContent = document.getElementById("cat-content");
-  const minLoadTime = 800;
+  if (catContent) catContent.setAttribute("aria-busy", "true");
   const startTime = Date.now();
-
   try {
-    const data = await getCatDetails(catId);
-    document.title = `${sanitize(data.breed_name)} | Cat Details`;
-
-    const breedNameEl = document.getElementById("breed-name");
-    const descEl = document.getElementById("description");
-    const likesEl = document.getElementById("likes-count");
-    const wikiLink = document.getElementById("wiki-link");
-    const originEl = document.getElementById("origin");
-    const temperamentEl = document.getElementById("temperament");
-    const lifeSpanEl = document.getElementById("life-span");
-    const weightEl = document.getElementById("weight");
-
-    breedNameEl.textContent = data.breed_name || "Unknown";
-    descEl.textContent = data.description || "—";
-    likesEl.textContent = data.count ?? 0;
-    if (data.wikipedia_url) {
-      wikiLink.href = data.wikipedia_url;
-      wikiLink.rel = "noopener noreferrer";
+    const data = await loadCatDetails(catId);
+    if (data && data.breed_name) {
+      document.title = `${sanitize(data.breed_name)} | Cat Details`;
     }
-    originEl.textContent = data.origin || "—";
-    temperamentEl.textContent = data.temperament || "—";
-    lifeSpanEl.textContent = data.life_span || "—";
-    weightEl.textContent = `${data.weight_imperial || "?"} фунтов (${
-      data.weight_metric || "?"
-    } кг)`;
-
-    // Preload single image with graceful timeout fallback
-    const targetUrl = data.image_url || PLACEHOLDER.LARGE;
-    const preload = await preloadImages([targetUrl], 3000);
-    const success = preload && preload[0] && preload[0].success;
-    const imgElement = document.getElementById("cat-image");
-    imgElement.src = success ? preload[0].img.src : targetUrl;
-
-    const elapsed = Date.now() - startTime;
-    const remain = Math.max(0, minLoadTime - elapsed);
-    setTimeout(() => {
-      skeletonContent.classList.add("hidden");
-      catContent.classList.remove("hidden");
-      requestAnimationFrame(() => {
-        catContent.classList.remove("opacity-0");
-        catContent.classList.add("opacity-100");
-      });
-    }, remain);
+    // Preload image independently; UI renderer will decide what to show
+    const targetUrl = (data && data.image_url) || null;
+    let preloadResult = null;
+    if (targetUrl) {
+      const preload = await preloadImages([targetUrl], 3000);
+      if (preload && preload[0]) preloadResult = preload[0];
+    }
+    // When store updates subscription will apply details. We just ensure reveal timing.
+    revealContent({ startTime });
   } catch (err) {
-    console.error("Cat details load error:", err);
-    document.getElementById("breed-name").textContent =
-      "Ошибка загрузки информации о коте";
-    skeletonContent.classList.add("hidden");
-    catContent.classList.remove("hidden", "opacity-0");
-    catContent.classList.add("opacity-100");
+    notifyError(err, { prefix: "Детали кота" });
+    showErrorState();
   }
 }
 
@@ -143,7 +116,23 @@ function init() {
   }
   initFeatureNavigation();
   initLikeButton();
-  loadCatDetails(catId);
+
+  // Subscribe once to catDetails state
+  const unsub = subscribe(
+    (s) => ({
+      data: s.catDetails,
+      loading: s.loading.catDetails,
+      error: s.errors.catDetails,
+    }),
+    ({ data, loading, error }) => {
+      if (data) {
+        applyCatDetails({ data });
+      }
+    }
+  );
+  registerCleanup(unsub);
+
+  runCatDetails(catId);
 }
 
 document.addEventListener("DOMContentLoaded", init);

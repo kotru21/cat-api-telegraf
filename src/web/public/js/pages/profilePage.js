@@ -1,31 +1,22 @@
-import {
-  getProfile,
-  getUserLikesCount,
-  getUserLikes,
-  deleteLike,
-} from "/js/api.js";
 import { sanitize } from "/js/utils.js";
-import showToast from "/js/toast.js";
 import initSearchAndSort from "/js/components/searchAndSort.js";
 import initConfirmationModal from "/js/components/confirmationModal.js";
-import renderLikesGrid from "/js/components/likesGrid.js";
+import store, { subscribe } from "/js/core/state/store.js";
+import { loadLikes, removeLike } from "/js/core/services/LikesService.js";
+import { loadProfile } from "/js/core/services/ProfileService.js";
+import { renderLikes } from "/js/core/ui/likes.js";
+import { notifyError, notifySuccess } from "/js/core/errors/notify.js";
+import { registerCleanup } from "/js/core/state/lifecycle.js";
 
-async function loadProfile() {
-  let profileData;
-  try {
-    profileData = await getProfile();
-  } catch (err) {
-    if (err.status === 401) {
-      window.location.href = "/login";
-      return null;
-    }
-    throw err;
-  }
+function applyProfile(profileData) {
+  if (!profileData) return;
   const avatar = document.getElementById("user-avatar");
-  avatar.addEventListener("error", function () {
-    this.src = this.getAttribute("data-fallback");
-  });
-
+  if (!avatar.dataset.bound) {
+    avatar.addEventListener("error", function () {
+      this.src = this.getAttribute("data-fallback");
+    });
+    avatar.dataset.bound = "1";
+  }
   document.getElementById("user-name").textContent = sanitize(
     (profileData.first_name || "") +
       (profileData.last_name ? " " + profileData.last_name : "")
@@ -39,92 +30,34 @@ async function loadProfile() {
   }
   const lastActive = document.getElementById("last-active");
   if (lastActive) lastActive.textContent = "Сегодня";
-  return profileData;
 }
 
-async function loadCounts() {
-  try {
-    const { count } = await getUserLikesCount();
-    document.getElementById("likes-count").textContent = count;
-  } catch (_) {}
-}
-
-async function loadLikes(modal, searchModule = null) {
-  const skeleton = document.getElementById("likes-skeleton");
-  try {
-    const likesData = await getUserLikes();
-    const { cards } = await renderLikesGrid({ data: likesData });
-    if (searchModule) {
-      attachRemoveHandlers(cards, modal, searchModule);
-    }
-    return cards;
-  } catch (err) {
-    console.error("Ошибка загрузки лайков профиля:", err);
-    showToast(
-      err.status === 401
-        ? "Сессия истекла. Перенаправление..."
-        : "Не удалось загрузить лайки",
-      "error"
-    );
-    if (err.status === 401) {
-      setTimeout(() => (window.location.href = "/login"), 1200);
-    }
-    // Скрываем скелетон даже при ошибке
-    if (skeleton) {
-      skeleton.style.opacity = "0";
-      setTimeout(() => (skeleton.style.display = "none"), 400);
-    }
-    const noLikes = document.getElementById("no-likes");
-    if (noLikes) noLikes.style.display = "block";
-    return [];
-  }
-}
-
-function attachRemoveHandlers(cards, modal, searchModule) {
-  cards.forEach((card) => {
-    const btn = card.querySelector(".remove-like-btn");
-    if (!btn) return;
-    btn.addEventListener("click", () => {
-      const catId = btn.dataset.catId;
-      const breedName = btn.dataset.breedName;
-      modal.show(breedName, async () => {
-        try {
-          try {
-            await deleteLike(catId);
-          } catch (err) {
-            if (err.status) {
-              showToast(err.message || "Ошибка удаления", "error");
-              return;
-            }
-            throw err;
+function handleRemove(modal, searchModule) {
+  return ({ catId, breedName, card }) => {
+    modal.show(breedName, async () => {
+      try {
+        card.style.opacity = "0";
+        card.style.transform = "scale(0.95)";
+        card.style.transition = "all 0.25s ease";
+        await removeLike(catId);
+        setTimeout(() => {
+          card.remove();
+          notifySuccess("Лайк успешно удален");
+          if (searchModule && searchModule.refresh) searchModule.refresh();
+          if (store.getState().likes.length === 0) {
+            document.getElementById("user-likes").style.display = "none";
+            const noLikes = document.getElementById("no-likes");
+            if (noLikes) noLikes.style.display = "block";
           }
-          card.style.opacity = "0";
-          card.style.transform = "scale(0.9)";
-          card.style.transition = "all 0.3s ease";
-          setTimeout(() => {
-            card.remove();
-            const likesCountElement = document.getElementById("likes-count");
-            if (likesCountElement) {
-              const current = parseInt(likesCountElement.textContent) || 0;
-              likesCountElement.textContent = Math.max(0, current - 1);
-            }
-            const container = document.getElementById("user-likes");
-            if (container && container.children.length === 0) {
-              container.style.display = "none";
-              const noLikes = document.getElementById("no-likes");
-              if (noLikes) noLikes.style.display = "block";
-            } else if (searchModule && searchModule.refresh) {
-              searchModule.refresh();
-            }
-            showToast("Лайк успешно удален", "success");
-          }, 300);
-        } catch (e) {
-          console.error("Ошибка при удалении лайка:", e);
-          showToast("Произошла ошибка при удалении лайка", "error");
-        }
-      });
+        }, 240);
+      } catch (err) {
+        console.error("Ошибка при удалении лайка", err);
+        notifyError(err, { prefix: "Удаление лайка" });
+        card.style.opacity = "1";
+        card.style.transform = "none";
+      }
     });
-  });
+  };
 }
 
 function initScrollHeader() {
@@ -143,19 +76,94 @@ function initScrollHeader() {
 
 async function init() {
   initScrollHeader();
-  const profile = await loadProfile();
-  if (!profile) return; // redirected
-  await loadCounts();
   const modal = initConfirmationModal({});
-  await loadLikes(modal, null); // сначала загружаем данные (без search)
-  const searchModule = initSearchAndSort({}); // затем инициализируем фильтры
-  // Обновляем обработчики удаления с новым searchModule
-  const container = document.getElementById("user-likes");
-  if (container) {
-    const cards = Array.from(container.children).filter((el) =>
-      el.classList.contains("cat-card")
-    );
-    attachRemoveHandlers(cards, modal, searchModule);
+  let searchModule = null;
+
+  // Subscriptions
+  const unsubProfile = subscribe(
+    (s) => ({
+      profile: s.profile,
+      pLoading: s.loading.profile,
+      error: s.errors.profile,
+    }),
+    ({ profile, pLoading, error }) => {
+      if (profile) applyProfile(profile);
+      if (error) notifyError(error, { prefix: "Профиль" });
+    }
+  );
+  registerCleanup(unsubProfile);
+
+  const unsubLikes = subscribe(
+    (s) => ({
+      likes: s.likes,
+      loading: s.loading.likes,
+      error: s.errors.likes,
+      count: s.likesCount,
+    }),
+    ({ likes, loading, error, count }) => {
+      const skeleton = document.getElementById("likes-skeleton");
+      const container = document.getElementById("user-likes");
+      const noLikes = document.getElementById("no-likes");
+      if (container) {
+        container.setAttribute("role", "list");
+        container.setAttribute("aria-busy", loading ? "true" : "false");
+      }
+      if (loading) {
+        if (skeleton) {
+          skeleton.style.display = "grid";
+          skeleton.style.opacity = "1";
+        }
+        if (container) {
+          container.style.opacity = "0";
+        }
+        return;
+      }
+      if (skeleton) {
+        skeleton.style.opacity = "0";
+        setTimeout(() => (skeleton.style.display = "none"), 350);
+      }
+      if (error) {
+        notifyError(error, { prefix: "Лайки" });
+        if (noLikes) noLikes.style.display = "block";
+        return;
+      }
+      if (!likes || likes.length === 0) {
+        container.style.display = "none";
+        if (noLikes) noLikes.style.display = "block";
+        return;
+      }
+      if (noLikes) noLikes.style.display = "none";
+      container.style.display = "grid";
+      renderLikes({
+        container,
+        data: likes,
+        onRemove: handleRemove(modal, searchModule),
+      });
+      container.style.opacity = "1";
+      document.getElementById("likes-count").textContent = count;
+      if (!searchModule) {
+        searchModule = initSearchAndSort({});
+      } else {
+        searchModule.refresh();
+      }
+    }
+  );
+  registerCleanup(unsubLikes);
+
+  try {
+    await loadProfile();
+  } catch (err) {
+    if (err.status === 401) {
+      window.location.href = "/login";
+      return;
+    }
+  }
+  try {
+    await loadLikes({});
+  } catch (err) {
+    if (err.status === 401) {
+      window.location.href = "/login";
+    }
   }
 }
 

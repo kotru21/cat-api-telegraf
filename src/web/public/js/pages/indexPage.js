@@ -1,7 +1,12 @@
-import initLeaderboard from "/js/components/leaderboard.js";
 import initHeroAvatars from "/js/components/heroAvatars.js";
+import store, { subscribe } from "/js/core/state/store.js";
+import { loadLeaderboard } from "/js/core/services/LeaderboardService.js";
+import { renderLeaderboard } from "/js/core/ui/leaderboard.js";
+import { mountTableSkeleton, renderFallbackRow } from "/js/core/ui/skeleton.js";
 import { buildWsUrl } from "/js/api.js";
 import { formatUptime } from "/js/utils.js";
+import { notifyError } from "/js/core/errors/notify.js";
+import { registerCleanup } from "/js/core/state/lifecycle.js";
 
 // Single WebSocket for uptime + message count + potential future signals
 function initStatsWebSocket({
@@ -76,8 +81,57 @@ function initStatsWebSocket({
   };
 }
 
+function initLeaderboardController() {
+  const tableBody = document.querySelector("#leaderboard-table tbody");
+  const table = document.getElementById("leaderboard-table");
+  const skeletonTemplate = document.querySelector("#skeleton-row");
+  let clearSkeleton = null;
+  if (tableBody && skeletonTemplate) {
+    clearSkeleton = mountTableSkeleton({
+      tableBody,
+      template: skeletonTemplate,
+      count: 5,
+    });
+  }
+  if (table) table.setAttribute("aria-busy", "true");
+
+  const unsub = subscribe(
+    (s) => ({
+      data: s.leaderboard,
+      loading: s.loading.leaderboard,
+      error: s.errors.leaderboard,
+    }),
+    ({ data, loading, error }) => {
+      if (!tableBody) return;
+      if (loading) return; // skeleton уже показан
+      if (error) {
+        if (clearSkeleton) clearSkeleton();
+        renderFallbackRow(tableBody, {
+          text: "Ошибка загрузки. Попробуйте позже.",
+        });
+        notifyError(error, { prefix: "Лидерборд" });
+        if (table) table.setAttribute("aria-busy", "false");
+        return;
+      }
+      if (!data || data.length === 0) {
+        if (clearSkeleton) clearSkeleton();
+        renderFallbackRow(tableBody, { text: "Нет данных для отображения." });
+        if (table) table.setAttribute("aria-busy", "false");
+        return;
+      }
+      if (clearSkeleton) clearSkeleton();
+      renderLeaderboard({ tableBody, data });
+      if (table) table.setAttribute("aria-busy", "false");
+    }
+  );
+  registerCleanup(unsub);
+
+  loadLeaderboard().catch(() => {});
+}
+
 async function init() {
-  await Promise.all([initHeroAvatars({}), initLeaderboard({})]);
+  await initHeroAvatars({});
+  initLeaderboardController();
   initStatsWebSocket({});
 }
 

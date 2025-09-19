@@ -206,80 +206,48 @@ BOT_TOKEN=your-production-bot-token
 # Безопасность
 WEBSITE_URL=https://yourdomain.com
 
-## Frontend Modular Structure (Refactor 2025-09)
+## Frontend Architecture (2025 Refactor)
 
-В рамках последнего рефакторинга инлайновые скрипты из HTML вынесены в ES-модули. Это упростит переиспользование, тестирование и будущую сборку (через Vite/Webpack/Rollup при необходимости).
+Новая архитектура фронтенда разделена на слои:
 
-Структура (`src/web/public/js`):
-
-```text
-js/
-   api.js            # Централизованный доступ к REST эндпоинтам + кэш
-   utils.js          # Общие утилиты: sanitize, debounce, preloadImages, placeholders, форматирование
-   toast.js          # Показывает уведомления (toast)
-   navigation.js     # Поведение навигации/хедера
-   components/       # Изолированные UI/поведенческие куски без знания страницы
-      leaderboard.js
-      heroAvatars.js
+```
+src/web/public/js/
+   api.js
+   utils.js
+   toast.js
+   navigation.js
+   core/
+      state/
+         store.js
+         lifecycle.js
+      services/
+         LeaderboardService.js
+         LikesService.js
+         ProfileService.js
+      ui/
+         leaderboard.js
+         likes.js
+         skeleton.js
+      errors/
+         errorMapper.js
+         notify.js
+   components/
       searchAndSort.js
-      confirmationModal.js
-      likesGrid.js
-   pages/            # Оркестраторы конкретных страниц (инициализация компонентов + поток данных)
+      heroAvatars.js (legacy / migrating)
+   pages/
       indexPage.js
       profilePage.js
       catDetailsPage.js
-````
-
-Принципы:
-
-1. pages/_ импортируют components/_, core (api/utils/toast), но не наоборот.
-2. components не делают прямых fetch вызовов — принимают данные или функции загрузки извне.
-3. Никакого инлайнового JS в HTML (кроме минимального fallback возможно в будущем). Подключение через `<script type="module" src="/js/pages/...">`.
-4. Именование: `Page.js` (суффикс Page) для страниц, существительные в camelCase для компонентов.
-
-Как добавить новую страницу:
-
-1. Создать `pages/newFeaturePage.js`.
-2. Внутри: функция `init()` (слушатель DOMContentLoaded) или мгновенный вызов, подключить нужные компоненты.
-3. В HTML добавить импорт: `<script type="module" src="/js/pages/newFeaturePage.js"></script>` после core модулей.
-
-Компонентный шаблон (минимум):
-
-```js
-// components/exampleWidget.js
-export function initExampleWidget(rootEl, options = {}) {
-  // подготовка DOM / подписка на события
-  return {
-    update(newData) {},
-    destroy() {},
-  };
-}
 ```
 
-Страница (пример):
+Guidelines:
+1. pages -> orchestration only (вызов services, подписка на store, вызов ui render)
+2. services -> api + нормализация + обновление store (нет прямого DOM)
+3. ui -> чистые DOM функции без fetch
+4. errors -> mapError + notify (toast)
+5. accessibility -> aria-busy во время загрузки, skeleton aria-hidden
 
-```js
-// pages/samplePage.js
-import { getProfile } from "/js/api.js";
-import { initExampleWidget } from "/js/components/exampleWidget.js";
-
-async function init() {
-  const data = await getProfile();
-  const widget = initExampleWidget(document.getElementById("widget-root"));
-  widget.update(data);
-}
-
-document.addEventListener("DOMContentLoaded", init);
-```
-
-Будущие улучшения:
-
-- Автоматическая регистрация страниц по data-атрибуту вместо прямых `<script>`.
-- Сборка/оптимизация (код-сплиттинг, minify, cache busting).
-- Ленивая загрузка тяжёлых компонентов (напр. leaderboard) через динамические import().
-- Типизация через JSDoc/TypeScript.
-
-Если добавляется функционал лайка (POST), логично вынести логику из `catDetailsPage.js` в отдельный `likeButton.js` компонент (пока не внедрено, отметка TODO присутствует).
+Подробнее: `docs/frontend-architecture.md` и `docs/migration-checklist.md`.
 
 ````
 
@@ -299,7 +267,7 @@ heroku config:set BOT_TOKEN=your-bot-token
 
 # Деплой
 git push heroku main
-````
+```
 
 ---
 

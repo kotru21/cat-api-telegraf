@@ -6,7 +6,8 @@ export function normalizeRow(row, index = 0) {
   // Backward-compatible shape + extended fields
   return {
     position: row.rank != null ? row.rank : index + 1,
-    breedId: row.breed_id || row.id,
+    // canonical identifier; backend должен возвращать breed_id
+    breedId: row.breed_id,
     breedName: row.breed_name || "Unknown Breed",
     likes:
       row.likes != null ? row.likes : row.count != null ? row.count : undefined,

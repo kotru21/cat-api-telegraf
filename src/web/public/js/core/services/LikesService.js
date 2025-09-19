@@ -3,7 +3,8 @@ import store, { setState, emit, getState } from "/js/core/state/store.js";
 
 export function normalizeLike(row) {
   return {
-    catId: row.cat_id || row.id || row.catId,
+    // canonical cat identifier
+    catId: row.cat_id,
     breedName: row.breed_name || "Unknown",
     imageUrl: row.image_url || row.imageUrl || "",
     likes: row.likes_count || row.count || 0,

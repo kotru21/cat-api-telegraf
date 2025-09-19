@@ -15,10 +15,30 @@ export async function renderLikesGrid({
   const noLikes = document.querySelector(noLikesSelector);
   if (!container) return { cards: [] };
 
+  // Ensure container starts exactly at skeleton position to avoid jump
+  if (skeleton) {
+    const rect = skeleton.getBoundingClientRect();
+    const h = rect.height;
+    if (h > 0) {
+      //  spacer
+      if (!skeleton.__spacerCreated) {
+        const spacer = document.createElement("div");
+        spacer.style.height = h + "px";
+        spacer.setAttribute("data-skeleton-spacer", "true");
+        skeleton.parentNode.insertBefore(spacer, skeleton.nextSibling);
+        skeleton.__spacerCreated = spacer;
+      }
+    }
+  }
+
   if (data.length === 0) {
     if (skeleton) skeleton.style.opacity = "0";
     setTimeout(() => {
-      if (skeleton) skeleton.style.display = "none";
+      if (skeleton) {
+        skeleton.style.display = "none";
+        if (skeleton.__spacerCreated)
+          skeleton.__spacerCreated.style.display = "none";
+      }
       if (noLikes) noLikes.style.display = "block";
     }, 500);
     return { cards: [] };
@@ -26,6 +46,20 @@ export async function renderLikesGrid({
 
   const preload = await preloadImages(data.map((c) => c.image_url));
   const hasTimeout = preload.length === 0;
+
+  // Абсолютное позиционирование нового контейнера поверх skeleton во время fade
+  if (skeleton && !container.__positioned) {
+    const skeletonRect = skeleton.getBoundingClientRect();
+    const parent = skeleton.parentElement;
+    parent.style.position = parent.style.position || "relative";
+    container.style.position = "absolute";
+    container.style.top = skeleton.offsetTop + "px";
+    container.style.left = skeleton.offsetLeft + "px";
+    container.style.width = skeletonRect.width + "px";
+    container.style.opacity = "0";
+    container.__positioned = true;
+  }
+
   container.style.display = "grid";
 
   const created = [];
@@ -93,11 +127,21 @@ export async function renderLikesGrid({
 
   requestAnimationFrame(() => {
     setTimeout(() => {
-      if (skeleton) skeleton.style.opacity = "0";
       container.style.opacity = "1";
+      if (skeleton) skeleton.style.opacity = "0";
       setTimeout(() => {
-        if (skeleton) skeleton.style.display = "none";
-      }, 500);
+        if (skeleton) {
+          skeleton.style.display = "none";
+          if (skeleton.__spacerCreated)
+            skeleton.__spacerCreated.style.display = "none";
+        }
+        if (container.__positioned) {
+          container.style.position = "relative";
+          container.style.top = "0";
+          container.style.left = "0";
+          container.style.width = "100%";
+        }
+      }, 450);
     }, 50);
   });
 

@@ -3,15 +3,14 @@ import store, { setState, emit, getState } from "/js/core/state/store.js";
 
 // Normalizer to keep UI decoupled from backend shape
 export function normalizeRow(row, index = 0) {
-  // Backward-compatible shape + extended fields
+  // Canonical shape. Backend returns msg rows: { id, breed_name, count, image_url }
   return {
     position: row.rank != null ? row.rank : index + 1,
-    // canonical identifier; backend должен возвращать breed_id
-    breedId: row.breed_id,
+    catId: row.id,
     breedName: row.breed_name || "Unknown Breed",
     likes:
       row.likes != null ? row.likes : row.count != null ? row.count : undefined,
-    change: 0, // placeholder for future movement metric
+    change: 0,
     imageUrl: row.image_url || "",
   };
 }

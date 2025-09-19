@@ -11,7 +11,7 @@ describe("normalizeRow", () => {
     const out = normalizeRow(input, 0);
     expect(out).toMatchObject({
       position: 1,
-      breedId: "abys",
+      catId: undefined, // backend sample used breed_id; with new contract we rely on id
       breedName: "Abyssinian",
       likes: 12,
       change: 0,
@@ -22,7 +22,7 @@ describe("normalizeRow", () => {
   it("defaults missing fields safely", () => {
     const out = normalizeRow({}, 4);
     expect(out.position).toBe(5);
-    expect(out.breedId).toBeUndefined();
+    expect(out.catId).toBeUndefined();
     expect(out.likes).toBeUndefined();
     expect(out.imageUrl).toBe("");
   });

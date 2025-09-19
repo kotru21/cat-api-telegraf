@@ -13,7 +13,7 @@
 - [🤖 Telegram Bot](#-telegram-bot)
 - [🚀 Развертывание](#-развертывание)
 
-## � Особенности
+## 🚀 Особенности
 
 - 🎲 **Случайные коты** с детальной информацией о породах
 - ❤️ **Система лайков** с персонализацией для пользователей
@@ -23,7 +23,7 @@
 - 🔄 **Real-time обновления** через WebSocket
 - 👤 **Telegram авторизация** в веб-интерфейсе
 
-## � Технологический стек
+## 🧱 Технологический стек
 
 **Backend:**
 
@@ -149,7 +149,7 @@ npm run prisma:migrate:dev
 npm run prisma:studio
 ```
 
-## � API Документация
+## 📊 API Документация
 
 ### Основные endpoints
 
@@ -206,48 +206,84 @@ BOT_TOKEN=your-production-bot-token
 # Безопасность
 WEBSITE_URL=https://yourdomain.com
 
-## Frontend Architecture (2025 Refactor)
+## 🧩 Frontend Architecture (2025 Refactor)
 
-Новая архитектура фронтенда разделена на слои:
+Фронтенд разделён на прозрачные слои (Clean-ish layering):
 
 ```
 src/web/public/js/
-   api.js
-   utils.js
-   toast.js
-   navigation.js
+   api.js                // HTTP helper + caching
+   utils.js              // Утилиты и константы (PLACEHOLDER, sanitize, preloadImages)
    core/
       state/
-         store.js
-         lifecycle.js
-      services/
+         store.js          // Pub/sub store + event bus
+         lifecycle.js      // registerCleanup / runCleanups
+      services/           // ONLY: fetch -> normalize -> update store (+ TTL кэш)
          LeaderboardService.js
          LikesService.js
          ProfileService.js
-      ui/
+         CatDetailsService.js
+      ui/                 // Чистый DOM (render / create... без fetch)
          leaderboard.js
          likes.js
+         catDetails.js
          skeleton.js
       errors/
          errorMapper.js
-         notify.js
-   components/
+         notify.js         // notifyError / notifySuccess (toast + dedupe)
+   components/           // Отдельные переиспользуемые "виджеты"
       searchAndSort.js
-      heroAvatars.js (legacy / migrating)
-   pages/
+      heroAvatars.js
+   pages/                // Оркестрация: подписка + вызов сервисов + lifecycle
       indexPage.js
       profilePage.js
       catDetailsPage.js
 ```
 
-Guidelines:
-1. pages -> orchestration only (вызов services, подписка на store, вызов ui render)
-2. services -> api + нормализация + обновление store (нет прямого DOM)
-3. ui -> чистые DOM функции без fetch
-4. errors -> mapError + notify (toast)
-5. accessibility -> aria-busy во время загрузки, skeleton aria-hidden
+Guidelines / Правила слоя:
+1. pages → orchestration only (никакой логики трансформации данных, минимум DOM).
+2. services → обращение к `api.js`, нормализация формата, TTL-кэш (Map / timestamps), обновление store.
+3. ui → функции create*/render* без сетевых запросов; получают уже нормализованные данные.
+4. errors → централизованный mapping + уведомления; исключает дублирование try/catch.
+5. a11y → `aria-busy` на контейнерах, `role=list/listitem`, скрытие skeleton через `aria-hidden` (частично внедрено).
+6. Никаких inline event handlers в HTML (CSP friendly) — см. раздел Security/CSP.
 
-Подробнее: `docs/frontend-architecture.md` и `docs/migration-checklist.md`.
+### Data Model (кратко)
+Полное описание: `docs/data-model.md` (создано для синхронизации фронт/бэк). Ниже краткая выжимка:
+
+| Entity            | Поля (нормализованные)                                                                                  |
+|-------------------|----------------------------------------------------------------------------------------------------------|
+| LeaderboardRow    | `position`, `catId`, `breedName`, `likes`, `change` (резерв), `imageUrl`                                 |
+| Like              | `catId`, `breedName`, `imageUrl`, `likes`                                                                |
+| CatDetails        | `id`, `breedName`, `description`, `likes`, `wikipediaUrl`, `origin`, `temperament`, `lifeSpan`, `weightMetric`, `weightImperial`, `imageUrl` |
+| Profile           | Телеграм данные пользователя (`first_name`, `last_name`, `username`, `photo_url`)                       |
+
+`catId` — единый публичный идентификатор. В переходный период сервис `normalizeRow` имеет fallback цепочку `id || breed_id || cat_id` и выводит предупреждение в dev, если идентификатора нет. План: удалить fallback после выравнивания схемы БД.
+
+### Кэширование (TTL)
+- Leaderboard: 15s
+- Likes: 10s + отдельный fetch count
+- Profile: 30s (см. ProfileService — если будет добавлен TTL)
+- CatDetails: 30s (Map cache)
+
+### Тестирование
+`jest` + `jsdom` для юнитов (store, нормализация, UI компонентов). Запуск:
+```
+npm test
+```
+Покрытие можно расширить тестами на optimistic update (удаление лайка) и поведение skeleton.
+
+### Security / CSP
+- Убраны inline обработчики (`onerror`, `onclick`) — заменены на JS привязку.
+- Используется Helmet + строгий `script-src-attr 'none'`.
+- Fallback изображений через `data-fallback` + JS `error` listener.
+
+### Roadmap / Next
+- [ ] Удалить fallback цепочку `breed_id` / `cat_id` → оставить только `id`.
+- [ ] Дополнить a11y: скрывать skeleton через `aria-hidden="true"`, live region для обновления лайков.
+- [ ] Интегрировать реальный POST лайка на странице деталей (сейчас кнопка локально инкрементирует число).
+- [ ] Расширить тесты (optimistic rollback, WebSocket stats stub).
+- [ ] Вынести image preloading в общий модуль с абстракцией cancellation.
 
 ````
 
@@ -280,3 +316,9 @@ git push heroku main
 ---
 
 ⭐ **Если проект был полезен, поставьте звездочку на GitHub!** ⭐
+
+---
+
+### Changelog (Frontend Refactor Summary)
+
+2025-09: Полный рефактор фронтенда (слои services/state/ui, удалены legacy компоненты, введены тесты, устранены inline handlers, консолидация идентификатора `catId`).

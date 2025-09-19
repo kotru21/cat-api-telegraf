@@ -110,6 +110,17 @@ function showMissingId() {
 function init() {
   const params = new URLSearchParams(window.location.search);
   const catId = params.get("id");
+  // Bind image error fallback (CSP-safe instead of inline onerror)
+  const img = document.getElementById("cat-image");
+  if (img && !img.dataset.errorBound) {
+    img.addEventListener("error", () => {
+      const fallback = img.getAttribute("data-fallback");
+      if (fallback && img.src !== fallback) {
+        img.src = fallback;
+      }
+    });
+    img.dataset.errorBound = "1";
+  }
   if (!catId) {
     showMissingId();
     return;

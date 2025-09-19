@@ -35,13 +35,14 @@ export function createLeaderboardRow(row, index) {
   const name = document.createElement("td");
   name.className =
     "px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle";
-  const targetId = row.catId || "";
-  name.innerHTML = `<a href="/catDetails?id=${encodeURIComponent(
-    targetId
-  )}" class="text-indigo-400 hover:text-indigo-300 transition-colors">${row.breedName.replace(
-    /</g,
-    "&lt;"
-  )}</a>`;
+  const safeName = row.breedName.replace(/</g, "&lt;");
+  if (row.catId) {
+    name.innerHTML = `<a href="/catDetails?id=${encodeURIComponent(
+      row.catId
+    )}" class="text-indigo-400 hover:text-indigo-300 transition-colors">${safeName}</a>`;
+  } else {
+    name.innerHTML = `<span class="text-gray-400" title="ID недоступен">${safeName}</span>`;
+  }
 
   const likes = document.createElement("td");
   likes.className =

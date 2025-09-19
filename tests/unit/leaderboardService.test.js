@@ -11,7 +11,7 @@ describe("normalizeRow", () => {
     const out = normalizeRow(input, 0);
     expect(out).toMatchObject({
       position: 1,
-      catId: undefined, // backend sample used breed_id; with new contract we rely on id
+      catId: "abys", // falls back to breed_id when id missing
       breedName: "Abyssinian",
       likes: 12,
       change: 0,

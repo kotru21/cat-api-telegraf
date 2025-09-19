@@ -4,9 +4,14 @@ import store, { setState, emit, getState } from "/js/core/state/store.js";
 // Normalizer to keep UI decoupled from backend shape
 export function normalizeRow(row, index = 0) {
   // Canonical shape. Backend returns msg rows: { id, breed_name, count, image_url }
+  const catId = row.id || row.breed_id || row.cat_id || undefined;
+  if (!catId && process?.env?.NODE_ENV !== "production") {
+    // Helpful during transition; remove when API stabilized
+    console.warn("normalizeRow: missing id field in leaderboard row", row);
+  }
   return {
     position: row.rank != null ? row.rank : index + 1,
-    catId: row.id,
+    catId,
     breedName: row.breed_name || "Unknown Breed",
     likes:
       row.likes != null ? row.likes : row.count != null ? row.count : undefined,

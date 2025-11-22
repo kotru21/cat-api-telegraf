@@ -4,10 +4,43 @@
 // store.subscribe(s => s.leaderboard, data => { ... })
 // store.emit('leaderboard:loading')
 
-const listeners = new Set(); // selector-based subscribers
-const eventMap = new Map(); // eventName -> Set(handlers)
+interface AppState {
+  leaderboard: any[];
+  likes: any[];
+  profile: any | null;
+  likesCount: number;
+  loading: {
+    leaderboard?: boolean;
+    likes?: boolean;
+    profile?: boolean;
+    catDetails?: boolean;
+  };
+  errors: {
+    leaderboard?: any | null;
+    likes?: any | null;
+    profile?: any | null;
+    catDetails?: any | null;
+  };
+  meta: Record<string, any>;
+  catDetails?: any | null;
+  [key: string]: any; // Allow dynamic keys for now to fix TS7053
+}
 
-const state = {
+type Selector<T> = (state: AppState) => T;
+type SubscriberCallback<T> = (newValue: T, prevState: AppState) => void;
+
+interface ListenerEntry<T> {
+  selector: Selector<T>;
+  cb: SubscriberCallback<T>;
+  lastValue: T;
+}
+
+type EventHandler = (payload?: any) => void;
+
+const listeners = new Set<ListenerEntry<any>>(); // selector-based subscribers
+const eventMap = new Map<string, Set<EventHandler>>(); // eventName -> Set(handlers)
+
+const state: AppState = {
   leaderboard: [],
   likes: [],
   profile: null,
@@ -17,7 +50,7 @@ const state = {
   meta: {},
 };
 
-function shallowEqual(a, b) {
+function shallowEqual(a: any, b: any) {
   if (Object.is(a, b)) return true;
   if (typeof a !== "object" || typeof b !== "object" || !a || !b) return false;
   const ka = Object.keys(a);
@@ -31,7 +64,7 @@ export function getState() {
   return state;
 }
 
-export function setState(patch) {
+export function setState(patch: Partial<AppState>) {
   const prev = { ...state };
   Object.entries(patch).forEach(([k, v]) => {
     if (v && typeof v === "object" && !Array.isArray(v) && state[k]) {
@@ -58,24 +91,24 @@ export function setState(patch) {
   });
 }
 
-export function subscribe(selector, cb) {
-  const entry = { selector, cb, lastValue: selector(state) };
+export function subscribe<T>(selector: Selector<T>, cb: SubscriberCallback<T>) {
+  const entry: ListenerEntry<T> = { selector, cb, lastValue: selector(state) };
   listeners.add(entry);
   return () => listeners.delete(entry);
 }
 
-export function on(eventName, handler) {
+export function on(eventName: string, handler: EventHandler) {
   if (!eventMap.has(eventName)) eventMap.set(eventName, new Set());
-  eventMap.get(eventName).add(handler);
+  eventMap.get(eventName)!.add(handler);
   return () => off(eventName, handler);
 }
 
-export function off(eventName, handler) {
+export function off(eventName: string, handler: EventHandler) {
   const set = eventMap.get(eventName);
   if (set) set.delete(handler);
 }
 
-export function emit(eventName, payload) {
+export function emit(eventName: string, payload?: any) {
   const set = eventMap.get(eventName);
   if (set) {
     set.forEach((h) => {

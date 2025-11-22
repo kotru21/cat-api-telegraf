@@ -2,9 +2,9 @@
 // registerCleanup(fn) -> stores cleanup callbacks (event listeners unsub, intervals, etc.)
 // runCleanups() -> executes & clears all registered callbacks
 
-const cleanups = new Set();
+const cleanups = new Set<Function>();
 
-export function registerCleanup(fn) {
+export function registerCleanup(fn: Function) {
   if (typeof fn !== "function") return () => {};
   cleanups.add(fn);
   return () => cleanups.delete(fn);

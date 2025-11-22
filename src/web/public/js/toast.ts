@@ -1,9 +1,15 @@
 import { sanitize } from "./utils";
 
+type ToastType = "success" | "error" | "info";
+
 // Toast notification system
 // Usage: showToast('Message', 'success' | 'error' | 'info')
 // Automatically dismisses after timeoutMs (default 3500)
-export function showToast(message, type = "info", { timeoutMs = 3500 } = {}) {
+export function showToast(
+  message: string,
+  type: ToastType = "info",
+  { timeoutMs = 3500 } = {}
+) {
   let container = document.getElementById("toast-container");
   if (!container) {
     container = document.createElement("div");
@@ -48,7 +54,9 @@ export function showToast(message, type = "info", { timeoutMs = 3500 } = {}) {
   `;
 
   const closeBtn = toast.querySelector("button");
-  closeBtn.addEventListener("click", () => dismiss());
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => dismiss());
+  }
 
   function dismiss() {
     toast.style.opacity = "0";

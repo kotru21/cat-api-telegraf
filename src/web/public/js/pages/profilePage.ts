@@ -8,32 +8,47 @@ import { renderLikes } from "../core/ui/likes";
 import { notifyError, notifySuccess } from "../core/errors/notify";
 import { registerCleanup } from "../core/state/lifecycle";
 
-function applyProfile(profileData) {
+interface ProfileData {
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+}
+
+function applyProfile(profileData: ProfileData) {
   if (!profileData) return;
-  const avatar = document.getElementById("user-avatar");
+  const avatar = document.getElementById("user-avatar") as HTMLImageElement;
   if (!avatar.dataset.bound) {
-    avatar.addEventListener("error", function () {
-      this.src = this.getAttribute("data-fallback");
+    avatar.addEventListener("error", function (this: HTMLImageElement) {
+      this.src = this.getAttribute("data-fallback") || "";
     });
     avatar.dataset.bound = "1";
   }
-  document.getElementById("user-name").textContent = sanitize(
+  document.getElementById("user-name")!.textContent = sanitize(
     (profileData.first_name || "") +
       (profileData.last_name ? " " + profileData.last_name : "")
   );
-  document.getElementById("user-username").textContent =
-    "@" + sanitize(profileData.username);
+  document.getElementById("user-username")!.textContent =
+    "@" + sanitize(profileData.username || "");
   if (profileData.photo_url && profileData.photo_url.trim() !== "") {
     avatar.src = profileData.photo_url;
   } else {
-    avatar.src = avatar.getAttribute("data-fallback");
+    avatar.src = avatar.getAttribute("data-fallback") || "";
   }
   const lastActive = document.getElementById("last-active");
   if (lastActive) lastActive.textContent = "Сегодня";
 }
 
-function handleRemove(modal, searchModule) {
-  return ({ catId, breedName, card }) => {
+function handleRemove(modal: any, searchModule: any) {
+  return ({
+    catId,
+    breedName,
+    card,
+  }: {
+    catId: string;
+    breedName: string;
+    card: HTMLElement;
+  }) => {
     modal.show(breedName, async () => {
       try {
         card.style.opacity = "0";
@@ -45,7 +60,7 @@ function handleRemove(modal, searchModule) {
           notifySuccess("Лайк успешно удален");
           if (searchModule && searchModule.refresh) searchModule.refresh();
           if (store.getState().likes.length === 0) {
-            document.getElementById("user-likes").style.display = "none";
+            document.getElementById("user-likes")!.style.display = "none";
             const noLikes = document.getElementById("no-likes");
             if (noLikes) noLikes.style.display = "block";
           }
@@ -77,11 +92,11 @@ function initScrollHeader() {
 async function init() {
   initScrollHeader();
   const modal = initConfirmationModal({});
-  let searchModule = null;
+  let searchModule: any = null;
 
   // Subscriptions
   const unsubProfile = subscribe(
-    (s) => ({
+    (s: any) => ({
       profile: s.profile,
       pLoading: s.loading.profile,
       error: s.errors.profile,
@@ -94,7 +109,7 @@ async function init() {
   registerCleanup(unsubProfile);
 
   const unsubLikes = subscribe(
-    (s) => ({
+    (s: any) => ({
       likes: s.likes,
       loading: s.loading.likes,
       error: s.errors.likes,
@@ -104,18 +119,17 @@ async function init() {
       const skeleton = document.getElementById("likes-skeleton");
       const container = document.getElementById("user-likes");
       const noLikes = document.getElementById("no-likes");
-      if (container) {
-        container.setAttribute("role", "list");
-        container.setAttribute("aria-busy", loading ? "true" : "false");
-      }
+      if (!container) return;
+
+      container.setAttribute("role", "list");
+      container.setAttribute("aria-busy", loading ? "true" : "false");
+
       if (loading) {
         if (skeleton) {
           skeleton.style.display = "grid";
           skeleton.style.opacity = "1";
         }
-        if (container) {
-          container.style.opacity = "0";
-        }
+        container.style.opacity = "0";
         return;
       }
       if (skeleton) {
@@ -140,7 +154,8 @@ async function init() {
         onRemove: handleRemove(modal, searchModule),
       });
       container.style.opacity = "1";
-      document.getElementById("likes-count").textContent = count;
+      const likesCountEl = document.getElementById("likes-count");
+      if (likesCountEl) likesCountEl.textContent = String(count);
       if (!searchModule) {
         searchModule = initSearchAndSort({});
       } else {
@@ -152,7 +167,7 @@ async function init() {
 
   try {
     await loadProfile();
-  } catch (err) {
+  } catch (err: any) {
     if (err.status === 401) {
       window.location.href = "/login";
       return;
@@ -160,7 +175,7 @@ async function init() {
   }
   try {
     await loadLikes({});
-  } catch (err) {
+  } catch (err: any) {
     if (err.status === 401) {
       window.location.href = "/login";
     }

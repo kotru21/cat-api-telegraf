@@ -2,17 +2,16 @@ import crypto from "crypto";
 import express, { Express, Request, Response, NextFunction } from "express";
 import { createServer, Server, IncomingMessage, ServerResponse } from "http";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
 import { WebSocketService } from "./WebSocketServer.js";
-import { createAppContext } from "../application/context.js";
-import { setupApiRoutes } from "./ApiRoutes.js";
+import { ApiRouter } from "./ApiRoutes.js";
 import { setupSecurity } from "./middleware/security.js";
 import { setupSession } from "./middleware/session.js";
 import { AuthController } from "./controllers/AuthController.js";
 import { AppError } from "../application/errors.js";
 import logger from "../utils/logger.js";
 import pinoHttp from "pino-http";
+import { LeaderboardService } from "../services/LeaderboardService.js";
 
 import AppEvents, { EVENTS } from "../application/events.js";
 const __filename = fileURLToPath(import.meta.url);
@@ -20,14 +19,28 @@ const __dirname = path.dirname(__filename);
 
 export class WebServer {
   private config: any;
-  private dependencies: any;
   private app: Express;
   private server: Server;
   private wsService: WebSocketService | null;
+  private authController: AuthController;
+  private leaderboardService: LeaderboardService;
+  private apiRouter: ApiRouter;
 
-  constructor(config: any, dependencies: any = {}) {
+  constructor({
+    config,
+    authController,
+    leaderboardService,
+    apiRouter,
+  }: {
+    config: any;
+    authController: AuthController;
+    leaderboardService: LeaderboardService;
+    apiRouter: ApiRouter;
+  }) {
     this.config = config;
-    this.dependencies = dependencies;
+    this.authController = authController;
+    this.leaderboardService = leaderboardService;
+    this.apiRouter = apiRouter;
     this.app = express();
     this.server = createServer(this.app);
     this.wsService = null;
@@ -69,9 +82,8 @@ export class WebServer {
     setupSession(this.app, this.config);
 
     // WebSocket setup
-    const appCtx = createAppContext(this.dependencies);
     this.wsService = new WebSocketService(this.server, "/wss", {
-      leaderboardService: appCtx.leaderboardService,
+      leaderboardService: this.leaderboardService,
       enablePolling: false,
     });
 
@@ -82,7 +94,7 @@ export class WebServer {
     this.setupTemplateEngine();
 
     // API routes
-    setupApiRoutes(this.app);
+    this.apiRouter.setup(this.app);
 
     // Centralized error handler (last)
     // eslint-disable-next-line no-unused-vars
@@ -102,8 +114,7 @@ export class WebServer {
     this.setupRoutes();
 
     // Контроллер аутентификации
-    const authController = new AuthController(this.config);
-    authController.setupRoutes(this.app);
+    this.authController.setupRoutes(this.app);
 
     return this;
   }
@@ -129,12 +140,9 @@ export class WebServer {
   }
 
   setupTemplateEngine() {
-    this.app.engine("html", (filePath, options, callback) => {
-      fs.readFile(filePath, "utf8", (err, content) => {
-        if (err) {
-          logger.error({ err, filePath }, `Error reading template file`);
-          return callback(err);
-        }
+    this.app.engine("html", async (filePath, options, callback) => {
+      try {
+        let content = await Bun.file(filePath).text();
 
         // Заменяем маркеры на содержимое шаблонов
         if (content.includes("<!-- INCLUDE_NAVIGATION -->")) {
@@ -144,8 +152,9 @@ export class WebServer {
           );
 
           try {
-            if (fs.existsSync(navPath)) {
-              const navContent = fs.readFileSync(navPath, "utf8");
+            const navFile = Bun.file(navPath);
+            if (await navFile.exists()) {
+              const navContent = await navFile.text();
               content = content.replace(
                 "<!-- INCLUDE_NAVIGATION -->",
                 navContent
@@ -159,7 +168,10 @@ export class WebServer {
         }
 
         callback(null, content);
-      });
+      } catch (err: any) {
+        logger.error({ err, filePath }, `Error reading template file`);
+        return callback(err);
+      }
     });
 
     this.app.set("views", path.join(__dirname, "views"));

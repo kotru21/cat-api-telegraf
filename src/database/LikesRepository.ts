@@ -4,7 +4,6 @@ import {
 } from "./interfaces/LikesRepositoryInterface.js";
 import logger from "../utils/logger.js";
 import getPrisma from "./prisma/PrismaClient.js";
-import AppEvents, { EVENTS } from "../application/events.js";
 import { PrismaClient } from "@prisma/client";
 
 export class LikesRepository implements LikesRepositoryInterface {
@@ -44,8 +43,6 @@ export class LikesRepository implements LikesRepositoryInterface {
         return true;
       });
 
-      // Уведомим подписчиков о смене лидерборда
-      AppEvents.emit(EVENTS.LEADERBOARD_CHANGED);
       return result;
     } catch (err: any) {
       // Уникальный дубликат (лайк уже есть)
@@ -79,9 +76,6 @@ export class LikesRepository implements LikesRepositoryInterface {
         return true;
       });
 
-      if (result) {
-        AppEvents.emit(EVENTS.LEADERBOARD_CHANGED);
-      }
       return result;
     } catch (err) {
       logger.error({ err }, "Failed to remove like (Prisma)");

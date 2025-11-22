@@ -1,6 +1,29 @@
 import { PLACEHOLDER } from "../../utils";
 
-export function applyCatDetails({ data, container = document, preloadResult }) {
+interface CatDetailsData {
+  breedName: string;
+  description: string;
+  likes: number;
+  wikipediaUrl?: string;
+  origin: string;
+  temperament: string;
+  lifeSpan: string;
+  weightMetric: string;
+  weightImperial: string;
+  imageUrl?: string;
+}
+
+interface ApplyCatDetailsOptions {
+  data: CatDetailsData;
+  container?: Document | HTMLElement;
+  preloadResult?: any;
+}
+
+export function applyCatDetails({
+  data,
+  container = document,
+  preloadResult,
+}: ApplyCatDetailsOptions) {
   if (!data) return;
   const {
     breedName,
@@ -15,28 +38,28 @@ export function applyCatDetails({ data, container = document, preloadResult }) {
     imageUrl,
   } = data;
 
-  const titleEl = container.getElementById("breed-name");
+  const titleEl = container.querySelector("#breed-name");
   if (titleEl) titleEl.textContent = breedName;
-  const descEl = container.getElementById("description");
+  const descEl = container.querySelector("#description");
   if (descEl) descEl.textContent = description;
-  const likesEl = container.getElementById("likes-count");
-  if (likesEl) likesEl.textContent = likes;
-  const wikiLink = container.getElementById("wiki-link");
+  const likesEl = container.querySelector("#likes-count");
+  if (likesEl) likesEl.textContent = String(likes);
+  const wikiLink = container.querySelector("#wiki-link") as HTMLAnchorElement;
   if (wikiLink && wikipediaUrl) {
     wikiLink.href = wikipediaUrl;
     wikiLink.rel = "noopener noreferrer";
   }
-  const originEl = container.getElementById("origin");
+  const originEl = container.querySelector("#origin");
   if (originEl) originEl.textContent = origin;
-  const temperamentEl = container.getElementById("temperament");
+  const temperamentEl = container.querySelector("#temperament");
   if (temperamentEl) temperamentEl.textContent = temperament;
-  const lifeSpanEl = container.getElementById("life-span");
+  const lifeSpanEl = container.querySelector("#life-span");
   if (lifeSpanEl) lifeSpanEl.textContent = lifeSpan;
-  const weightEl = container.getElementById("weight");
+  const weightEl = container.querySelector("#weight");
   if (weightEl)
     weightEl.textContent = `${weightImperial} фунтов (${weightMetric} кг)`;
 
-  const imgElement = container.getElementById("cat-image");
+  const imgElement = container.querySelector("#cat-image") as HTMLImageElement;
   if (imgElement) {
     const target = imageUrl || PLACEHOLDER.LARGE;
     if (preloadResult && preloadResult.success && preloadResult.img) {
@@ -52,6 +75,11 @@ export function revealContent({
   contentId = "cat-content",
   minLoadTime = 800,
   startTime,
+}: {
+  skeletonId?: string;
+  contentId?: string;
+  minLoadTime?: number;
+  startTime: number;
 }) {
   const skeletonContent = document.getElementById(skeletonId);
   const catContent = document.getElementById(contentId);

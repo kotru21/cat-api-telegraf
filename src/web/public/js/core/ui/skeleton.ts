@@ -1,6 +1,16 @@
 // Reusable skeleton utilities for tables and blocks
 
-export function mountTableSkeleton({ tableBody, template, count = 5 }) {
+interface MountTableSkeletonOptions {
+  tableBody: HTMLElement;
+  template: HTMLTemplateElement;
+  count?: number;
+}
+
+export function mountTableSkeleton({
+  tableBody,
+  template,
+  count = 5,
+}: MountTableSkeletonOptions) {
   if (!tableBody || !template) return () => {};
   tableBody.innerHTML = "";
   for (let i = 0; i < count; i++) {
@@ -14,9 +24,15 @@ export function mountTableSkeleton({ tableBody, template, count = 5 }) {
   return () => (tableBody.innerHTML = "");
 }
 
+interface RenderFallbackRowOptions {
+  text: string;
+  colspan?: number;
+  classes?: string;
+}
+
 export function renderFallbackRow(
-  tableBody,
-  { text, colspan = 4, classes = "" }
+  tableBody: HTMLElement,
+  { text, colspan = 4, classes = "" }: RenderFallbackRowOptions
 ) {
   if (!tableBody) return;
   tableBody.innerHTML = `<tr><td colspan="${colspan}" class="${classes} text-center py-8 text-gray-400">${text}</td></tr>`;

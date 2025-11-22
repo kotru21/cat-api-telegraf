@@ -1,5 +1,20 @@
 import { debounce } from "../utils";
 
+interface CatSnapshot {
+  element: Element;
+  breedName: string;
+  likesCount: number;
+}
+
+interface SearchAndSortOptions {
+  searchInputSelector?: string;
+  sortSelectSelector?: string;
+  containerSelector?: string;
+  resultsBlockSelector?: string;
+  resultsCountSelector?: string;
+  emptyClass?: string;
+}
+
 // Initializes search & sort functionality on likes grid
 export function initSearchAndSort({
   searchInputSelector = "#search-input",
@@ -8,15 +23,23 @@ export function initSearchAndSort({
   resultsBlockSelector = "#search-results",
   resultsCountSelector = "#results-count",
   emptyClass = "empty-state",
-} = {}) {
-  const searchInput = document.querySelector(searchInputSelector);
-  const sortSelect = document.querySelector(sortSelectSelector);
-  const container = document.querySelector(containerSelector);
-  const resultsBlock = document.querySelector(resultsBlockSelector);
-  const resultsCount = document.querySelector(resultsCountSelector);
+}: SearchAndSortOptions = {}) {
+  const searchInput = document.querySelector(
+    searchInputSelector!
+  ) as HTMLInputElement;
+  const sortSelect = document.querySelector(
+    sortSelectSelector!
+  ) as HTMLSelectElement;
+  const container = document.querySelector(containerSelector!) as HTMLElement;
+  const resultsBlock = document.querySelector(
+    resultsBlockSelector!
+  ) as HTMLElement;
+  const resultsCount = document.querySelector(
+    resultsCountSelector!
+  ) as HTMLElement;
   if (!searchInput || !sortSelect || !container) return {};
 
-  let allCats = [];
+  let allCats: CatSnapshot[] = [];
 
   function snapshot() {
     const cards = Array.from(container.children).filter((el) =>
@@ -24,20 +47,20 @@ export function initSearchAndSort({
     );
     allCats = cards.map((card) => ({
       element: card,
-      breedName: card.querySelector("h3")?.textContent.toLowerCase() || "",
+      breedName: card.querySelector("h3")?.textContent?.toLowerCase() || "",
       likesCount:
         parseInt(
-          card.querySelector(".likes-badge")?.textContent.split(" ")[0]
+          card.querySelector(".likes-badge")?.textContent?.split(" ")[0] || "0"
         ) || 0,
     }));
     console.log(`Snapshot: found ${allCats.length} cats`); // для отладки
   }
 
-  function filterCats(items, term) {
+  function filterCats(items: CatSnapshot[], term: string) {
     if (!term) return items;
     return items.filter((c) => c.breedName.includes(term));
   }
-  function sortCats(items, sortBy) {
+  function sortCats(items: CatSnapshot[], sortBy: string) {
     if (sortBy === "name")
       return [...items].sort((a, b) => a.breedName.localeCompare(b.breedName));
     if (sortBy === "likes")
@@ -45,7 +68,7 @@ export function initSearchAndSort({
     return items; // latest = исходный порядок
   }
 
-  function render(list, term) {
+  function render(list: CatSnapshot[], term: string) {
     container.innerHTML = "";
     list.forEach((c) => container.appendChild(c.element));
     if (
@@ -54,7 +77,7 @@ export function initSearchAndSort({
       resultsCount
     ) {
       resultsBlock.style.display = "block";
-      resultsCount.textContent = list.length;
+      resultsCount.textContent = String(list.length);
     } else if (resultsBlock) {
       resultsBlock.style.display = "none";
     }

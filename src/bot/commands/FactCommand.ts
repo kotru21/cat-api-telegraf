@@ -1,20 +1,32 @@
 import { Markup, Context } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import logger from "../../utils/logger.js";
+import { CatInfoService } from "../../services/CatInfoService.js";
+import { LikeService } from "../../services/LikeService.js";
 
 export class FactCommand extends BaseCommand {
-  constructor() {
+  private catInfoService: CatInfoService;
+  private likeService: LikeService;
+
+  constructor({
+    catInfoService,
+    likeService,
+  }: {
+    catInfoService: CatInfoService;
+    likeService: LikeService;
+  }) {
     super("fact", "Получить факт о кошке");
+    this.catInfoService = catInfoService;
+    this.likeService = likeService;
     this.register();
   }
 
   register() {
     this.composer.command(this.name, async (ctx: Context) => {
       try {
-        const appCtx = this.createAppContext();
-        const catData = await appCtx.catInfoService.getRandomCat();
+        const catData = await this.catInfoService.getRandomCat();
         const breed = catData.breeds[0];
-        const likes = await appCtx.likeService.getLikesForCat(catData.id);
+        const likes = await this.likeService.getLikesForCat(catData.id);
 
         await ctx.replyWithPhoto(
           { url: catData.url },
@@ -45,5 +57,3 @@ export class FactCommand extends BaseCommand {
     ]);
   }
 }
-
-export default new FactCommand();

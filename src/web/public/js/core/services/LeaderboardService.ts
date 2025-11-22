@@ -1,8 +1,31 @@
 import { getLeaderboard } from "../../api";
 import store, { setState, emit, getState } from "../state/store";
 
+interface LeaderboardRow {
+  id?: string;
+  breed_id?: string;
+  cat_id?: string;
+  rank?: number;
+  breed_name?: string;
+  likes?: number;
+  count?: number;
+  image_url?: string;
+}
+
+interface NormalizedLeaderboardRow {
+  position: number;
+  catId?: string;
+  breedName: string;
+  likes?: number;
+  change: number;
+  imageUrl: string;
+}
+
 // Normalizer to keep UI decoupled from backend shape
-export function normalizeRow(row, index = 0) {
+export function normalizeRow(
+  row: LeaderboardRow,
+  index = 0
+): NormalizedLeaderboardRow {
   // Canonical shape. Backend returns msg rows: { id, breed_name, count, image_url }
   const catId = row.id || row.breed_id || row.cat_id || undefined;
   if (!catId && process?.env?.NODE_ENV !== "production") {
@@ -31,7 +54,7 @@ export async function loadLeaderboard({ force = false } = {}) {
   emit("leaderboard:loading");
   setState({ loading: { leaderboard: true }, errors: { leaderboard: null } });
   try {
-    const raw = await getLeaderboard();
+    const raw: LeaderboardRow[] = await getLeaderboard();
     const data = Array.isArray(raw)
       ? raw.map((r, i) => normalizeRow(r, i))
       : [];

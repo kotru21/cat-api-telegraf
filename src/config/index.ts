@@ -1,7 +1,6 @@
-import dotenv from "dotenv";
 import { EnvSchema } from "./schema.js";
 
-dotenv.config();
+// dotenv.config() is not needed in Bun
 
 const parsed = EnvSchema.safeParse(process.env);
 if (!parsed.success) {

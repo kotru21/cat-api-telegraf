@@ -1,6 +1,13 @@
 import { PLACEHOLDER } from "../../utils";
 
-export function createLeaderboardRow(row, index) {
+interface LeaderboardRowData {
+  breedName: string;
+  imageUrl?: string;
+  catId?: string;
+  likes: number;
+}
+
+export function createLeaderboardRow(row: LeaderboardRowData, index: number) {
   const tr = document.createElement("tr");
   tr.className = "relative overflow-hidden";
 
@@ -56,7 +63,13 @@ export function createLeaderboardRow(row, index) {
   return tr;
 }
 
-export function renderLeaderboard({ tableBody, data }) {
+export function renderLeaderboard({
+  tableBody,
+  data,
+}: {
+  tableBody: HTMLElement;
+  data: LeaderboardRowData[];
+}) {
   if (!tableBody) return;
   const frag = document.createDocumentFragment();
   data.forEach((row, i) => frag.appendChild(createLeaderboardRow(row, i)));

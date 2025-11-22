@@ -1,6 +1,13 @@
 import { getLeaderboard } from "../api";
 import { preloadImages, PLACEHOLDER } from "../utils";
 
+interface LeaderboardEntry {
+  id: string;
+  breed_name: string;
+  image_url: string;
+  count: number;
+}
+
 // Initialize leaderboard rendering
 // containerSelector: table body parent (#leaderboard-table tbody)
 export async function initLeaderboard({
@@ -8,8 +15,10 @@ export async function initLeaderboard({
   skeletonTemplateSelector = "#skeleton-row",
   skeletonCount = 5,
 } = {}) {
-  const tableBody = document.querySelector(tableBodySelector);
-  const skeletonTemplate = document.querySelector(skeletonTemplateSelector);
+  const tableBody = document.querySelector(tableBodySelector) as HTMLElement;
+  const skeletonTemplate = document.querySelector(
+    skeletonTemplateSelector
+  ) as HTMLTemplateElement;
   if (!tableBody || !skeletonTemplate) return;
 
   function showSkeletons(count = skeletonCount) {
@@ -24,14 +33,14 @@ export async function initLeaderboard({
 
   async function load() {
     try {
-      const leaderboard = await getLeaderboard();
+      const leaderboard: LeaderboardEntry[] = await getLeaderboard();
       if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
         tableBody.innerHTML =
           '<tr><td colspan="4" class="text-center py-8 text-gray-400">Нет данных для отображения</td></tr>';
         return;
       }
 
-      let preloadResults = [];
+      let preloadResults: any[] = [];
       let hasTimeout = false;
       try {
         const results = await preloadImages(
@@ -40,7 +49,7 @@ export async function initLeaderboard({
         if (results.length === 0) {
           hasTimeout = true;
         } else {
-          preloadResults = results.map((r) => ({
+          preloadResults = results.map((r: any) => ({
             ...r,
             row: leaderboard[r.index],
           }));
@@ -57,8 +66,8 @@ export async function initLeaderboard({
           createRow(row, index, false, null);
         });
       } else {
-        preloadResults.sort((a, b) => a.index - b.index);
-        preloadResults.forEach((result) => {
+        preloadResults.sort((a: any, b: any) => a.index - b.index);
+        preloadResults.forEach((result: any) => {
           createRow(result.row, result.index, result.success, result.img);
         });
       }
@@ -69,7 +78,12 @@ export async function initLeaderboard({
     }
   }
 
-  function createRow(row, index, imageLoaded = false, preloadedImg = null) {
+  function createRow(
+    row: LeaderboardEntry,
+    index: number,
+    imageLoaded = false,
+    preloadedImg: HTMLImageElement | null = null
+  ) {
     const tr = document.createElement("tr");
     tr.className = "relative overflow-hidden";
 

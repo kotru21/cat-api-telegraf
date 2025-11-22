@@ -1,32 +1,15 @@
 import { Composer, Markup, Context } from "telegraf";
-import { AwilixContainer } from "awilix";
 import logger from "../../utils/logger.js";
+import { LikeService } from "../../services/LikeService.js";
 
-class LikeAction {
+export class LikeAction {
   private composer: Composer<any>;
-  private container: AwilixContainer | null;
+  private likeService: LikeService;
 
-  constructor() {
+  constructor({ likeService }: { likeService: LikeService }) {
     this.composer = new Composer();
-    this.container = null;
-  }
-
-  setContainer(container: AwilixContainer) {
-    this.container = container;
+    this.likeService = likeService;
     this.register();
-  }
-
-  createAppContext() {
-    if (!this.container) {
-      throw new Error(
-        "LikeAction: container is not set. Call setContainer() first."
-      );
-    }
-    return {
-      likeService: this.container.resolve("likeService"),
-      leaderboardService: this.container.resolve("leaderboardService"),
-      catInfoService: this.container.resolve("catInfoService"),
-    };
   }
 
   register() {
@@ -39,9 +22,8 @@ class LikeAction {
         // @ts-ignore
         const message = ctx.update.callback_query.message;
 
-        const appCtx = this.createAppContext();
         // like via service
-        const likeAdded = await appCtx.likeService.addLikeToCat(catId, userId);
+        const likeAdded = await this.likeService.addLikeToCat(catId, userId);
 
         if (!likeAdded) {
           // Если лайк уже был поставлен этим пользователем
@@ -49,7 +31,7 @@ class LikeAction {
           return;
         }
 
-        const likes = await appCtx.likeService.getLikesForCat(catId);
+        const likes = await this.likeService.getLikesForCat(catId);
 
         // Обновляем клавиатуру с новым числом лайков
         // @ts-ignore
@@ -84,4 +66,4 @@ class LikeAction {
   }
 }
 
-export default new LikeAction();
+export default LikeAction;

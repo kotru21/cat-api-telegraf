@@ -1,22 +1,23 @@
 import { PLACEHOLDER } from "../utils";
 
+interface OverlayImageOptions {
+  src: string;
+  alt?: string;
+  width?: number | string;
+  height?: number | string;
+  shape?: "circle" | "rect";
+  wrapperClass?: string;
+  imgClass?: string;
+  skeletonClass?: string;
+  borderClass?: string;
+  placeholder?: string;
+  alreadyLoaded?: boolean;
+  lazy?: boolean;
+  delay?: number;
+}
+
 /**
  * Универсальный helper для наложения skeleton поверх изображения без layout shift.
- * @param {Object} opts
- * @param {string} opts.src - исходный URL изображения.
- * @param {string} [opts.alt] - alt текст.
- * @param {number|string} [opts.width] - ширина контейнера (css значение).
- * @param {number|string} [opts.height] - высота контейнера (css значение).
- * @param {string} [opts.shape] - 'circle' | 'rect'.
- * @param {string} [opts.wrapperClass] - дополнительные классы для wrapper.
- * @param {string} [opts.imgClass] - дополнительные классы для img.
- * @param {string} [opts.skeletonClass] - дополнительные классы для skeleton.
- * @param {string} [opts.borderClass] - классы рамки.
- * @param {string} [opts.placeholder] - placeholder src.
- * @param {boolean} [opts.alreadyLoaded] - если true, изображение уже предзагружено.
- * @param {boolean} [opts.lazy=true] - добавить loading="lazy".
- * @param {number} [opts.delay=50] - задержка перед показом изображения (мс).
- * @returns {{wrapper:HTMLElement,img:HTMLImageElement,skeleton:HTMLElement}}
  */
 export function overlayImageWithSkeleton({
   src,
@@ -32,7 +33,7 @@ export function overlayImageWithSkeleton({
   alreadyLoaded = false,
   lazy = true,
   delay = 50,
-} = {}) {
+}: OverlayImageOptions) {
   const wrapper = document.createElement("div");
   wrapper.className =
     `relative inline-block overflow-hidden ${wrapperClass}`.trim();

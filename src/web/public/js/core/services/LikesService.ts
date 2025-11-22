@@ -1,7 +1,7 @@
 import { getUserLikes, getUserLikesCount, deleteLike } from "../../api";
 import store, { setState, emit, getState } from "../state/store";
 
-export function normalizeLike(row) {
+export function normalizeLike(row: any) {
   return {
     // canonical cat identifier
     catId: row.cat_id,
@@ -42,7 +42,7 @@ export async function loadLikes({ force = false } = {}) {
   }
 }
 
-export async function removeLike(catId) {
+export async function removeLike(catId: string) {
   const prev = getState().likes;
   const next = prev.filter((l) => String(l.catId) !== String(catId));
   setState({ likes: next, likesCount: Math.max(0, getState().likesCount - 1) });

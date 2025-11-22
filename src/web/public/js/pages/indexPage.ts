@@ -8,17 +8,24 @@ import { formatUptime } from "../utils";
 import { notifyError } from "../core/errors/notify";
 import { registerCleanup } from "../core/state/lifecycle";
 
+interface StatsWebSocketOptions {
+  messageSelector?: string;
+  timeSelector?: string;
+  messageLoader?: string;
+  timeLoader?: string;
+}
+
 // Single WebSocket for uptime + message count + potential future signals
 function initStatsWebSocket({
   messageSelector = "#messageOutput",
   timeSelector = "#timeOutput",
   messageLoader = "#messageLoader",
   timeLoader = "#timeLoader",
-} = {}) {
-  const msgEl = document.querySelector(messageSelector);
-  const timeEl = document.querySelector(timeSelector);
-  const msgLoader = document.querySelector(messageLoader);
-  const timeLoaderEl = document.querySelector(timeLoader);
+}: StatsWebSocketOptions = {}) {
+  const msgEl = document.querySelector(messageSelector!);
+  const timeEl = document.querySelector(timeSelector!);
+  const msgLoader = document.querySelector(messageLoader!);
+  const timeLoaderEl = document.querySelector(timeLoader!);
   if (!msgEl || !timeEl) return;
 
   let dataReceived = false;
@@ -26,10 +33,10 @@ function initStatsWebSocket({
 
   function showContent() {
     [msgLoader, timeLoaderEl].forEach((l) => {
-      if (l) l.classList.add("hidden");
+      if (l) l?.classList.add("hidden");
     });
-    msgEl.classList.remove("hidden");
-    timeEl.classList.remove("hidden");
+    msgEl!.classList.remove("hidden");
+    timeEl!.classList.remove("hidden");
   }
 
   ws.onopen = () => {
@@ -41,7 +48,7 @@ function initStatsWebSocket({
     try {
       const { messageCount, uptimeDateObject } = JSON.parse(event.data);
       if (messageCount != null) {
-        msgEl.textContent = messageCount;
+        msgEl!.textContent = messageCount;
       }
       if (uptimeDateObject) {
         const startDate = new Date(uptimeDateObject);
@@ -73,8 +80,8 @@ function initStatsWebSocket({
 
   ws.onerror = () => {
     showContent();
-    msgEl.textContent = "Ошибка подключения";
-    timeEl.textContent = "Ошибка подключения";
+    msgEl!.textContent = "Ошибка подключения";
+    timeEl!.textContent = "Ошибка подключения";
   };
   ws.onclose = () => {
     showContent();
@@ -82,21 +89,23 @@ function initStatsWebSocket({
 }
 
 function initLeaderboardController() {
-  const tableBody = document.querySelector("#leaderboard-table tbody");
+  const tableBody = document.querySelector(
+    "#leaderboard-table tbody"
+  ) as HTMLElement;
   const table = document.getElementById("leaderboard-table");
   const skeletonTemplate = document.querySelector("#skeleton-row");
-  let clearSkeleton = null;
+  let clearSkeleton: (() => void) | null = null;
   if (tableBody && skeletonTemplate) {
     clearSkeleton = mountTableSkeleton({
       tableBody,
-      template: skeletonTemplate,
+      template: skeletonTemplate as HTMLTemplateElement,
       count: 5,
     });
   }
   if (table) table.setAttribute("aria-busy", "true");
 
   const unsub = subscribe(
-    (s) => ({
+    (s: any) => ({
       data: s.leaderboard,
       loading: s.loading.leaderboard,
       error: s.errors.leaderboard,

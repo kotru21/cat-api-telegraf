@@ -1,11 +1,5 @@
 import config from "./config/index.js";
 
-// Импорт команд бота
-import factCommand from "./bot/commands/FactCommand.js";
-import menuCommand from "./bot/commands/MenuCommand.js";
-import myLikesCommand from "./bot/commands/MyLikesCommand.js";
-import topCommand from "./bot/commands/TopCommand.js";
-import likeAction from "./bot/actions/LikeAction.js";
 import { buildContainer } from "./di/container.js";
 import { setAppContainer } from "./application/context.js";
 
@@ -42,15 +36,11 @@ class Application {
     // Устанавливаем контейнер приложения глобально для use-cases/web
     setAppContainer(this.container);
     this.dbService = null; // Prisma is initialized lazily via getPrisma
-    this.botService = new BotService(
-      this.config,
-      [factCommand, menuCommand, myLikesCommand, topCommand, likeAction],
-      this.container
-    );
+    this.botService = this.container.resolve("botService");
     this.webServer = null;
 
     if (this.config.WEB_ENABLED !== false) {
-      this.webServer = new WebServer(this.config, {});
+      this.webServer = this.container.resolve("webServer");
     } else {
       logger.info(
         "Web server is disabled by configuration (WEB_ENABLED=false)"

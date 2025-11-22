@@ -1,28 +1,26 @@
 import { Telegraf, Context } from "telegraf";
 // @ts-ignore
 import RateLimitMiddleware from "telegraf-ratelimit";
-import { AwilixContainer } from "awilix";
 import { incrementMessageCount } from "../utils/messageCounter.js";
 import logger from "../utils/logger.js";
 export interface BotModule {
   middleware(): any;
-  setContainer?(container: AwilixContainer): void;
 }
 
 export class BotService {
   private config: any;
   private commands: BotModule[];
-  private container: AwilixContainer | null;
   public bot: Telegraf<Context> | null;
 
-  constructor(
-    config: any,
-    commands: BotModule[] = [],
-    container: AwilixContainer | null = null
-  ) {
+  constructor({
+    config,
+    commands = [],
+  }: {
+    config: any;
+    commands: BotModule[];
+  }) {
     this.config = config;
     this.commands = commands;
-    this.container = container;
     this.bot = null;
   }
 
@@ -50,10 +48,6 @@ export class BotService {
 
     // Register command middlewares
     this.commands.forEach((command) => {
-      // Передаем контейнер в команды, если они поддерживают setContainer
-      if (this.container && typeof command.setContainer === "function") {
-        command.setContainer(this.container);
-      }
       this.bot!.use(command.middleware());
     });
 

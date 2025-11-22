@@ -1,21 +1,25 @@
 import { createEl } from "../utils";
 
+interface PaginationOptions {
+  totalItems: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+  mount: HTMLElement | string;
+}
+
 /**
  * Инициализация пагинации.
- * @param {Object} opts
- * @param {number} opts.totalItems
- * @param {number} [opts.pageSize=9]
- * @param {function(page:number, slice:Array):void} opts.onPageChange
- * @param {HTMLElement|string} opts.mount
  */
 export default function initPagination({
   totalItems,
   pageSize = 9,
   onPageChange,
   mount,
-}) {
+}: PaginationOptions) {
   const mountEl =
-    typeof mount === "string" ? document.querySelector(mount) : mount;
+    typeof mount === "string"
+      ? (document.querySelector(mount) as HTMLElement)
+      : mount;
   if (!mountEl) return null;
   if (totalItems <= pageSize) {
     mountEl.innerHTML = "";
@@ -24,7 +28,12 @@ export default function initPagination({
   let currentPage = 1;
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  function buildButton(label, page, disabled = false, active = false) {
+  function buildButton(
+    label: string,
+    page: number,
+    disabled = false,
+    active = false
+  ) {
     const btn = createEl("button", {
       classes: [
         "px-3",
@@ -44,7 +53,7 @@ export default function initPagination({
       btn.classList.add("bg-gray-800", "text-gray-300", "hover:bg-gray-700");
     }
     if (disabled) {
-      btn.disabled = true;
+      (btn as HTMLButtonElement).disabled = true;
       btn.classList.add("opacity-50", "cursor-not-allowed");
     } else {
       btn.addEventListener("click", () => setPage(page));
@@ -109,12 +118,12 @@ export default function initPagination({
     mountEl.appendChild(container);
   }
 
-  function sliceData(data) {
+  function sliceData(data: any[]) {
     const startIdx = (currentPage - 1) * pageSize;
     return data.slice(startIdx, startIdx + pageSize);
   }
 
-  function setPage(p) {
+  function setPage(p: number) {
     if (p < 1 || p > totalPages || p === currentPage) return;
     currentPage = p;
     renderControls();

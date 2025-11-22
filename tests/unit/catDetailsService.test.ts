@@ -26,6 +26,6 @@ describe("normalizeCatDetails", () => {
     });
   });
   it("handles null gracefully", () => {
-    expect(normalizeCatDetails(null)).toBeNull();
+    expect(normalizeCatDetails(null as any)).toBeNull();
   });
 });

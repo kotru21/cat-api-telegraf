@@ -1,16 +1,28 @@
 import { preloadImages, PLACEHOLDER, sanitize } from "../utils";
 import overlayImageWithSkeleton from "./overlayImage";
 
+interface CatData {
+  id: string;
+  breed_name: string;
+  description: string;
+  image_url: string;
+  count: number;
+}
+
+interface SimilarGridOptions {
+  data?: CatData[];
+  pageData?: CatData[];
+  skipSkeleton?: boolean;
+}
+
 /**
  * Рендер сетки похожих котов со скелетоном и предзагрузкой.
- * @param {Object} opts
- * @param {Array} opts.data - массив котов ({ id, breed_name, description, image_url, count })
  */
 export default async function renderSimilarGrid({
   data = [],
   pageData,
   skipSkeleton = false,
-} = {}) {
+}: SimilarGridOptions = {}) {
   const skeletonContent = document.getElementById("skeleton-content");
   const resultsContent = document.getElementById("results-content");
   if (!resultsContent || !skeletonContent) return { cards: [] };
@@ -39,7 +51,7 @@ export default async function renderSimilarGrid({
 
     const preloaded =
       !hasTimeout && Array.isArray(preloadResult)
-        ? preloadResult.find((r) => r.index === idx && r.success)
+        ? preloadResult.find((r: any) => r.index === idx && r.success)
         : null;
 
     const imgContainer = document.createElement("div");

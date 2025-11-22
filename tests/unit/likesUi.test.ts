@@ -10,7 +10,11 @@ describe("renderLikes", () => {
       { catId: "1", breedName: "Breed A", imageUrl: "", likes: 2 },
       { catId: "2", breedName: "Breed B", imageUrl: "", likes: 5 },
     ];
-    const cards = renderLikes({ container, data, onRemove: () => {} });
+    const cards = renderLikes({
+      container: container as HTMLElement,
+      data,
+      onRemove: () => {},
+    });
     expect(cards.length).toBe(2);
     expect(container?.querySelectorAll(".cat-card").length).toBe(2);
     expect(container?.textContent).toContain("Breed A");
@@ -18,7 +22,7 @@ describe("renderLikes", () => {
 
   it("returns empty if no container", () => {
     const cards = renderLikes({
-      container: null,
+      container: null as any,
       data: [],
       onRemove: () => {},
     });

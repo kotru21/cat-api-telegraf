@@ -1,6 +1,8 @@
 import { Markup, Context } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import logger from "../../utils/logger.js";
+import { LikeService } from "../../services/LikeService.js";
+import { CatInfoService } from "../../services/CatInfoService.js";
 
 // Простая in-memory кэш структура для лайков пользователя
 // key: userId -> { data: [...], ts: number }
@@ -17,8 +19,19 @@ function mdEscape(str: string | number | null | undefined) {
 }
 
 export class MyLikesCommand extends BaseCommand {
-  constructor() {
+  private likeService: LikeService;
+  private catInfoService: CatInfoService;
+
+  constructor({
+    likeService,
+    catInfoService,
+  }: {
+    likeService: LikeService;
+    catInfoService: CatInfoService;
+  }) {
     super("mylikes", "Просмотреть мои лайки");
+    this.likeService = likeService;
+    this.catInfoService = catInfoService;
     this.register();
   }
 
@@ -105,8 +118,7 @@ export class MyLikesCommand extends BaseCommand {
       try {
         // @ts-ignore
         const catId = ctx.match[1];
-        const appCtx = this.createAppContext();
-        const catDetails = await appCtx.catInfoService.getCatById(catId);
+        const catDetails = await this.catInfoService.getCatById(catId);
 
         if (!catDetails) {
           await ctx.answerCbQuery("Информация о коте не найдена");
@@ -244,14 +256,13 @@ export class MyLikesCommand extends BaseCommand {
       return cached.data;
     }
     // Обновляем из сервиса
-    const appCtx = this.createAppContext();
-    const data = await appCtx.likeService.getUserLikes(userId);
+    const data = await this.likeService.getUserLikes(userId);
     userLikesCache.set(userId, { data, ts: now });
     return data;
   }
 }
 
-export default new MyLikesCommand();
+export default MyLikesCommand;
 
 // Вспомогательный лимитер текста (обрезаем по границе слова)
 function limitText(text: string, max: number) {

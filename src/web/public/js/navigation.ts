@@ -1,3 +1,10 @@
+declare global {
+  interface Window {
+    navigationInitialized?: boolean;
+    authChecked?: boolean;
+  }
+}
+
 // Проверяем, был ли уже инициализирован скрипт навигации
 if (window.navigationInitialized) {
   console.log(
@@ -7,7 +14,7 @@ if (window.navigationInitialized) {
   window.navigationInitialized = true;
 
   // Анимация и появление header при скролле
-  let headerState = null; // null | "scrolled" | "top"
+  let headerState: string | null = null; // null | "scrolled" | "top"
   const handleScrollHeader = () => {
     const header = document.querySelector(".header");
     if (!header) return;
@@ -76,9 +83,11 @@ if (window.navigationInitialized) {
 
     // Закрытие меню при клике вне меню
     document.addEventListener("click", function (event) {
+      const target = event.target as Node;
       if (
-        !menuButton.contains(event.target) &&
-        !mobileMenu.contains(event.target) &&
+        target &&
+        !menuButton.contains(target) &&
+        !mobileMenu.contains(target) &&
         menuOpen
       ) {
         mobileMenu.classList.add("hidden");
@@ -103,7 +112,7 @@ async function checkAuth() {
     if (profileResponse.ok) {
       // Пользователь авторизован
       authLinks.forEach((link) => {
-        link.style.display = "inline-flex";
+        (link as HTMLElement).style.display = "inline-flex";
       });
 
       // Устанавливаем имя пользователя, если он авторизован
@@ -112,13 +121,13 @@ async function checkAuth() {
       profileLinks.forEach((link) => {
         const icon = link.querySelector("i");
         link.innerHTML = "";
-        link.appendChild(icon);
+        if (icon) link.appendChild(icon);
         link.innerHTML += ` ${profileData.first_name || "Профиль"}`;
       });
     } else {
       // Пользователь не авторизован
       authLinks.forEach((link) => {
-        link.style.display = "none";
+        (link as HTMLElement).style.display = "none";
       });
 
       // Добавляем ссылку "Войти"

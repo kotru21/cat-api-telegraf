@@ -12,7 +12,7 @@ import { registerCleanup } from "../core/state/lifecycle";
 // Simple like state (no backend mutation yet) to avoid double increments quickly
 let likeLocked = false;
 
-function navigateSimilar(feature, rawValue) {
+function navigateSimilar(feature: string, rawValue: string) {
   let cleanValue = rawValue;
   if (feature === "weight_metric") {
     const metricMatch = rawValue.match(/\(([0-9. -]+)кг\)/);
@@ -43,13 +43,13 @@ function navigateSimilar(feature, rawValue) {
   window.location.href = url;
 }
 
-async function runCatDetails(catId) {
+async function runCatDetails(catId: string) {
   const skeletonContent = document.getElementById("skeleton-content");
   const catContent = document.getElementById("cat-content");
   if (catContent) catContent.setAttribute("aria-busy", "true");
   const startTime = Date.now();
   try {
-    const data = await loadCatDetails(catId);
+    const data: any = await loadCatDetails(catId);
     if (data && data.breed_name) {
       document.title = `${sanitize(data.breed_name)} | Cat Details`;
     }
@@ -71,11 +71,11 @@ async function runCatDetails(catId) {
 function initFeatureNavigation() {
   document.querySelectorAll(".stat-card").forEach((card) => {
     if (card.id === "wiki-link") return;
-    card.addEventListener("click", function () {
+    card.addEventListener("click", function (this: HTMLElement) {
       const featureType = this.dataset.feature || "";
       const valueElement = this.querySelector("p");
       if (valueElement && featureType) {
-        navigateSimilar(featureType, valueElement.textContent);
+        navigateSimilar(featureType, valueElement.textContent || "");
       }
     });
   });
@@ -84,12 +84,12 @@ function initFeatureNavigation() {
 function initLikeButton() {
   const likeBtn = document.getElementById("likeBtn");
   const likesEl = document.getElementById("likes-count");
-  if (!likeBtn) return;
+  if (!likeBtn || !likesEl) return;
   likeBtn.addEventListener("click", () => {
     if (likeLocked) return;
     likeLocked = true;
-    const current = parseInt(likesEl.textContent) || 0;
-    likesEl.textContent = current + 1; // TODO integrate real like POST
+    const current = parseInt(likesEl.textContent || "0") || 0;
+    likesEl.textContent = String(current + 1); // TODO integrate real like POST
     likeBtn.classList.add("scale-110");
     setTimeout(() => likeBtn.classList.remove("scale-110"), 200);
     setTimeout(() => {
@@ -101,17 +101,20 @@ function initLikeButton() {
 function showMissingId() {
   const skeletonContent = document.getElementById("skeleton-content");
   const catContent = document.getElementById("cat-content");
-  document.getElementById("breed-name").textContent = "ID кота не указан";
-  skeletonContent.classList.add("hidden");
-  catContent.classList.remove("hidden", "opacity-0");
-  catContent.classList.add("opacity-100");
+  const breedName = document.getElementById("breed-name");
+  if (breedName) breedName.textContent = "ID кота не указан";
+  if (skeletonContent) skeletonContent.classList.add("hidden");
+  if (catContent) {
+    catContent.classList.remove("hidden", "opacity-0");
+    catContent.classList.add("opacity-100");
+  }
 }
 
 function init() {
   const params = new URLSearchParams(window.location.search);
   const catId = params.get("id");
   // Bind image error fallback (CSP-safe instead of inline onerror)
-  const img = document.getElementById("cat-image");
+  const img = document.getElementById("cat-image") as HTMLImageElement;
   if (img && !img.dataset.errorBound) {
     img.addEventListener("error", () => {
       const fallback = img.getAttribute("data-fallback");

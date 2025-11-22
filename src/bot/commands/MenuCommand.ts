@@ -2,10 +2,28 @@ import { Markup, Context } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import config from "../../config/index.js";
 import logger from "../../utils/logger.js";
+import { CatInfoService } from "../../services/CatInfoService.js";
+import { LikeService } from "../../services/LikeService.js";
+import { LeaderboardService } from "../../services/LeaderboardService.js";
 
 export class MenuCommand extends BaseCommand {
-  constructor() {
+  private catInfoService: CatInfoService;
+  private likeService: LikeService;
+  private leaderboardService: LeaderboardService;
+
+  constructor({
+    catInfoService,
+    likeService,
+    leaderboardService,
+  }: {
+    catInfoService: CatInfoService;
+    likeService: LikeService;
+    leaderboardService: LeaderboardService;
+  }) {
     super("menu", "Показать меню");
+    this.catInfoService = catInfoService;
+    this.likeService = likeService;
+    this.leaderboardService = leaderboardService;
     this.register();
   }
 
@@ -28,10 +46,9 @@ export class MenuCommand extends BaseCommand {
       await ctx.reply("Получаю случайного кота...");
       // Имитируем обработку команды /fact
       try {
-        const appCtx = this.createAppContext();
-        const catData = await appCtx.catInfoService.getRandomCat();
+        const catData = await this.catInfoService.getRandomCat();
         const breed = catData.breeds[0];
-        const likes = await appCtx.likeService.getLikesForCat(catData.id);
+        const likes = await this.likeService.getLikesForCat(catData.id);
 
         await ctx.replyWithPhoto(
           { url: catData.url },
@@ -63,8 +80,7 @@ export class MenuCommand extends BaseCommand {
       try {
         if (!ctx.from) return;
         const userId = ctx.from.id.toString();
-        const appCtx = this.createAppContext();
-        const userLikes = await appCtx.likeService.getUserLikes(userId);
+        const userLikes = await this.likeService.getUserLikes(userId);
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.reply("Вы еще не поставили ни одного лайка 😿");
@@ -85,8 +101,7 @@ export class MenuCommand extends BaseCommand {
       await ctx.reply("Загружаю рейтинг...");
       // Прямой вызов кода обработки команды
       try {
-        const appCtx = this.createAppContext();
-        const topCats = await appCtx.leaderboardService.getLeaderboard(10);
+        const topCats = await this.leaderboardService.getLeaderboard(10);
 
         if (!topCats || topCats.length === 0) {
           await ctx.reply("Пока нет популярных пород в рейтинге 😿");
@@ -119,7 +134,7 @@ export class MenuCommand extends BaseCommand {
         ]);
 
         await ctx.replyWithPhoto(
-          { url: topCats[0].image_url },
+          { url: topCats[0].image_url || "" },
           {
             caption: message,
             parse_mode: "Markdown",
@@ -159,8 +174,7 @@ export class MenuCommand extends BaseCommand {
         try {
           if (!ctx.from) return;
           const userId = ctx.from.id.toString();
-          const appCtx = this.createAppContext();
-          const userLikes = await appCtx.likeService.getUserLikes(userId);
+          const userLikes = await this.likeService.getUserLikes(userId);
 
           if (!userLikes || userLikes.length === 0) {
             await ctx.answerCbQuery("Список лайков пуст");
@@ -192,8 +206,7 @@ export class MenuCommand extends BaseCommand {
       try {
         // @ts-ignore
         const catId = ctx.match[1];
-        const appCtx = this.createAppContext();
-        const catDetails = await appCtx.catInfoService.getCatById(catId);
+        const catDetails = await this.catInfoService.getCatById(catId);
 
         if (!catDetails) {
           await ctx.answerCbQuery("Информация о коте не найдена");
@@ -212,7 +225,7 @@ export class MenuCommand extends BaseCommand {
           `[Подробнее на Википедии](${catDetails.wikipedia_url})`;
 
         await ctx.replyWithPhoto(
-          { url: catDetails.image_url },
+          { url: catDetails.image_url || "" },
           {
             caption: detailsMessage,
             parse_mode: "Markdown",
@@ -290,4 +303,4 @@ export class MenuCommand extends BaseCommand {
   }
 }
 
-export default new MenuCommand();
+export default MenuCommand;

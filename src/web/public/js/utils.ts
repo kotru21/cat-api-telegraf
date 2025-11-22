@@ -1,6 +1,6 @@
 // Generic frontend utilities
 
-export function sanitize(text) {
+export function sanitize(text: string | null | undefined): string {
   if (text == null) return "";
   return String(text)
     .replace(/&/g, "&amp;")
@@ -10,20 +10,20 @@ export function sanitize(text) {
     .replace(/'/g, "&#39;");
 }
 
-export function debounce(fn, delay = 200) {
-  let t;
-  return function (...args) {
+export function debounce(fn: Function, delay = 200) {
+  let t: any;
+  return function (this: any, ...args: any[]) {
     clearTimeout(t);
     t = setTimeout(() => fn.apply(this, args), delay);
   };
 }
 
-export async function preloadImages(urls = [], timeoutMs = 3000) {
+export async function preloadImages(urls: string[] = [], timeoutMs = 3000) {
   if (!Array.isArray(urls) || urls.length === 0) return [];
 
   const controller = { timedOut: false };
 
-  const timeout = new Promise((resolve) => {
+  const timeout = new Promise<any[]>((resolve) => {
     setTimeout(() => {
       controller.timedOut = true;
       resolve([]);
@@ -57,7 +57,16 @@ export const PLACEHOLDER = Object.freeze({
   LARGE: "https://placehold.co/800x600/1F2937/4F46E5?text=No+Image",
 });
 
-export function createEl(tag, { classes = [], attrs = {}, text } = {}) {
+interface CreateElOptions {
+  classes?: string[];
+  attrs?: Record<string, string>;
+  text?: string;
+}
+
+export function createEl(
+  tag: string,
+  { classes = [], attrs = {}, text }: CreateElOptions = {}
+) {
   const el = document.createElement(tag);
   if (classes.length) el.className = classes.join(" ");
   Object.entries(attrs).forEach(([k, v]) => {
@@ -67,18 +76,18 @@ export function createEl(tag, { classes = [], attrs = {}, text } = {}) {
   return el;
 }
 
-export function formatUptime(startDate) {
+export function formatUptime(startDate: Date) {
   const currentDate = new Date();
-  const timeDifference = currentDate - startDate;
+  const timeDifference = currentDate.getTime() - startDate.getTime();
   const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
   const hours = Math.floor((timeDifference / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
   const seconds = Math.floor((timeDifference / 1000) % 60);
 
   return {
-    days: { value: days, label: "дн." },
-    hours: { value: hours, label: "ч." },
-    minutes: { value: minutes, label: "мин." },
-    seconds: { value: seconds, label: "сек." },
+    days: { value: String(days), label: "дн." },
+    hours: { value: String(hours), label: "ч." },
+    minutes: { value: String(minutes), label: "мин." },
+    seconds: { value: String(seconds), label: "сек." },
   };
 }

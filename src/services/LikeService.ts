@@ -1,6 +1,7 @@
 import logger from "../utils/logger.js";
 import { LikesRepository } from "../database/LikesRepository.js";
 import { UserLikeDTO } from "../database/interfaces/LikesRepositoryInterface.js";
+import AppEvents, { EVENTS } from "../application/events.js";
 
 export class LikeService {
   private repository: LikesRepository;
@@ -15,7 +16,11 @@ export class LikeService {
   }
 
   async addLikeToCat(catId: string, userId: string): Promise<boolean> {
-    return this.repository.addLike(catId, userId);
+    const result = await this.repository.addLike(catId, userId);
+    if (result) {
+      AppEvents.emit(EVENTS.LEADERBOARD_CHANGED);
+    }
+    return result;
   }
 
   async removeLikeFromCat(catId: string, userId: string): Promise<boolean> {
@@ -29,6 +34,9 @@ export class LikeService {
 
       const result = await this.repository.removeLike(catId, userId);
       logger.debug({ result }, "LikeService: unlike result");
+      if (result) {
+        AppEvents.emit(EVENTS.LEADERBOARD_CHANGED);
+      }
       return result;
     } catch (error) {
       logger.error({ err: error }, "LikeService: error while removing like");

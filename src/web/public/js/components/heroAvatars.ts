@@ -11,9 +11,9 @@ export async function initHeroAvatars({
   const skeletonHTML = container.innerHTML;
 
   try {
-    const images = await getRandomImages(count);
+    const images: any[] = await getRandomImages(count);
     const preloadPromises = images.map(
-      (img, index) =>
+      (img: any, index: number) =>
         new Promise((resolve) => {
           const pre = new Image();
           pre.onload = () =>
@@ -26,10 +26,10 @@ export async function initHeroAvatars({
     );
 
     const results = await Promise.all(preloadPromises);
-    results.sort((a, b) => a.index - b.index);
+    results.sort((a: any, b: any) => a.index - b.index);
 
     container.innerHTML = "";
-    results.forEach((result) => {
+    results.forEach((result: any) => {
       const { wrapper } = overlayImageWithSkeleton({
         src: result.loaded ? result.src : PLACEHOLDER.SMALL,
         alt: "Cat",

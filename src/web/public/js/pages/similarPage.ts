@@ -3,7 +3,7 @@ import renderSimilarGrid from "../components/similarGrid";
 import { sanitize } from "../utils";
 import initPagination from "../components/pagination";
 
-const FEATURE_NAMES = {
+const FEATURE_NAMES: Record<string, string> = {
   origin: "происхождению",
   temperament: "темпераменту",
   life_span: "продолжительности жизни",
@@ -20,7 +20,7 @@ function showNoResults(
   if (resultsContent) resultsContent.style.display = "none";
   if (skeletonContent) skeletonContent.style.display = "none";
   if (noResults) {
-    noResults.querySelector("p").textContent = message;
+    noResults.querySelector("p")!.textContent = message;
     noResults.style.display = "block";
   }
   if (searchHeader) searchHeader.style.display = "none";
@@ -47,7 +47,7 @@ async function init() {
   document.title = `Поиск по ${featureName}: ${value} | CatBot`;
 
   try {
-    const data = await getSimilarCats(feature, value);
+    const data: any[] = await getSimilarCats(feature, value);
     if (!Array.isArray(data) || data.length === 0) {
       showNoResults();
       return;

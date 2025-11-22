@@ -2,11 +2,39 @@ import store, { emit } from "../state/store";
 import { getCatDetails } from "../../api";
 import { sanitize } from "../../utils";
 
+interface RawCatDetails {
+  id: string;
+  breed_name?: string;
+  description?: string;
+  count?: number;
+  wikipedia_url?: string;
+  origin?: string;
+  temperament?: string;
+  life_span?: string;
+  weight_metric?: string;
+  weight_imperial?: string;
+  image_url?: string;
+}
+
+interface CatDetails {
+  id: string;
+  breedName: string;
+  description: string;
+  likes: number;
+  wikipediaUrl: string | null;
+  origin: string;
+  temperament: string;
+  lifeSpan: string;
+  weightMetric: string;
+  weightImperial: string;
+  imageUrl: string | null;
+}
+
 // TTL cache for cat details to avoid refetch when navigating back quickly
-const cache = new Map(); // catId -> { data, ts }
+const cache = new Map<string, { data: RawCatDetails; ts: number }>(); // catId -> { data, ts }
 const TTL = 30 * 1000;
 
-export function normalizeCatDetails(raw) {
+export function normalizeCatDetails(raw: RawCatDetails): CatDetails | null {
   if (!raw) return null;
   return {
     id: raw.id,
@@ -23,7 +51,7 @@ export function normalizeCatDetails(raw) {
   };
 }
 
-export async function loadCatDetails(catId, { force = false } = {}) {
+export async function loadCatDetails(catId: string, { force = false } = {}) {
   if (!catId) return;
   const now = Date.now();
   const cached = cache.get(catId);

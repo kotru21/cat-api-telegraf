@@ -1,18 +1,25 @@
 import { Markup, Context } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import logger from "../../utils/logger.js";
+import { LeaderboardService } from "../../services/LeaderboardService.js";
 
 export class TopCommand extends BaseCommand {
-  constructor() {
+  private leaderboardService: LeaderboardService;
+
+  constructor({
+    leaderboardService,
+  }: {
+    leaderboardService: LeaderboardService;
+  }) {
     super("top", "Показать топ популярных пород котов");
+    this.leaderboardService = leaderboardService;
     this.register();
   }
 
   register() {
     this.composer.command(this.name, async (ctx: Context) => {
       try {
-        const appCtx = this.createAppContext();
-        const topCats = await appCtx.leaderboardService.getLeaderboard(10); // получаем топ-10 пород
+        const topCats = await this.leaderboardService.getLeaderboard(10); // получаем топ-10 пород
 
         if (!topCats || topCats.length === 0) {
           await ctx.reply("Пока нет популярных пород в рейтинге 😿");
@@ -46,7 +53,7 @@ export class TopCommand extends BaseCommand {
 
         //сообщение с фото топовой породы и кнопками
         await ctx.replyWithPhoto(
-          { url: topCats[0].image_url },
+          { url: topCats[0].image_url || "" },
           {
             caption: message,
             parse_mode: "Markdown",
@@ -66,4 +73,4 @@ export class TopCommand extends BaseCommand {
   }
 }
 
-export default new TopCommand();
+export default TopCommand;

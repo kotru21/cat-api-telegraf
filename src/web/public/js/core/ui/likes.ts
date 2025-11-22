@@ -1,7 +1,25 @@
 import { PLACEHOLDER, sanitize } from "../../utils";
 import overlayImageWithSkeleton from "../../components/overlayImage";
 
-export function createLikeCard(like, { onRemove } = {}) {
+interface LikeData {
+  imageUrl?: string;
+  breedName: string;
+  likes: number;
+  catId: string;
+}
+
+interface CreateLikeCardOptions {
+  onRemove?: (args: {
+    catId: string;
+    breedName: string;
+    card: HTMLElement;
+  }) => void;
+}
+
+export function createLikeCard(
+  like: LikeData,
+  { onRemove }: CreateLikeCardOptions = {}
+) {
   const card = document.createElement("div");
   card.className = "cat-card";
   const imgContainer = document.createElement("div");
@@ -48,10 +66,10 @@ export function createLikeCard(like, { onRemove } = {}) {
 
   if (onRemove) {
     card.querySelector(".remove-like-btn")?.addEventListener("click", (e) => {
-      const btn = e.currentTarget;
+      const btn = e.currentTarget as HTMLElement;
       onRemove({
-        catId: btn.getAttribute("data-cat-id"),
-        breedName: btn.getAttribute("data-breed-name"),
+        catId: btn.getAttribute("data-cat-id") || "",
+        breedName: btn.getAttribute("data-breed-name") || "",
         card,
       });
     });
@@ -59,7 +77,15 @@ export function createLikeCard(like, { onRemove } = {}) {
   return card;
 }
 
-export function renderLikes({ container, data, onRemove }) {
+export function renderLikes({
+  container,
+  data,
+  onRemove,
+}: {
+  container: HTMLElement;
+  data: LikeData[];
+  onRemove?: any;
+}) {
   if (!container) return [];
   const frag = document.createDocumentFragment();
   const cards = data.map((l) => {

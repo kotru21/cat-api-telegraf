@@ -1,5 +1,6 @@
-import { CatRepository } from "../database/CatRepository.js";
-import { msg as Cat } from "@prisma/client";
+import { CatRepository } from '../database/CatRepository.js';
+import { LikesRepositoryInterface } from '../database/interfaces/LikesRepositoryInterface';
+import { Cat } from '@prisma/client';
 
 export class LeaderboardService {
   private repository: CatRepository;

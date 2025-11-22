@@ -3,9 +3,9 @@
 // через setAppContainer и далее только используется. Новые контейнеры
 // внутри этого модуля НЕ создаются, чтобы избежать рассинхронизации синглтонов.
 
-import { AwilixContainer } from "awilix";
-import logger from "../utils/logger.js";
-import { AppError, ValidationError, NotFoundError } from "./errors.js";
+import { AwilixContainer } from 'awilix';
+import logger from '../utils/logger.js';
+import { AppError, ValidationError, NotFoundError } from './errors.js';
 
 let appContainer: AwilixContainer | null = null;
 
@@ -15,9 +15,7 @@ export function setAppContainer(container: AwilixContainer) {
 
 export function getContainer() {
   if (!appContainer) {
-    throw new Error(
-      "App DI container is not set. Call setAppContainer(container) during startup."
-    );
+    throw new Error('App DI container is not set. Call setAppContainer(container) during startup.');
   }
   return appContainer;
 }
@@ -25,10 +23,9 @@ export function getContainer() {
 export function createAppContext(overrides: any = {}) {
   const c = getContainer();
   return {
-    catInfoService: overrides.catInfoService || c.resolve("catInfoService"),
-    likeService: overrides.likeService || c.resolve("likeService"),
-    leaderboardService:
-      overrides.leaderboardService || c.resolve("leaderboardService"),
+    catInfoService: overrides.catInfoService || c.resolve('catInfoService'),
+    likeService: overrides.likeService || c.resolve('likeService'),
+    leaderboardService: overrides.leaderboardService || c.resolve('leaderboardService'),
   };
 }
 

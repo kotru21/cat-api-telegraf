@@ -1,5 +1,5 @@
-import { getLeaderboard } from "../../api";
-import store, { setState, emit, getState } from "../state/store";
+import { getLeaderboard } from '../../api';
+import store, { setState, emit, getState } from '../state/store';
 
 interface LeaderboardRow {
   id?: string;
@@ -22,24 +22,20 @@ interface NormalizedLeaderboardRow {
 }
 
 // Normalizer to keep UI decoupled from backend shape
-export function normalizeRow(
-  row: LeaderboardRow,
-  index = 0
-): NormalizedLeaderboardRow {
+export function normalizeRow(row: LeaderboardRow, index = 0): NormalizedLeaderboardRow {
   // Canonical shape. Backend returns msg rows: { id, breed_name, count, image_url }
   const catId = row.id || row.breed_id || row.cat_id || undefined;
-  if (!catId && process?.env?.NODE_ENV !== "production") {
+  if (!catId && process?.env?.NODE_ENV !== 'production') {
     // Helpful during transition; remove when API stabilized
-    console.warn("normalizeRow: missing id field in leaderboard row", row);
+    console.warn('normalizeRow: missing id field in leaderboard row', row);
   }
   return {
     position: row.rank != null ? row.rank : index + 1,
     catId,
-    breedName: row.breed_name || "Unknown Breed",
-    likes:
-      row.likes != null ? row.likes : row.count != null ? row.count : undefined,
+    breedName: row.breed_name || 'Unknown Breed',
+    likes: row.likes != null ? row.likes : row.count != null ? row.count : undefined,
     change: 0,
-    imageUrl: row.image_url || "",
+    imageUrl: row.image_url || '',
   };
 }
 
@@ -51,21 +47,19 @@ export async function loadLeaderboard({ force = false } = {}) {
   if (!force && now - lastLoadTs < CACHE_TTL && getState().leaderboard.length) {
     return getState().leaderboard;
   }
-  emit("leaderboard:loading");
+  emit('leaderboard:loading');
   setState({ loading: { leaderboard: true }, errors: { leaderboard: null } });
   try {
     const raw: LeaderboardRow[] = await getLeaderboard();
-    const data = Array.isArray(raw)
-      ? raw.map((r, i) => normalizeRow(r, i))
-      : [];
+    const data = Array.isArray(raw) ? raw.map((r, i) => normalizeRow(r, i)) : [];
     lastLoadTs = Date.now();
     setState({ leaderboard: data, loading: { leaderboard: false } });
-    emit("leaderboard:loaded", data);
+    emit('leaderboard:loaded', data);
     return data;
   } catch (err) {
-    console.error("Leaderboard load failed", err);
+    console.error('Leaderboard load failed', err);
     setState({ loading: { leaderboard: false }, errors: { leaderboard: err } });
-    emit("leaderboard:error", err);
+    emit('leaderboard:error', err);
     throw err;
   }
 }

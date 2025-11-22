@@ -1,89 +1,96 @@
+import { Cat, LeaderboardEntry, UserProfile } from './types.js';
+
 // Centralized API helper functions for frontend
 // Lightweight fetch wrapper with JSON + error handling
 
-const API_CACHE = new Map<string, { ts: number; ttl: number; data: any }>(); // key -> { ts, ttl, data }
-const DEFAULT_TTL = 15_000; // 15s cache for relatively static endpoints like leaderboard
+interface CacheEntry<T> {
+  ts: number;
+  ttl: number;
+  data: T;
+}
 
-function setCache(key: string, data: any, ttl = DEFAULT_TTL) {
+const API_CACHE = new Map<string, CacheEntry<unknown>>();
+const DEFAULT_TTL = 15_000;
+
+function setCache<T>(key: string, data: T, ttl = DEFAULT_TTL) {
   API_CACHE.set(key, { ts: Date.now(), ttl, data });
 }
 
-function getCache(key: string) {
+function getCache<T>(key: string): T | null {
   const entry = API_CACHE.get(key);
   if (!entry) return null;
   if (Date.now() - entry.ts > entry.ttl) {
     API_CACHE.delete(key);
     return null;
   }
-  return entry.data;
+  return entry.data as T;
 }
 
-export async function fetchJSON(
-  path: string,
-  {
-    method = "GET",
+export interface FetchOptions {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: unknown;
+  cache?: boolean;
+  ttl?: number;
+  credentials?: RequestCredentials;
+}
+
+export async function fetchJSON<T>(path: string, options: FetchOptions = {}): Promise<T> {
+  const {
+    method = 'GET',
     headers = {},
     body,
     cache = false,
     ttl,
-    credentials = "include",
-  }: {
-    method?: string;
-    headers?: Record<string, string>;
-    body?: any;
-    cache?: boolean;
-    ttl?: number;
-    credentials?: RequestCredentials;
-  } = {}
-) {
-  const cacheKey = cache
-    ? `${method}:${path}:${body ? JSON.stringify(body) : ""}`
-    : null;
+    credentials = 'include',
+  } = options;
+
+  const cacheKey = cache ? `${method}:${path}:${body ? JSON.stringify(body) : ''}` : null;
   if (cache && cacheKey) {
-    const cached = getCache(cacheKey);
+    const cached = getCache<T>(cacheKey);
     if (cached) return cached;
   }
 
   const init: RequestInit = {
     method,
-    headers: { Accept: "application/json", ...headers },
+    headers: { Accept: 'application/json', ...headers },
     credentials,
   };
   if (body) {
-    // @ts-ignore
-    init.headers["Content-Type"] = "application/json";
-    init.body = typeof body === "string" ? body : JSON.stringify(body);
+    (init.headers as Record<string, string>)['Content-Type'] = 'application/json';
+    init.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
   let response;
   try {
     response = await fetch(path, init);
-  } catch (networkError: any) {
-    throw new Error(`NETWORK_ERROR:${networkError.message}`);
+  } catch (networkError) {
+    const msg = networkError instanceof Error ? networkError.message : String(networkError);
+    throw new Error(`NETWORK_ERROR:${msg}`);
   }
 
   if (!response.ok) {
-    // Attempt to parse error JSON
     let errPayload = null;
     try {
       errPayload = await response.json();
-    } catch (_) {}
-    const msg =
-      errPayload?.error || errPayload?.message || `HTTP ${response.status}`;
-    const error: any = new Error(msg);
+    } catch {
+      // ignore
+    }
+    const msg = errPayload?.error || errPayload?.message || `HTTP ${response.status}`;
+    const error = new Error(msg) as Error & { status: number; payload: unknown };
     error.status = response.status;
     error.payload = errPayload;
     throw error;
   }
 
-  // Empty 204
-  if (response.status === 204) return null;
+  if (response.status === 204) return null as T;
 
-  let data;
+  let data: T;
   try {
     data = await response.json();
-  } catch (parseError: any) {
-    throw new Error(`INVALID_JSON_RESPONSE:${parseError.message}`);
+  } catch (parseError) {
+    const msg = parseError instanceof Error ? parseError.message : String(parseError);
+    throw new Error(`INVALID_JSON_RESPONSE:${msg}`);
   }
 
   if (cache && cacheKey) setCache(cacheKey, data, ttl ?? DEFAULT_TTL);
@@ -92,27 +99,27 @@ export async function fetchJSON(
 
 // Domain specific helpers
 export const getLeaderboard = () =>
-  fetchJSON("/api/leaderboard", { cache: true });
+  fetchJSON<LeaderboardEntry[]>('/api/leaderboard', { cache: true });
 export const getRandomImages = (count = 3) =>
-  fetchJSON(`/api/random-images?count=${count}`, { cache: false });
-export const getProfile = () => fetchJSON("/api/profile", { cache: false });
-export const getUserLikes = () => fetchJSON("/api/mylikes", { cache: false });
+  fetchJSON<Cat[]>(`/api/random-images?count=${count}`, { cache: false });
+export const getProfile = () => fetchJSON<UserProfile>('/api/profile', { cache: false });
+export const getUserLikes = () => fetchJSON<Cat[]>('/api/mylikes', { cache: false });
 export const getUserLikesCount = () =>
-  fetchJSON("/api/user/likes/count", { cache: false });
+  fetchJSON<{ count: number }>('/api/user/likes/count', { cache: false });
+export const addLike = (catId: string) =>
+  fetchJSON<{ success: boolean }>('/api/like', { method: 'POST', body: { catId } });
 export const deleteLike = (catId: string) =>
-  fetchJSON("/api/like", { method: "DELETE", body: { catId } });
+  fetchJSON<void>('/api/like', { method: 'DELETE', body: { catId } });
 export const getCatDetails = (id: string) =>
-  fetchJSON(`/api/cat/${encodeURIComponent(id)}`, { cache: true, ttl: 60_000 });
+  fetchJSON<Cat>(`/api/cat/${encodeURIComponent(id)}`, { cache: true, ttl: 60_000 });
 export const getSimilarCats = (feature: string, value: string) =>
   fetchJSON(
-    `/api/similar?feature=${encodeURIComponent(
-      feature
-    )}&value=${encodeURIComponent(value)}`,
-    { cache: false }
+    `/api/similar?feature=${encodeURIComponent(feature)}&value=${encodeURIComponent(value)}`,
+    { cache: false },
   );
 
 // Generic ws builder (not yet used directly here)
-export function buildWsUrl(path = "/wss") {
-  const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+export function buildWsUrl(path = '/wss') {
+  const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   return `${proto}//${window.location.host}${path}`;
 }

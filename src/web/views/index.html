@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
   <head>
     <title>CatBot</title>
@@ -8,20 +8,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    <script type="module" src="/js/app.js"></script>
     <!-- Все стили переведены в Tailwind utilities -->
   </head>
   <body class="bg-gray-900 text-gray-100 font-inter antialiased">
     <div class="relative">
       <header
-        class="header fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-500 bg-transparent min-h-[88px] border-b border-transparent will-change-transform">
+        class="header fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-500 bg-transparent min-h-[88px] border-b border-transparent will-change-transform"
+        x-data="navigation"
+        :class="{ 'bg-gray-900/85 shadow-lg shadow-black/40 backdrop-saturate-150 border-gray-800/60': scrolled, 'bg-transparent border-transparent': !scrolled }"
+      >
         <nav
           aria-label="Global"
-          class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+          class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+        >
           <div class="flex lg:flex-1">
             <a
               href="/"
-              class="flex items-center -m-1.5 p-1.5 text-white font-semibold tracking-tight">
+              class="flex items-center -m-1.5 p-1.5 text-white font-semibold tracking-tight"
+            >
               <i class="fas fa-cat text-indigo-500 text-2xl mr-2"></i>
               <span>CatBot</span>
             </a>
@@ -29,9 +36,9 @@
           <div class="flex lg:hidden">
             <button
               type="button"
-              command="show-modal"
-              commandfor="mobile-menu"
-              class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-200">
+              @click="toggleMobileMenu"
+              class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-200"
+            >
               <span class="sr-only">Открыть меню</span>
               <svg
                 viewBox="0 0 24 24"
@@ -39,18 +46,18 @@
                 stroke="currentColor"
                 stroke-width="1.5"
                 aria-hidden="true"
-                class="size-6">
+                class="size-6"
+              >
                 <path
                   d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
                   stroke-linecap="round"
-                  stroke-linejoin="round" />
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
           </div>
           <div class="hidden lg:flex lg:gap-x-12">
-            <a
-              href="#leaderboard"
-              class="text-sm font-semibold text-white hover:text-indigo-400"
+            <a href="#leaderboard" class="text-sm font-semibold text-white hover:text-indigo-400"
               >Лидерборд</a
             >
             <a
@@ -67,76 +74,114 @@
             >
           </div>
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a
-              href="/login"
-              class="text-sm font-semibold text-white hover:text-indigo-400"
-              >Войти <span aria-hidden="true">→</span></a
-            >
+            <template x-if="$store.global.user">
+              <div class="flex items-center gap-4">
+                <a
+                  href="/profile"
+                  class="text-sm font-semibold text-white hover:text-indigo-400 flex items-center"
+                >
+                  <i class="fas fa-user mr-2"></i>
+                  <span x-text="$store.global.user.first_name || 'Профиль'"></span>
+                </a>
+                <a href="/logout" class="text-sm font-semibold text-white hover:text-indigo-400">
+                  <i class="fas fa-sign-out-alt"></i>
+                </a>
+              </div>
+            </template>
+            <template x-if="!$store.global.user">
+              <a href="/login" class="text-sm font-semibold text-white hover:text-indigo-400"
+                >Войти <span aria-hidden="true">→</span></a
+              >
+            </template>
           </div>
         </nav>
-        <el-dialog>
-          <dialog id="mobile-menu" class="backdrop:bg-transparent lg:hidden">
-            <div tabindex="0" class="fixed inset-0 focus:outline-none"></div>
-            <el-dialog-panel
-              class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
-              <div class="flex items-center justify-between">
-                <a href="/" class="-m-1.5 p-1.5">
-                  <span class="sr-only">CatBot</span>
-                  <i class="fas fa-cat text-indigo-500 text-2xl"></i>
-                </a>
-                <button
-                  type="button"
-                  command="close"
-                  commandfor="mobile-menu"
-                  class="-m-2.5 rounded-md p-2.5 text-gray-200">
-                  <span class="sr-only">Закрыть меню</span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    aria-hidden="true"
-                    class="size-6">
-                    <path
-                      d="M6 18 18 6M6 6l12 12"
-                      stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg>
-                </button>
-              </div>
-              <div class="mt-6 flow-root">
-                <div class="-my-6 divide-y divide-white/10">
-                  <div class="space-y-2 py-6">
-                    <a
-                      href="#leaderboard"
-                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
-                      >Лидерборд</a
-                    >
-                    <a
-                      href="https://t.me/catbotjss_bot"
-                      target="_blank"
-                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
-                      >Telegram</a
-                    >
-                    <a
-                      href="https://github.com/kotru21/cat-api-telegraf"
-                      target="_blank"
-                      class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
-                      >GitHub</a
-                    >
-                  </div>
-                  <div class="py-6">
+
+        <div
+          x-show="mobileMenuOpen"
+          class="lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          style="display: none"
+        >
+          <div class="fixed inset-0 z-50"></div>
+          <div
+            class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10"
+          >
+            <div class="flex items-center justify-between">
+              <a href="/" class="-m-1.5 p-1.5">
+                <span class="sr-only">CatBot</span>
+                <i class="fas fa-cat text-indigo-500 text-2xl"></i>
+              </a>
+              <button
+                type="button"
+                @click="closeMobileMenu"
+                class="-m-2.5 rounded-md p-2.5 text-gray-200"
+              >
+                <span class="sr-only">Закрыть меню</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  aria-hidden="true"
+                  class="size-6"
+                >
+                  <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div class="mt-6 flow-root">
+              <div class="-my-6 divide-y divide-white/10">
+                <div class="space-y-2 py-6">
+                  <a
+                    href="#leaderboard"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
+                    @click="closeMobileMenu"
+                    >Лидерборд</a
+                  >
+                  <a
+                    href="https://t.me/catbotjss_bot"
+                    target="_blank"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
+                    >Telegram</a
+                  >
+                  <a
+                    href="https://github.com/kotru21/cat-api-telegraf"
+                    target="_blank"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold text-white hover:bg-white/5"
+                    >GitHub</a
+                  >
+                </div>
+                <div class="py-6">
+                  <template x-if="$store.global.user">
+                    <div>
+                      <a
+                        href="/profile"
+                        class="-mx-3 rounded-lg px-3 py-2.5 text-base font-semibold text-white hover:bg-white/5 flex items-center"
+                        @click="closeMobileMenu"
+                      >
+                        <i class="fas fa-user mr-2"></i>
+                        <span x-text="$store.global.user.first_name || 'Профиль'"></span>
+                      </a>
+                      <a
+                        href="/logout"
+                        class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-white hover:bg-white/5"
+                        >Выйти</a
+                      >
+                    </div>
+                  </template>
+                  <template x-if="!$store.global.user">
                     <a
                       href="/login"
                       class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold text-white hover:bg-white/5"
                       >Войти</a
                     >
-                  </div>
+                  </template>
                 </div>
               </div>
-            </el-dialog-panel>
-          </dialog>
-        </el-dialog>
+            </div>
+          </div>
+        </div>
       </header>
 
       <!-- HERO -->
@@ -144,16 +189,20 @@
         <!-- Верхняя фигура -->
         <div
           aria-hidden="true"
-          class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+          class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+        >
           <div
-            class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"></div>
+            class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
+          ></div>
         </div>
         <!-- Радиальный градиент поверх -->
         <div
-          class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_90%_10%,rgba(79,70,229,0.15)_0%,transparent_50%)]"></div>
+          class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_90%_10%,rgba(79,70,229,0.15)_0%,transparent_50%)]"
+        ></div>
         <div class="mx-auto max-w-3xl text-center">
           <div
-            class="inline-flex items-center mb-6 px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-500/10 text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
+            class="inline-flex items-center mb-6 px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-500/10 text-indigo-300 ring-1 ring-inset ring-indigo-500/30"
+          >
             Telegram бот с котиками
           </div>
           <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl">
@@ -161,174 +210,166 @@
             <span class="text-indigo-400">кошек</span>
           </h1>
           <p class="mt-6 text-lg leading-8 text-gray-400">
-            Отправляйте себе случайных котиков, узнавайте интересные факты о
-            породах и продвигайте любимцев в топе лайков.
+            Отправляйте себе случайных котиков, узнавайте интересные факты о породах и продвигайте
+            любимцев в топе лайков.
           </p>
           <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
             <a
               href="https://t.me/catbotjss_bot"
               target="_blank"
-              class="inline-flex items-center px-6 py-3 rounded-md bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500 transition">
+              class="inline-flex items-center px-6 py-3 rounded-md bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500 transition"
+            >
               <i class="fab fa-telegram-plane mr-2"></i> Открыть в Telegram
             </a>
             <a
               href="#leaderboard"
-              class="inline-flex items-center px-6 py-3 rounded-md bg-gray-800 text-white font-semibold border border-gray-700 hover:bg-gray-700 transition">
+              class="inline-flex items-center px-6 py-3 rounded-md bg-gray-800 text-white font-semibold border border-gray-700 hover:bg-gray-700 transition"
+            >
               <i class="fas fa-trophy mr-2"></i> Популярные коты
             </a>
           </div>
 
           <!-- Аватары -->
           <div
-            class="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-center">
-            <div class="flex -space-x-2" id="hero-cats-container">
-              <!-- skeleton avatars (3) -->
-              <div class="relative w-10 h-10">
-                <div
-                  class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800">
-                  <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+            class="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-center"
+            x-data="heroAvatars"
+          >
+            <div class="flex -space-x-2">
+              <template x-if="loading">
+                <div class="flex -space-x-2">
+                  <div class="relative w-10 h-10">
+                    <div
+                      class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800"
+                    >
+                      <div
+                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="relative w-10 h-10">
+                    <div
+                      class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800"
+                    >
+                      <div
+                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="relative w-10 h-10">
+                    <div
+                      class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800"
+                    >
+                      <div
+                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                      ></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="relative w-10 h-10">
+              </template>
+              <template x-for="cat in avatars" :key="cat.id">
                 <div
-                  class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800">
-                  <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                  class="relative w-10 h-10 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800 mr-[-0.5rem] first:ml-0"
+                >
+                  <img :src="cat.url" class="w-full h-full object-cover" alt="Cat" />
                 </div>
-              </div>
-              <div class="relative w-10 h-10">
-                <div
-                  class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800">
-                  <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                </div>
-              </div>
+              </template>
             </div>
-            <span class="text-sm text-gray-400"
-              >Присоединяйтесь к сообществу котолюбителей</span
-            >
+            <span class="text-sm text-gray-400">Присоединяйтесь к сообществу котолюбителей</span>
           </div>
         </div>
 
         <!-- Интегрированные статистические карточки -->
-        <div class="mt-16 mx-auto max-w-6xl">
+        <div class="mt-16 mx-auto max-w-6xl" x-data="stats">
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <!-- Время работы -->
             <div
-              class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5">
+              class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5"
+            >
               <h2 class="text-lg font-semibold mb-3 flex items-center">
                 <i class="fas fa-clock text-indigo-400 mr-2"></i>
                 Аптайм бота
               </h2>
-              <div id="timeLoader" class="grid grid-cols-4 gap-2 text-sm">
+              <div x-show="loading" class="grid grid-cols-4 gap-2 text-sm">
                 <!-- uptime skeleton cells (increased height) -->
-                <div
-                  class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
+                <template x-for="i in 4">
                   <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                </div>
-                <div
-                  class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
-                  <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                </div>
-                <div
-                  class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
-                  <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                </div>
-                <div
-                  class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden">
-                  <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                </div>
+                    class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden"
+                  >
+                    <div
+                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                    ></div>
+                  </div>
+                </template>
               </div>
-              <div
-                id="timeOutput"
-                class="hidden transition-opacity duration-500">
+              <div x-show="!loading" style="display: none">
                 <div class="grid grid-cols-4 gap-2 text-sm animate-fade-in">
-                  <div
-                    class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
+                  <template x-for="(unit, key) in uptime" :key="key">
                     <div
-                      class="text-indigo-400 font-bold text-xl leading-none"
-                      id="uptime-days">
-                      0
+                      class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5"
+                    >
+                      <div
+                        class="text-indigo-400 font-bold text-xl leading-none"
+                        x-text="unit.value"
+                      >
+                        0
+                      </div>
+                      <div class="text-[11px] mt-1 opacity-80" x-text="unit.label"></div>
                     </div>
-                    <div class="text-[11px] mt-1 opacity-80">дн.</div>
-                  </div>
-                  <div
-                    class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
-                    <div
-                      class="text-indigo-400 font-bold text-xl leading-none"
-                      id="uptime-hours">
-                      0
-                    </div>
-                    <div class="text-[11px] mt-1 opacity-80">ч.</div>
-                  </div>
-                  <div
-                    class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
-                    <div
-                      class="text-indigo-400 font-bold text-xl leading-none"
-                      id="uptime-minutes">
-                      0
-                    </div>
-                    <div class="text-[11px] mt-1 opacity-80">мин.</div>
-                  </div>
-                  <div
-                    class="text-center p-2 bg-gray-600/20 rounded-md border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/40 transition transform hover:-translate-y-0.5">
-                    <div
-                      class="text-indigo-400 font-bold text-xl leading-none"
-                      id="uptime-seconds">
-                      0
-                    </div>
-                    <div class="text-[11px] mt-1 opacity-80">сек.</div>
-                  </div>
+                  </template>
                 </div>
               </div>
             </div>
             <!-- Сообщения -->
             <div
-              class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5">
+              class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5"
+            >
               <h2 class="text-lg font-semibold mb-1 flex items-center">
                 <i class="fas fa-comment text-indigo-400 mr-2"></i>
                 Сообщений отправлено
               </h2>
-              <div id="messageLoader" class="flex items-end h-[56px]">
-                <div
-                  class="relative h-10 w-16 rounded-md bg-gray-800 overflow-hidden">
+              <div x-show="loading" class="flex items-end h-[56px]">
+                <div class="relative h-10 w-16 rounded-md bg-gray-800 overflow-hidden">
                   <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                  ></div>
                 </div>
               </div>
               <p
-                id="messageOutput"
-                class="hidden text-3xl font-bold text-white">
+                x-show="!loading"
+                class="text-3xl font-bold text-white"
+                x-text="messageCount"
+                style="display: none"
+              >
                 0
               </p>
             </div>
             <!-- Команды -->
             <div
-              class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5">
+              class="bg-gray-800/80 backdrop-blur-md rounded-xl p-6 border border-gray-600/30 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5"
+            >
               <h2 class="text-lg font-semibold mb-3 flex items-center">
                 <i class="fas fa-terminal text-indigo-400 mr-2"></i>
                 Команды бота
               </h2>
               <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2">
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"
+                >
                   <code class="text-indigo-400">/fact</code>
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"
+                >
                   <code class="text-indigo-400">/menu</code>
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"
+                >
                   <code class="text-indigo-400">/mylikes</code>
                 </div>
                 <div
-                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700">
+                  class="flex items-center justify-center p-2 rounded-lg bg-gray-800 border border-gray-700"
+                >
                   <code class="text-indigo-400">/top</code>
                 </div>
               </div>
@@ -338,89 +379,158 @@
 
         <div
           aria-hidden="true"
-          class="pointer-events-none absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-25rem)]">
+          class="pointer-events-none absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-25rem)]"
+        >
           <div
-            class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"></div>
+            class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
+          ></div>
         </div>
       </div>
     </div>
 
     <!-- Секция лидерборда -->
-    <section id="leaderboard" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
+    <section id="leaderboard" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900" x-data="leaderboard">
       <div class="max-w-6xl mx-auto">
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold mb-4">Популярные породы кошек</h2>
           <p class="text-gray-400 max-w-2xl mx-auto">
-            Рейтинг самых популярных пород кошек на основе количества лайков от
-            пользователей.
+            Рейтинг самых популярных пород кошек на основе количества лайков от пользователей.
           </p>
         </div>
 
-        <div
-          class="overflow-x-auto rounded-xl shadow-2xl border border-gray-800">
+        <div class="overflow-x-auto rounded-xl shadow-2xl border border-gray-800">
           <table
             class="w-full min-w-[600px] border-separate border-spacing-0 rounded-xl overflow-hidden"
-            id="leaderboard-table">
+          >
             <thead>
               <tr>
                 <th
-                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400 text-left">
+                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400 text-left"
+                >
                   #
                 </th>
                 <th
-                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400">
+                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400"
+                >
                   Изображение
                 </th>
                 <th
-                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400 text-left">
+                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400 text-left"
+                >
                   Порода
                 </th>
                 <th
-                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400">
+                  class="px-4 py-4 font-semibold uppercase text-[11px] tracking-wider bg-gray-800/90 text-gray-400"
+                >
                   Лайки
                 </th>
               </tr>
             </thead>
             <tbody>
-              <!-- Шаблон для скелетон строк -->
-              <template id="skeleton-row">
-                <tr class="relative overflow-hidden">
-                  <td
-                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle">
-                    <div
-                      class="relative w-8 h-8 rounded-full overflow-hidden bg-indigo-900/40 flex items-center justify-center">
+              <template x-if="loading">
+                <template x-for="i in 5">
+                  <tr class="relative overflow-hidden">
+                    <td
+                      class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle"
+                    >
                       <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                        class="relative w-8 h-8 rounded-full overflow-hidden bg-indigo-900/40 flex items-center justify-center"
+                      >
+                        <div
+                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        ></div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle"
+                    >
+                      <div
+                        class="relative w-24 h-24 mx-auto rounded-lg overflow-hidden bg-gray-800/40"
+                      >
+                        <div
+                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        ></div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle"
+                    >
+                      <div
+                        class="relative h-5 w-40 max-w-full rounded-md overflow-hidden bg-gray-800/60"
+                      >
+                        <div
+                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        ></div>
+                      </div>
+                    </td>
+                    <td
+                      class="px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle"
+                    >
+                      <div
+                        class="relative inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-900/40 overflow-hidden"
+                      >
+                        <div
+                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        ></div>
+                        <div class="h-4 w-12"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </template>
+
+              <template x-for="(item, index) in items" :key="item.breed_id">
+                <tr class="hover:bg-gray-800/50 transition-colors duration-200 group">
+                  <td
+                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle"
+                  >
+                    <div
+                      class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm"
+                      :class="index < 3 ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-gray-700 text-gray-400'"
+                    >
+                      <span x-text="index + 1"></span>
                     </div>
                   </td>
                   <td
-                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle">
+                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle"
+                  >
                     <div
-                      class="relative w-24 h-24 mx-auto rounded-lg overflow-hidden bg-gray-800/40">
-                      <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                      class="relative w-24 h-24 mx-auto rounded-lg overflow-hidden shadow-md group-hover:shadow-indigo-500/20 transition-all duration-300 group-hover:scale-105"
+                    >
+                      <img
+                        :src="item.image_url"
+                        :alt="item.breed_name"
+                        class="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
                   </td>
                   <td
-                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle">
-                    <div
-                      class="relative h-5 w-40 max-w-full rounded-md overflow-hidden bg-gray-800/60">
-                      <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                    </div>
+                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle"
+                  >
+                    <a
+                      :href="`/cat-details.html?id=${item.example_cat_id}`"
+                      class="text-lg font-medium text-white hover:text-indigo-400 transition-colors flex items-center gap-2"
+                    >
+                      <span x-text="item.breed_name"></span>
+                      <i
+                        class="fas fa-external-link-alt text-xs opacity-0 group-hover:opacity-100 transition-opacity text-gray-500"
+                      ></i>
+                    </a>
+                    <div class="text-xs text-gray-500 mt-1" x-text="item.origin || 'Unknown'"></div>
                   </td>
                   <td
-                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle">
+                    class="px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle"
+                  >
                     <div
-                      class="relative inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-900/40 overflow-hidden">
-                      <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                      <div class="h-4 w-12"></div>
+                      class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-900/30 text-indigo-300 border border-indigo-500/20 group-hover:bg-indigo-900/50 transition-colors"
+                    >
+                      <i class="fas fa-heart text-xs mr-1.5 text-indigo-400"></i>
+                      <span class="font-bold" x-text="item.likes"></span>
                     </div>
                   </td>
                 </tr>
               </template>
-              <!-- Данные будут добавлены через JavaScript -->
             </tbody>
           </table>
         </div>
@@ -428,8 +538,7 @@
     </section>
 
     <!-- Footer -->
-    <footer
-      class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-900 border-t border-gray-800">
+    <footer class="py-10 px-4 sm:px-6 lg:px-8 bg-gray-900 border-t border-gray-800">
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="flex items-center mb-4 md:mb-0">
@@ -441,24 +550,23 @@
             <a
               href="https://github.com/kotru21/cat-api-telegraf"
               target="_blank"
-              class="text-gray-400 hover:text-white transition-colors">
+              class="text-gray-400 hover:text-white transition-colors"
+            >
               <i class="fab fa-github text-xl"></i>
             </a>
             <a
               href="https://t.me/catbotjss_bot"
               target="_blank"
-              class="text-gray-400 hover:text-white transition-colors">
+              class="text-gray-400 hover:text-white transition-colors"
+            >
               <i class="fab fa-telegram text-xl"></i>
             </a>
           </div>
         </div>
 
-        <div
-          class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
+        <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
           © 2025 Copyright:
-          <a
-            href="https://kotikov.is-a.dev/"
-            class="text-indigo-400 hover:text-indigo-300"
+          <a href="https://kotikov.is-a.dev/" class="text-indigo-400 hover:text-indigo-300"
             >Arsenij Kotikov</a
           >
         </div>
@@ -466,9 +574,5 @@
     </footer>
 
     <!-- Скрипты -->
-    <script src="/js/navigation.js" defer></script>
-    <script type="module" src="/js/api.js"></script>
-    <script type="module" src="/js/utils.js"></script>
-    <script type="module" src="/js/pages/indexPage.js"></script>
   </body>
 </html>

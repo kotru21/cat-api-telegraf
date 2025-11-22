@@ -1,16 +1,16 @@
 // Generic frontend utilities
 
 export function sanitize(text: string | null | undefined): string {
-  if (text == null) return "";
+  if (text == null) return '';
   return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-export function debounce(fn: Function, delay = 200) {
+export function debounce(fn: (...args: any[]) => void, delay = 200) {
   let t: any;
   return function (this: any, ...args: any[]) {
     clearTimeout(t);
@@ -43,8 +43,8 @@ export async function preloadImages(urls: string[] = [], timeoutMs = 3000) {
             // If cached by browser already
             resolve({ success: true, url, index, img });
           }
-        })
-    )
+        }),
+    ),
   );
 
   const result = await Promise.race([loads, timeout]);
@@ -52,9 +52,9 @@ export async function preloadImages(urls: string[] = [], timeoutMs = 3000) {
 }
 
 export const PLACEHOLDER = Object.freeze({
-  SMALL: "https://placehold.co/96x96/1F2937/4F46E5?text=No+Img",
-  MEDIUM: "https://placehold.co/300x200/1F2937/4F46E5?text=No+Image",
-  LARGE: "https://placehold.co/800x600/1F2937/4F46E5?text=No+Image",
+  SMALL: 'https://placehold.co/96x96/1F2937/4F46E5?text=No+Img',
+  MEDIUM: 'https://placehold.co/300x200/1F2937/4F46E5?text=No+Image',
+  LARGE: 'https://placehold.co/800x600/1F2937/4F46E5?text=No+Image',
 });
 
 interface CreateElOptions {
@@ -63,12 +63,9 @@ interface CreateElOptions {
   text?: string;
 }
 
-export function createEl(
-  tag: string,
-  { classes = [], attrs = {}, text }: CreateElOptions = {}
-) {
+export function createEl(tag: string, { classes = [], attrs = {}, text }: CreateElOptions = {}) {
   const el = document.createElement(tag);
-  if (classes.length) el.className = classes.join(" ");
+  if (classes.length) el.className = classes.join(' ');
   Object.entries(attrs).forEach(([k, v]) => {
     if (v != null) el.setAttribute(k, v);
   });
@@ -85,9 +82,9 @@ export function formatUptime(startDate: Date) {
   const seconds = Math.floor((timeDifference / 1000) % 60);
 
   return {
-    days: { value: String(days), label: "дн." },
-    hours: { value: String(hours), label: "ч." },
-    minutes: { value: String(minutes), label: "мин." },
-    seconds: { value: String(seconds), label: "сек." },
+    days: { value: String(days), label: 'дн.' },
+    hours: { value: String(hours), label: 'ч.' },
+    minutes: { value: String(minutes), label: 'мин.' },
+    seconds: { value: String(seconds), label: 'сек.' },
   };
 }

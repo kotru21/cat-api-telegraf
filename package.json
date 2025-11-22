@@ -16,7 +16,10 @@
     "prisma:migrate:deploy": "bunx prisma migrate deploy",
     "prisma:migrate:reset": "bunx prisma migrate reset --force",
     "prisma:studio": "bunx prisma studio",
-    "build": "bun build ./src/web/public/js/pages/*.ts --outdir ./src/web/public/dist --target browser"
+    "build": "vite build",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "author": "kotru21",
   "license": "ISC",
@@ -28,6 +31,7 @@
     "@libsql/client": "^0.15.15",
     "@prisma/adapter-libsql": "^7.0.0",
     "@prisma/client": "^7.0.0",
+    "alpinejs": "^3.15.2",
     "awilix": "^12.0.5",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
@@ -47,15 +51,23 @@
   "devDependencies": {
     "@jest/environment": "^30.2.0",
     "@jest/globals": "^30.2.0",
+    "@types/alpinejs": "^3.13.11",
     "@types/bun": "^1.3.3",
     "@types/cors": "^2.8.19",
+    "@types/eslint": "^9.6.1",
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
     "@types/node": "^24.10.1",
     "@types/ws": "^8.18.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
+    "prettier": "^3.6.2",
     "prisma": "^7.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.47.0",
+    "vite": "^7.2.4"
   }
 }

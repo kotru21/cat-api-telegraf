@@ -1,28 +1,20 @@
-import { getLeaderboard } from "../api";
-import { preloadImages, PLACEHOLDER } from "../utils";
-
-interface LeaderboardEntry {
-  id: string;
-  breed_name: string;
-  image_url: string;
-  count: number;
-}
+import { getLeaderboard } from '../api';
+import { preloadImages, PLACEHOLDER } from '../utils';
+import { LeaderboardEntry } from '../types';
 
 // Initialize leaderboard rendering
 // containerSelector: table body parent (#leaderboard-table tbody)
 export async function initLeaderboard({
-  tableBodySelector = "#leaderboard-table tbody",
-  skeletonTemplateSelector = "#skeleton-row",
+  tableBodySelector = '#leaderboard-table tbody',
+  skeletonTemplateSelector = '#skeleton-row',
   skeletonCount = 5,
 } = {}) {
   const tableBody = document.querySelector(tableBodySelector) as HTMLElement;
-  const skeletonTemplate = document.querySelector(
-    skeletonTemplateSelector
-  ) as HTMLTemplateElement;
+  const skeletonTemplate = document.querySelector(skeletonTemplateSelector) as HTMLTemplateElement;
   if (!tableBody || !skeletonTemplate) return;
 
   function showSkeletons(count = skeletonCount) {
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = '';
     for (let i = 0; i < count; i++) {
       const clone = document.importNode(skeletonTemplate.content, true);
       tableBody.appendChild(clone);
@@ -43,9 +35,7 @@ export async function initLeaderboard({
       let preloadResults: any[] = [];
       let hasTimeout = false;
       try {
-        const results = await preloadImages(
-          leaderboard.map((r) => r.image_url)
-        );
+        const results = await preloadImages(leaderboard.map((r) => r.url));
         if (results.length === 0) {
           hasTimeout = true;
         } else {
@@ -56,10 +46,10 @@ export async function initLeaderboard({
         }
         await new Promise((r) => setTimeout(r, 300));
       } catch (err) {
-        console.error("Ошибка предзагрузки изображений:", err);
+        console.error('Ошибка предзагрузки изображений:', err);
       }
 
-      tableBody.innerHTML = "";
+      tableBody.innerHTML = '';
 
       if (hasTimeout && preloadResults.length < leaderboard.length) {
         leaderboard.forEach((row, index) => {
@@ -72,7 +62,7 @@ export async function initLeaderboard({
         });
       }
     } catch (err) {
-      console.error("Ошибка загрузки данных лидерборда:", err);
+      console.error('Ошибка загрузки данных лидерборда:', err);
       tableBody.innerHTML =
         '<tr><td colspan="4" class="text-center py-8 text-gray-400">Ошибка загрузки. Пожалуйста, попробуйте позже.</td></tr>';
     }
@@ -82,53 +72,52 @@ export async function initLeaderboard({
     row: LeaderboardEntry,
     index: number,
     imageLoaded = false,
-    preloadedImg: HTMLImageElement | null = null
+    preloadedImg: HTMLImageElement | null = null,
   ) {
-    const tr = document.createElement("tr");
-    tr.className = "relative overflow-hidden";
+    const tr = document.createElement('tr');
+    tr.className = 'relative overflow-hidden';
 
-    const rankCell = document.createElement("td");
-    rankCell.className =
-      "px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle";
+    const rankCell = document.createElement('td');
+    rankCell.className = 'px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle';
     rankCell.innerHTML = `
       <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-        index < 3 ? "bg-indigo-600 text-white" : "bg-indigo-900 text-indigo-200"
+        index < 3 ? 'bg-indigo-600 text-white' : 'bg-indigo-900 text-indigo-200'
       }">${index + 1}</div>
     `;
 
-    const imgCell = document.createElement("td");
+    const imgCell = document.createElement('td');
     imgCell.className =
-      "px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle";
+      'px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle';
 
-    const imgContainer = document.createElement("div");
-    imgContainer.className = "img-container mx-auto";
-    imgContainer.style.width = "96px";
-    imgContainer.style.height = "96px";
+    const imgContainer = document.createElement('div');
+    imgContainer.className = 'img-container mx-auto';
+    imgContainer.style.width = '96px';
+    imgContainer.style.height = '96px';
 
-    const skeleton = document.createElement("div");
+    const skeleton = document.createElement('div');
     skeleton.className =
-      "skeleton bg-gray-700 animate-pulse rounded-lg w-full h-full opacity-100 transition-opacity duration-300";
+      'skeleton bg-gray-700 animate-pulse rounded-lg w-full h-full opacity-100 transition-opacity duration-300';
 
-    const img = document.createElement("img");
+    const img = document.createElement('img');
     img.className =
-      "w-24 h-24 object-cover rounded-lg mx-auto img-preload opacity-0 transition-opacity duration-300";
-    img.alt = row.breed_name || "Cat breed";
+      'w-24 h-24 object-cover rounded-lg mx-auto img-preload opacity-0 transition-opacity duration-300';
+    img.alt = row.breed_name || 'Cat breed';
     if (imageLoaded && preloadedImg) img.src = preloadedImg.src;
-    else img.src = row.image_url || "";
-    img.setAttribute("loading", "lazy");
+    else img.src = row.url || '';
+    img.setAttribute('loading', 'lazy');
 
     img.onload = () => {
       requestAnimationFrame(() => {
-        img.classList.add("img-loaded", "opacity-100");
-        skeleton.classList.add("skeleton-hidden", "opacity-0");
+        img.classList.add('img-loaded', 'opacity-100');
+        skeleton.classList.add('skeleton-hidden', 'opacity-0');
         setTimeout(() => skeleton.remove(), 400);
       });
     };
     img.onerror = () => {
       img.src = PLACEHOLDER.SMALL;
       requestAnimationFrame(() => {
-        img.classList.add("img-loaded", "opacity-100");
-        skeleton.classList.add("skeleton-hidden", "opacity-0");
+        img.classList.add('img-loaded', 'opacity-100');
+        skeleton.classList.add('skeleton-hidden', 'opacity-0');
         setTimeout(() => skeleton.remove(), 400);
       });
     };
@@ -136,8 +125,8 @@ export async function initLeaderboard({
     if (imageLoaded && preloadedImg) {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          img.classList.add("img-loaded", "opacity-100");
-          skeleton.classList.add("skeleton-hidden", "opacity-0");
+          img.classList.add('img-loaded', 'opacity-100');
+          skeleton.classList.add('skeleton-hidden', 'opacity-0');
           setTimeout(() => skeleton.remove(), 400);
         }, 50);
       });
@@ -147,23 +136,22 @@ export async function initLeaderboard({
     imgContainer.appendChild(img);
     imgCell.appendChild(imgContainer);
 
-    const nameCell = document.createElement("td");
-    nameCell.className =
-      "px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle";
-    const safeName = (row.breed_name || "Unknown Breed").replace(/</g, "&lt;");
+    const nameCell = document.createElement('td');
+    nameCell.className = 'px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle';
+    const safeName = (row.breed_name || 'Unknown Breed').replace(/</g, '&lt;');
     nameCell.innerHTML = `
-      <a href="${"/catDetails?id=" + encodeURIComponent(row.id)}" 
+      <a href="${'/catDetails?id=' + encodeURIComponent(row.catId)}" 
          class="text-indigo-400 hover:text-indigo-300 transition-colors">
         ${safeName}
       </a>
     `;
 
-    const likesCell = document.createElement("td");
+    const likesCell = document.createElement('td');
     likesCell.className =
-      "px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle";
+      'px-4 py-4 border-b border-gray-800 bg-gray-800/30 text-center align-middle';
     likesCell.innerHTML = `
       <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-900 text-indigo-300">
-        <i class="fas fa-heart text-red-500 mr-1.5"></i> ${row.count || 0}
+        <i class="fas fa-heart text-red-500 mr-1.5"></i> ${row.likes || 0}
       </div>
     `;
 

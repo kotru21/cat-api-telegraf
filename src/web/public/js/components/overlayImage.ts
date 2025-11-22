@@ -1,11 +1,11 @@
-import { PLACEHOLDER } from "../utils";
+import { PLACEHOLDER } from '../utils';
 
 interface OverlayImageOptions {
   src: string;
   alt?: string;
   width?: number | string;
   height?: number | string;
-  shape?: "circle" | "rect";
+  shape?: 'circle' | 'rect';
   wrapperClass?: string;
   imgClass?: string;
   skeletonClass?: string;
@@ -21,45 +21,42 @@ interface OverlayImageOptions {
  */
 export function overlayImageWithSkeleton({
   src,
-  alt = "",
+  alt = '',
   width,
   height,
-  shape = "rect",
-  wrapperClass = "",
-  imgClass = "",
-  skeletonClass = "",
-  borderClass = "",
+  shape = 'rect',
+  wrapperClass = '',
+  imgClass = '',
+  skeletonClass = '',
+  borderClass = '',
   placeholder = PLACEHOLDER.MEDIUM,
   alreadyLoaded = false,
   lazy = true,
   delay = 50,
 }: OverlayImageOptions) {
-  const wrapper = document.createElement("div");
-  wrapper.className =
-    `relative inline-block overflow-hidden ${wrapperClass}`.trim();
-  if (width != null)
-    wrapper.style.width = typeof width === "number" ? width + "px" : width;
-  if (height != null)
-    wrapper.style.height = typeof height === "number" ? height + "px" : height;
+  const wrapper = document.createElement('div');
+  wrapper.className = `relative inline-block overflow-hidden ${wrapperClass}`.trim();
+  if (width != null) wrapper.style.width = typeof width === 'number' ? width + 'px' : width;
+  if (height != null) wrapper.style.height = typeof height === 'number' ? height + 'px' : height;
 
-  const sharedRadius = shape === "circle" ? "rounded-full" : "rounded-lg";
+  const sharedRadius = shape === 'circle' ? 'rounded-full' : 'rounded-lg';
 
-  const skeleton = document.createElement("div");
+  const skeleton = document.createElement('div');
   skeleton.className =
     `absolute inset-0 ${sharedRadius} bg-gray-700 animate-pulse opacity-100 transition-opacity duration-300 ${borderClass} ${skeletonClass}`.trim();
 
-  const img = document.createElement("img");
+  const img = document.createElement('img');
   img.alt = alt;
-  img.decoding = "async";
-  if (lazy) img.loading = "lazy";
+  img.decoding = 'async';
+  if (lazy) img.loading = 'lazy';
   img.className =
     `absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 ${sharedRadius} ${borderClass} ${imgClass}`.trim();
   img.src = src || placeholder;
 
   const finalize = () => {
     requestAnimationFrame(() => {
-      img.classList.add("opacity-100");
-      skeleton.classList.add("opacity-0");
+      img.classList.add('opacity-100');
+      skeleton.classList.add('opacity-0');
       setTimeout(() => skeleton.remove(), 350);
     });
   };

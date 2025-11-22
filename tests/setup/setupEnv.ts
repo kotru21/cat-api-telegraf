@@ -1,10 +1,10 @@
 // Basic polyfills or globals for tests
-import "@jest/globals";
-import { JSDOM } from "jsdom";
+import '@jest/globals';
+import { JSDOM } from 'jsdom';
 
-console.log("SetupEnv running...");
-const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-  url: "http://localhost/",
+console.log('SetupEnv running...');
+const dom = new JSDOM('<!doctype html><html><body></body></html>', {
+  url: 'http://localhost/',
 });
 global.window = dom.window as any;
 global.document = dom.window.document;

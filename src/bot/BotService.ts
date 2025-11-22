@@ -1,24 +1,23 @@
-import { Telegraf, Context } from "telegraf";
-// @ts-ignore
-import RateLimitMiddleware from "telegraf-ratelimit";
-import { incrementMessageCount } from "../utils/messageCounter.js";
-import logger from "../utils/logger.js";
+import { Telegraf, Context, Middleware } from 'telegraf';
+// @ts-expect-error telegraf-ratelimit types are missing
+import RateLimitMiddleware from 'telegraf-ratelimit';
+import { incrementMessageCount } from '../utils/messageCounter.js';
+import logger from '../utils/logger.js';
+import { z } from 'zod';
+import { EnvSchema } from '../config/schema.js';
+
+export type AppConfig = z.infer<typeof EnvSchema>;
+
 export interface BotModule {
-  middleware(): any;
+  middleware(): Middleware<Context>;
 }
 
 export class BotService {
-  private config: any;
+  private config: AppConfig;
   private commands: BotModule[];
   public bot: Telegraf<Context> | null;
 
-  constructor({
-    config,
-    commands = [],
-  }: {
-    config: any;
-    commands: BotModule[];
-  }) {
+  constructor({ config, commands = [] }: { config: AppConfig; commands: BotModule[] }) {
     this.config = config;
     this.commands = commands;
     this.bot = null;
@@ -26,7 +25,7 @@ export class BotService {
 
   initialize() {
     if (!this.config.BOT_TOKEN) {
-      throw new Error("BOT_TOKEN is required to initialize the bot");
+      throw new Error('BOT_TOKEN is required to initialize the bot');
     }
     this.bot = new Telegraf(this.config.BOT_TOKEN);
 
@@ -35,7 +34,7 @@ export class BotService {
       window: 3000,
       limit: 3,
       onLimitExceeded: (ctx: Context) =>
-        ctx.reply("Пожалуйста, не отправляйте команды так часто 🙏"),
+        ctx.reply('Пожалуйста, не отправляйте команды так часто 🙏'),
     };
 
     this.bot.use(new RateLimitMiddleware(limitConfig));
@@ -53,32 +52,29 @@ export class BotService {
 
     // Global error handler для бота
     this.bot.catch((err, ctx) => {
+      const message = ctx.message && 'text' in ctx.message ? ctx.message.text : undefined;
       logger.error(
         {
           err,
           userId: ctx.from?.id,
           username: ctx.from?.username,
-          // @ts-ignore
-          command: ctx.message?.text,
+          command: message,
         },
-        "Bot command error"
+        'Bot command error',
       );
 
       ctx
-        .reply("Произошла ошибка при выполнении команды. Попробуйте позже.", {
-          // @ts-ignore
+        .reply('Произошла ошибка при выполнении команды. Попробуйте позже.', {
+          // @ts-expect-error - reply_to_message_id type mismatch
           reply_to_message_id: ctx.message?.message_id,
         })
         .catch((replyErr) => {
-          logger.error(
-            { err: replyErr },
-            "Failed to send error message to user"
-          );
+          logger.error({ err: replyErr }, 'Failed to send error message to user');
         });
     });
 
     // /start handler
-    this.bot.start((ctx) => ctx.reply("Hi! Use /menu to navigate."));
+    this.bot.start((ctx) => ctx.reply('Hi! Use /menu to navigate.'));
 
     return this.bot;
   }
@@ -88,14 +84,14 @@ export class BotService {
       this.initialize();
     }
     await this.bot!.launch();
-    logger.info("Bot launched successfully");
+    logger.info('Bot launched successfully');
     return this.bot;
   }
 
-  stop(reason = "SIGTERM") {
+  stop(reason = 'SIGTERM') {
     if (this.bot) {
       this.bot.stop(reason);
-      logger.info({ reason }, "Bot stopped");
+      logger.info({ reason }, 'Bot stopped');
     }
   }
 }

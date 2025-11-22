@@ -1,6 +1,9 @@
 <!-- Навигационная панель -->
 <nav
-  class="py-4 fixed w-full bg-none header z-50 transition-all duration-300 border-b border-transparent will-change-transform will-change-contents">
+  class="py-4 fixed w-full bg-none header z-50 transition-all duration-300 border-b border-transparent will-change-transform will-change-contents"
+  x-data="navigation"
+  :class="{ 'bg-gray-900/85 shadow-lg shadow-black/40 backdrop-saturate-150 border-gray-800/60': scrolled, 'bg-transparent border-transparent': !scrolled }"
+>
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center">
       <a href="/" class="text-xl font-bold text-white flex items-center">
@@ -12,62 +15,113 @@
         <a href="/" class="text-gray-300 hover:text-white transition-colors">
           <i class="fas fa-home mr-1"></i> Главная
         </a>
-        <a
-          href="/#leaderboard"
-          class="text-gray-300 hover:text-white transition-colors">
+        <a href="/#leaderboard" class="text-gray-300 hover:text-white transition-colors">
           <i class="fas fa-trophy mr-1"></i> Топ котов
         </a>
-        <a
-          href="/profile"
-          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
-          <i class="fas fa-user mr-1"></i> Профиль
-        </a>
+
+        <template x-if="$store.global.user">
+          <a
+            href="/profile"
+            class="text-gray-300 hover:text-white transition-colors flex items-center"
+          >
+            <i class="fas fa-user mr-1"></i>
+            <span x-text="$store.global.user.first_name || 'Профиль'"></span>
+          </a>
+        </template>
+
         <a
           href="https://t.me/catbotjss_bot"
-          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors">
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm transition-colors"
+        >
           <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
         </a>
-        <a
-          href="/logout"
-          class="text-gray-300 hover:text-white transition-colors user-auth-link flex items-center">
-          <i class="fas fa-sign-out-alt mr-1"></i> Выйти
-        </a>
+
+        <template x-if="$store.global.user">
+          <a
+            href="/logout"
+            class="text-gray-300 hover:text-white transition-colors flex items-center"
+          >
+            <i class="fas fa-sign-out-alt mr-1"></i> Выйти
+          </a>
+        </template>
+        <template x-if="!$store.global.user">
+          <a
+            href="/login"
+            class="text-gray-300 hover:text-white transition-colors flex items-center"
+          >
+            <i class="fas fa-sign-in-alt mr-1"></i> Войти
+          </a>
+        </template>
       </div>
       <!-- Мобильная кнопка меню -->
-      <button id="menuButton" class="md:hidden text-gray-300 hover:text-white">
-        <i class="fas fa-bars text-xl"></i>
+      <button @click="toggleMobileMenu" class="md:hidden text-gray-300 hover:text-white">
+        <i class="fas" :class="mobileMenuOpen ? 'fa-times text-xl' : 'fa-bars text-xl'"></i>
       </button>
     </div>
 
     <!-- Мобильное меню (скрыто по умолчанию) -->
-    <div id="mobileMenu" class="md:hidden hidden">
+    <div
+      x-show="mobileMenuOpen"
+      @click.away="closeMobileMenu"
+      x-transition
+      class="md:hidden"
+      style="display: none"
+    >
       <div
-        class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg">
+        class="px-2 pt-2 pb-3 space-y-1 mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-md rounded-lg"
+      >
         <a
           href="/"
-          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700"
+          @click="closeMobileMenu"
+        >
           <i class="fas fa-home mr-1"></i> Главная
         </a>
         <a
           href="/#leaderboard"
-          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700"
+          @click="closeMobileMenu"
+        >
           <i class="fas fa-trophy mr-1"></i> Топ котов
         </a>
-        <a
-          href="/profile"
-          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 user-auth-link flex items-center">
-          <i class="fas fa-user mr-1"></i> Профиль
-        </a>
+
+        <template x-if="$store.global.user">
+          <a
+            href="/profile"
+            class="px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 flex items-center"
+            @click="closeMobileMenu"
+          >
+            <i class="fas fa-user mr-1"></i>
+            <span x-text="$store.global.user.first_name || 'Профиль'"></span>
+          </a>
+        </template>
+
         <a
           href="https://t.me/catbotjss_bot"
-          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700">
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700"
+          @click="closeMobileMenu"
+        >
           <i class="fab fa-telegram-plane mr-1"></i> Открыть бота
         </a>
-        <a
-          href="/logout"
-          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 user-auth-link flex items-center">
-          <i class="fas fa-sign-out-alt mr-1"></i> Выйти
-        </a>
+
+        <template x-if="$store.global.user">
+          <a
+            href="/logout"
+            class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 flex items-center"
+            @click="closeMobileMenu"
+          >
+            <i class="fas fa-sign-out-alt mr-1"></i> Выйти
+          </a>
+        </template>
+        <template x-if="!$store.global.user">
+          <a
+            href="/login"
+            class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 flex items-center"
+            @click="closeMobileMenu"
+          >
+            <i class="fas fa-sign-in-alt mr-1"></i> Войти
+          </a>
+        </template>
       </div>
     </div>
   </div>

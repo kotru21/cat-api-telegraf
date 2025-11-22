@@ -1,6 +1,7 @@
-import { Composer, Markup, Context } from "telegraf";
-import logger from "../../utils/logger.js";
-import { LikeService } from "../../services/LikeService.js";
+import { Composer, Markup, Context } from 'telegraf';
+import logger from '../../utils/logger.js';
+import { LikeService } from '../../services/LikeService.js';
+import { Keyboards } from '../keyboards/index.js';
 
 export class LikeAction {
   private composer: Composer<any>;
@@ -15,11 +16,11 @@ export class LikeAction {
   register() {
     this.composer.action(/^data-(.*?)$/, async (ctx: Context) => {
       try {
-        // @ts-ignore
+        // @ts-expect-error - ctx.match is not typed in generic Context
         const catId = ctx.match[1];
         if (!ctx.from) return;
         const userId = ctx.from.id.toString();
-        // @ts-ignore
+        // @ts-expect-error - callback_query message type issue
         const message = ctx.update.callback_query.message;
 
         // like via service
@@ -27,36 +28,27 @@ export class LikeAction {
 
         if (!likeAdded) {
           // Если лайк уже был поставлен этим пользователем
-          await ctx.answerCbQuery("Вы уже поставили лайк этому коту 😺");
+          await ctx.answerCbQuery('Вы уже поставили лайк этому коту 😺');
           return;
         }
 
         const likes = await this.likeService.getLikesForCat(catId);
 
         // Обновляем клавиатуру с новым числом лайков
-        // @ts-ignore
         const existingKeyboard = message.reply_markup.inline_keyboard;
         // Пытаемся сохранить первую кнопку (Википедия), если она есть
-        const firstButton =
-          existingKeyboard && existingKeyboard[0] && existingKeyboard[0][0];
+        const firstButton = existingKeyboard && existingKeyboard[0] && existingKeyboard[0][0];
 
-        const buttons = [];
-        if (firstButton && firstButton.url) {
-          buttons.push(Markup.button.url("Википедия", firstButton.url));
-        }
-        buttons.push(Markup.button.callback(`👍 ${likes}`, `data-${catId}`));
+        const wikipediaUrl = firstButton && firstButton.url ? firstButton.url : undefined;
 
-        await ctx.editMessageReplyMarkup({
-          inline_keyboard: [buttons],
-        });
-
-        await ctx.answerCbQuery("Лайк засчитан!");
-      } catch (error) {
-        logger.error(
-          { err: error, userId: ctx.from?.id },
-          "LikeAction: error handling like"
+        await ctx.editMessageReplyMarkup(
+          Keyboards.catDetails(wikipediaUrl, likes, catId).reply_markup,
         );
-        await ctx.answerCbQuery("Произошла ошибка");
+
+        await ctx.answerCbQuery('Лайк засчитан!');
+      } catch (error) {
+        logger.error({ err: error, userId: ctx.from?.id }, 'LikeAction: error handling like');
+        await ctx.answerCbQuery('Произошла ошибка');
       }
     });
   }

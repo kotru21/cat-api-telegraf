@@ -1,4 +1,4 @@
-import { user_likes as UserLike, msg as Cat } from "@prisma/client";
+import { user_likes as UserLike, Cat } from '@prisma/client';
 
 export interface UserLikeDTO {
   cat_id: string;

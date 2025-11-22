@@ -1,8 +1,8 @@
-import { Markup, Context } from "telegraf";
-import { BaseCommand } from "./BaseCommand.js";
-import logger from "../../utils/logger.js";
-import { LikeService } from "../../services/LikeService.js";
-import { CatInfoService } from "../../services/CatInfoService.js";
+import { Markup, Context } from 'telegraf';
+import { BaseCommand } from './BaseCommand.js';
+import logger from '../../utils/logger.js';
+import { LikeService } from '../../services/LikeService.js';
+import { CatInfoService } from '../../services/CatInfoService.js';
 
 // Простая in-memory кэш структура для лайков пользователя
 // key: userId -> { data: [...], ts: number }
@@ -14,8 +14,8 @@ const navigationLocks = new Map<string, boolean>();
 
 // Базовый санитайзер для Markdown (Telegram classic) — экранируем спецсимволы
 function mdEscape(str: string | number | null | undefined) {
-  if (!str) return "";
-  return String(str).replace(/([_*\\`\[\]()~>#+\-=|{}.!])/g, "\\$1");
+  if (!str) return '';
+  return String(str).replace(/([_*\\`[\]()~>#+\-=|{}.!])/g, '\\$1');
 }
 
 export class MyLikesCommand extends BaseCommand {
@@ -29,7 +29,7 @@ export class MyLikesCommand extends BaseCommand {
     likeService: LikeService;
     catInfoService: CatInfoService;
   }) {
-    super("mylikes", "Просмотреть мои лайки");
+    super('mylikes', 'Просмотреть мои лайки');
     this.likeService = likeService;
     this.catInfoService = catInfoService;
     this.register();
@@ -43,85 +43,76 @@ export class MyLikesCommand extends BaseCommand {
         const userLikes = await this.getCachedUserLikes(userId, ctx);
 
         if (!userLikes || userLikes.length === 0) {
-          await ctx.reply("Вы еще не поставили ни одного лайка 😿");
+          await ctx.reply('Вы еще не поставили ни одного лайка 😿');
           return;
         }
 
         await this.sendLikeInfo(ctx, userLikes, 0);
       } catch (error) {
-        logger.error(
-          { err: error, userId: ctx.from?.id },
-          "MyLikesCommand: failed to fetch likes"
-        );
-        await ctx.reply(
-          "Извините, произошла ошибка при получении списка ваших лайков"
-        );
+        logger.error({ err: error, userId: ctx.from?.id }, 'MyLikesCommand: failed to fetch likes');
+        await ctx.reply('Извините, произошла ошибка при получении списка ваших лайков');
       }
     });
 
     // Обработчики кнопок навигации по лайкам
-    this.composer.action(
-      /^like_nav:(prev|next):(\d+)$/,
-      async (ctx: Context) => {
-        try {
-          if (!ctx.from) return;
-          const userId = ctx.from.id.toString();
+    this.composer.action(/^like_nav:(prev|next):(\d+)$/, async (ctx: Context) => {
+      try {
+        if (!ctx.from) return;
+        const userId = ctx.from.id.toString();
 
-          if (navigationLocks.get(userId)) {
-            await ctx.answerCbQuery("Подождите...");
-            return;
-          }
-          navigationLocks.set(userId, true);
+        if (navigationLocks.get(userId)) {
+          await ctx.answerCbQuery('Подождите...');
+          return;
+        }
+        navigationLocks.set(userId, true);
 
-          const userLikes = await this.getCachedUserLikes(userId, ctx);
+        const userLikes = await this.getCachedUserLikes(userId, ctx);
 
-          if (!userLikes || userLikes.length === 0) {
-            await ctx.answerCbQuery("Список лайков пуст");
-            navigationLocks.delete(userId);
-            return;
-          }
-
-          // @ts-ignore
-          const action = ctx.match[1]; // prev или next
-          // @ts-ignore
-          let currentIndex = parseInt(ctx.match[2]);
-
-          if (action === "next") {
-            currentIndex = (currentIndex + 1) % userLikes.length;
-          } else {
-            currentIndex =
-              (currentIndex - 1 + userLikes.length) % userLikes.length;
-          }
-
-          logger.debug(
-            { userId, action, currentIndex, total: userLikes.length },
-            "MyLikesCommand: navigation"
-          );
-
-          await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
-          await ctx.answerCbQuery();
+        if (!userLikes || userLikes.length === 0) {
+          await ctx.answerCbQuery('Список лайков пуст');
           navigationLocks.delete(userId);
-        } catch (error) {
-          logger.error(
-            { err: error, userId: ctx.from?.id },
-            "MyLikesCommand: likes navigation error"
-          );
-          await ctx.answerCbQuery("Произошла ошибка");
-          if (ctx.from) {
-            navigationLocks.delete(ctx.from.id.toString());
-          }
+          return;
+        }
+
+        // @ts-expect-error - ctx.match is not typed
+        const action = ctx.match[1]; // prev или next
+        // @ts-expect-error - ctx.match is not typed
+        let currentIndex = parseInt(ctx.match[2]);
+
+        if (action === 'next') {
+          currentIndex = (currentIndex + 1) % userLikes.length;
+        } else {
+          currentIndex = (currentIndex - 1 + userLikes.length) % userLikes.length;
+        }
+
+        logger.debug(
+          { userId, action, currentIndex, total: userLikes.length },
+          'MyLikesCommand: navigation',
+        );
+
+        await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
+        await ctx.answerCbQuery();
+        navigationLocks.delete(userId);
+      } catch (error) {
+        logger.error(
+          { err: error, userId: ctx.from?.id },
+          'MyLikesCommand: likes navigation error',
+        );
+        await ctx.answerCbQuery('Произошла ошибка');
+        if (ctx.from) {
+          navigationLocks.delete(ctx.from.id.toString());
         }
       }
-    );
+    });
 
     this.composer.action(/^like_details:(.+)$/, async (ctx: Context) => {
       try {
-        // @ts-ignore
+        // @ts-expect-error - ctx.match is not typed
         const catId = ctx.match[1];
         const catDetails = await this.catInfoService.getCatById(catId);
 
         if (!catDetails) {
-          await ctx.answerCbQuery("Информация о коте не найдена");
+          await ctx.answerCbQuery('Информация о коте не найдена');
           return;
         }
 
@@ -129,28 +120,20 @@ export class MyLikesCommand extends BaseCommand {
         const detailsMessage =
           `*${mdEscape(catDetails.breed_name)}*\n\n` +
           (catDetails.description
-            ? `*Описание:* ${mdEscape(
-                limitText(catDetails.description, 600)
-              )}\n\n`
-            : "") +
-          (catDetails.origin
-            ? `*Происхождение:* ${mdEscape(catDetails.origin)}\n`
-            : "") +
-          (catDetails.temperament
-            ? `*Темперамент:* ${mdEscape(catDetails.temperament)}\n`
-            : "") +
+            ? `*Описание:* ${mdEscape(limitText(catDetails.description, 600))}\n\n`
+            : '') +
+          (catDetails.origin ? `*Происхождение:* ${mdEscape(catDetails.origin)}\n` : '') +
+          (catDetails.temperament ? `*Темперамент:* ${mdEscape(catDetails.temperament)}\n` : '') +
           (catDetails.life_span
             ? `*Продолжительность жизни:* ${mdEscape(catDetails.life_span)}\n`
-            : "") +
+            : '') +
           (catDetails.weight_imperial || catDetails.weight_metric
             ? `*Вес:* ${mdEscape(
-                catDetails.weight_imperial || "?"
-              )} фунтов (${mdEscape(catDetails.weight_metric || "?")} кг)\n`
-            : "") +
+                catDetails.weight_imperial || '?',
+              )} фунтов (${mdEscape(catDetails.weight_metric || '?')} кг)\n`
+            : '') +
           `*Количество лайков:* ${catDetails.count}\n\n` +
-          (catDetails.wikipedia_url
-            ? `[Подробнее на Википедии](${catDetails.wikipedia_url})`
-            : "");
+          (catDetails.wikipedia_url ? `[Подробнее на Википедии](${catDetails.wikipedia_url})` : '');
 
         const photoUrl = catDetails.image_url || this.getFallbackImage();
 
@@ -159,45 +142,35 @@ export class MyLikesCommand extends BaseCommand {
             { url: photoUrl },
             {
               caption: detailsMessage,
-              parse_mode: "Markdown",
+              parse_mode: 'Markdown',
               ...Markup.inlineKeyboard([
-                [Markup.button.callback("👍 Лайк", `data-${catDetails.id}`)],
+                [Markup.button.callback('👍 Лайк', `data-${catDetails.id}`)],
               ]),
-            }
+            },
           );
         } catch (err) {
-          logger.warn(
-            { err },
-            "MyLikesCommand: failed to send details photo, fallback to text"
-          );
-          await ctx.reply(detailsMessage, { parse_mode: "Markdown" });
+          logger.warn({ err }, 'MyLikesCommand: failed to send details photo, fallback to text');
+          await ctx.reply(detailsMessage, { parse_mode: 'Markdown' });
         }
 
-        await ctx.answerCbQuery("Подробная информация о коте");
+        await ctx.answerCbQuery('Подробная информация о коте');
       } catch (error) {
-        logger.error({ err: error }, "MyLikesCommand: failed to fetch details");
-        await ctx.answerCbQuery("Произошла ошибка при получении информации");
+        logger.error({ err: error }, 'MyLikesCommand: failed to fetch details');
+        await ctx.answerCbQuery('Произошла ошибка при получении информации');
       }
     });
   }
 
-  async sendLikeInfo(
-    ctx: Context,
-    userLikes: any[],
-    index: number,
-    isEdit = false
-  ) {
+  async sendLikeInfo(ctx: Context, userLikes: any[], index: number, isEdit = false) {
     const likeInfo = userLikes[index];
     if (!likeInfo) return;
     const total = userLikes.length;
     const photoUrl = likeInfo.image_url || this.getFallbackImage();
 
     const caption =
-      `*${mdEscape(likeInfo.breed_name || "Без названия")}*\n\n` +
+      `*${mdEscape(likeInfo.breed_name || 'Без названия')}*\n\n` +
       `👍 Запись ${index + 1} из ${total}` +
-      (likeInfo.likes_count !== undefined
-        ? `\n❤️ Всего лайков: ${likeInfo.likes_count}`
-        : "");
+      (likeInfo.likes_count !== undefined ? `\n❤️ Всего лайков: ${likeInfo.likes_count}` : '');
 
     const keyboard = this.buildNavigationKeyboard(index, likeInfo.cat_id);
 
@@ -205,16 +178,16 @@ export class MyLikesCommand extends BaseCommand {
       try {
         await ctx.editMessageMedia(
           {
-            type: "photo",
+            type: 'photo',
             media: photoUrl,
             caption,
-            parse_mode: "Markdown",
+            parse_mode: 'Markdown',
           },
-          { reply_markup: keyboard.reply_markup }
+          { reply_markup: keyboard.reply_markup },
         );
       } catch (error) {
         await ctx.editMessageCaption(caption, {
-          parse_mode: "Markdown",
+          parse_mode: 'Markdown',
           reply_markup: keyboard.reply_markup,
         });
       }
@@ -222,14 +195,11 @@ export class MyLikesCommand extends BaseCommand {
       try {
         await ctx.replyWithPhoto(
           { url: photoUrl },
-          { caption, parse_mode: "Markdown", ...keyboard }
+          { caption, parse_mode: 'Markdown', ...keyboard },
         );
       } catch (err) {
-        logger.warn(
-          { err },
-          "MyLikesCommand: failed to send photo, fallback to text"
-        );
-        await ctx.reply(caption, { parse_mode: "Markdown" });
+        logger.warn({ err }, 'MyLikesCommand: failed to send photo, fallback to text');
+        await ctx.reply(caption, { parse_mode: 'Markdown' });
       }
     }
   }
@@ -237,16 +207,16 @@ export class MyLikesCommand extends BaseCommand {
   buildNavigationKeyboard(index: number, catId: string) {
     return Markup.inlineKeyboard([
       [
-        Markup.button.callback("◀️ Предыдущий", `like_nav:prev:${index}`),
-        Markup.button.callback("Следующий ▶️", `like_nav:next:${index}`),
+        Markup.button.callback('◀️ Предыдущий', `like_nav:prev:${index}`),
+        Markup.button.callback('Следующий ▶️', `like_nav:next:${index}`),
       ],
-      [Markup.button.callback("📝 Подробнее", `like_details:${catId}`)],
+      [Markup.button.callback('📝 Подробнее', `like_details:${catId}`)],
     ]);
   }
 
   getFallbackImage() {
     // Можно заменить на внешний URL или статику, если бот деплоится без public
-    return "https://placekitten.com/600/400"; // универсальный fallback
+    return 'https://placekitten.com/600/400'; // универсальный fallback
   }
 
   async getCachedUserLikes(userId: string, ctx: Context) {
@@ -266,9 +236,9 @@ export default MyLikesCommand;
 
 // Вспомогательный лимитер текста (обрезаем по границе слова)
 function limitText(text: string, max: number) {
-  if (!text) return "";
+  if (!text) return '';
   if (text.length <= max) return text;
   const slice = text.slice(0, max);
-  const lastSpace = slice.lastIndexOf(" ");
-  return (lastSpace > 0 ? slice.slice(0, lastSpace) : slice) + "…";
+  const lastSpace = slice.lastIndexOf(' ');
+  return (lastSpace > 0 ? slice.slice(0, lastSpace) : slice) + '…';
 }

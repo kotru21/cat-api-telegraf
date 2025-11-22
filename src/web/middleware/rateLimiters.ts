@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+import rateLimit from 'express-rate-limit';
 
 export function createRateLimiters() {
   // Базовый лимитер для всех API-запросов
@@ -7,7 +7,7 @@ export function createRateLimiters() {
     max: 100, // ограничение каждого IP до 100 запросов в окне
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: "Слишком много запросов, пожалуйста, попробуйте позже" },
+    message: { error: 'Слишком много запросов, пожалуйста, попробуйте позже' },
   });
 
   // Более строгие ограничения для некоторых эндпоинтов
@@ -15,8 +15,7 @@ export function createRateLimiters() {
     windowMs: 5 * 60 * 1000, // 5 минут
     max: 30, // ограничение до 30 запросов в окне
     message: {
-      error:
-        "Слишком много запросов к лидерборду, пожалуйста, попробуйте позже",
+      error: 'Слишком много запросов к лидерборду, пожалуйста, попробуйте позже',
     },
   });
 

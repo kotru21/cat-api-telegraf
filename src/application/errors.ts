@@ -6,10 +6,10 @@ export class AppError extends Error {
   constructor(
     message: string,
     {
-      code = "APP_ERROR",
+      code = 'APP_ERROR',
       status = 500,
       cause,
-    }: { code?: string; status?: number; cause?: any } = {}
+    }: { code?: string; status?: number; cause?: any } = {},
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -23,19 +23,19 @@ export class ValidationError extends AppError {
   public details: any;
 
   constructor(message: string, details?: any) {
-    super(message, { code: "VALIDATION_ERROR", status: 400 });
+    super(message, { code: 'VALIDATION_ERROR', status: 400 });
     this.details = details;
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message = "Not found") {
-    super(message, { code: "NOT_FOUND", status: 404 });
+  constructor(message = 'Not found') {
+    super(message, { code: 'NOT_FOUND', status: 404 });
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = "Unauthorized") {
-    super(message, { code: "UNAUTHORIZED", status: 401 });
+  constructor(message = 'Unauthorized') {
+    super(message, { code: 'UNAUTHORIZED', status: 401 });
   }
 }

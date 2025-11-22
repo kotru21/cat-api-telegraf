@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
   <head>
     <title>Мой профиль | CatBot</title>
@@ -8,10 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <!-- Стили перенесены на Tailwind utility классы -->
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
   </head>
-  <body class="bg-gray-900 text-gray-100 font-inter">
+  <body class="bg-gray-900 text-gray-100 font-inter" x-data="profile">
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Содержимое страницы -->
@@ -19,53 +24,58 @@
       <div class="max-w-6xl mx-auto">
         <!-- Профиль пользователя -->
         <div
-          class="relative p-6 mb-10 rounded-2xl overflow-hidden bg-gradient-to-b from-indigo-500/20 to-transparent after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_90%_10%,rgba(79,70,229,0.3)_0%,transparent_70%)]">
-          <div
-            class="flex flex-col md:flex-row items-center md:items-start gap-8">
+          class="relative p-6 mb-10 rounded-2xl overflow-hidden bg-gradient-to-b from-indigo-500/20 to-transparent after:content-[''] after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_90%_10%,rgba(79,70,229,0.3)_0%,transparent_70%)]"
+        >
+          <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
             <!-- Аватар пользователя -->
             <div
-              class="relative after:content-[''] after:absolute after:-inset-1 after:rounded-full after:bg-[linear-gradient(45deg,#4f46e5,#ec4899)] after:-z-10 rounded-full">
+              class="relative after:content-[''] after:absolute after:-inset-1 after:rounded-full after:bg-[linear-gradient(45deg,#4f46e5,#ec4899)] after:-z-10 rounded-full"
+            >
               <img
-                id="user-avatar"
                 class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-indigo-600 object-cover bg-gray-700"
-                src=""
+                :src="$store.global.user?.photo_url || '/media/catface.svg'"
                 alt="Профиль"
-                data-fallback="/media/catface.svg" />
+                @error="$el.src = '/media/catface.svg'"
+              />
             </div>
 
             <!-- Информация о пользователе -->
             <div class="text-center md:text-left flex-1">
-              <h1 class="text-3xl font-bold mb-1" id="user-name">
-                Загрузка...
-              </h1>
+              <h1
+                class="text-3xl font-bold mb-1"
+                x-text="($store.global.user?.first_name || '') + ($store.global.user?.last_name ? ' ' + $store.global.user.last_name : '') || 'Загрузка...'"
+              ></h1>
               <p class="text-gray-400 mb-4">
                 <i class="fab fa-telegram text-indigo-400 mr-1"></i>
-                <span id="user-username">@username</span>
+                <span x-text="'@' + ($store.global.user?.username || 'username')"></span>
               </p>
 
               <!-- Статистика пользователя -->
-              <div
-                class="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+              <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 <div
-                  class="py-2 px-4 rounded-lg flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-600/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500">
+                  class="py-2 px-4 rounded-lg flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-600/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500"
+                >
                   <div
-                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center">
+                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center"
+                  >
                     <i class="fas fa-heart text-red-500 text-xl"></i>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold" id="likes-count">0</div>
+                    <div class="text-2xl font-bold" x-text="likes.length">0</div>
                     <div class="text-xs text-gray-400">лайков поставлено</div>
                   </div>
                 </div>
 
                 <div
-                  class="py-2 px-4 rounded-lg flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-600/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500">
+                  class="py-2 px-4 rounded-lg flex items-center gap-2 bg-gray-800/80 backdrop-blur-sm border border-gray-600/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500"
+                >
                   <div
-                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center">
+                    class="w-10 h-10 bg-indigo-900 rounded-full flex items-center justify-center"
+                  >
                     <i class="fas fa-calendar-alt text-green-400 text-xl"></i>
                   </div>
                   <div>
-                    <div class="text-2xl font-bold" id="last-active">-</div>
+                    <div class="text-2xl font-bold">Сегодня</div>
                     <div class="text-xs text-gray-400">активность</div>
                   </div>
                 </div>
@@ -75,8 +85,7 @@
         </div>
 
         <div class="mb-8">
-          <h2
-            class="text-2xl font-bold flex items-center border-b border-gray-800 pb-3">
+          <h2 class="text-2xl font-bold flex items-center border-b border-gray-800 pb-3">
             <i class="fas fa-heart text-red-500 mr-2"></i> Мои лайки
           </h2>
         </div>
@@ -84,108 +93,133 @@
         <!-- Поиск и фильтры -->
         <div class="mb-6 flex flex-col sm:flex-row gap-4 items-center">
           <div
-            class="rounded-xl flex items-center flex-1 px-4 py-2 bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 transition">
+            class="rounded-xl flex items-center flex-1 px-4 py-2 bg-gray-800/60 backdrop-blur-sm border border-gray-600/40 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 transition"
+          >
             <i class="fas fa-search text-gray-400 mr-3"></i>
             <input
               type="text"
-              id="search-input"
+              x-model="search"
               placeholder="Найти по породе..."
-              class="bg-transparent border-none outline-none w-full text-white" />
+              class="bg-transparent border-none outline-none w-full text-white"
+            />
           </div>
-
-          <select
-            id="sort-select"
-            class="bg-gray-800/80 backdrop-blur-md border border-gray-600/50 rounded-xl py-3 px-4 text-sm outline-none cursor-pointer transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 hover:-translate-y-0.5 hover:border-indigo-400 appearance-none pr-10 min-w-[200px] [background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3e%3c/svg%3e')] bg-[length:1rem] bg-no-repeat bg-right-3">
-            <option value="latest">Недавние сначала</option>
-            <option value="name">По алфавиту</option>
-            <option value="likes">По числу лайков</option>
-          </select>
         </div>
 
         <!-- Раздел с лайкнутыми котами -->
         <div class="likes-container mb-8">
           <!-- Скелетон-загрузчик для карточек -->
-          <div
-            id="likes-skeleton"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <template id="like-skel-template">
-              <div
-                class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 p-0">
+          <div x-show="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <template x-for="i in 3">
+              <div class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 p-0">
                 <div class="relative h-48 bg-gray-800 overflow-hidden">
                   <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                  ></div>
                 </div>
                 <div class="p-4 space-y-3">
-                  <div
-                    class="h-5 w-3/4 rounded bg-gray-800 relative overflow-hidden">
+                  <div class="h-5 w-3/4 rounded bg-gray-800 relative overflow-hidden">
                     <div
-                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                    ></div>
                   </div>
-                  <div
-                    class="h-4 w-1/2 rounded bg-gray-800 relative overflow-hidden">
+                  <div class="h-4 w-1/2 rounded bg-gray-800 relative overflow-hidden">
                     <div
-                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                  </div>
-                  <div class="flex items-center justify-between pt-1">
-                    <div
-                      class="h-4 w-1/4 rounded bg-gray-800 relative overflow-hidden">
-                      <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                    </div>
-                    <div
-                      class="h-8 w-8 rounded-full bg-gray-800 relative overflow-hidden">
-                      <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-                    </div>
+                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                    ></div>
                   </div>
                 </div>
               </div>
             </template>
-            <div class="contents" id="like-skeleton-mount"></div>
-            <script>
-              //  3 карточки скелетона без дублирования в HTML
-              (function () {
-                const mount = document.currentScript.previousElementSibling;
-                const tpl = document.getElementById("like-skel-template");
-                for (let i = 0; i < 3; i++) {
-                  mount.appendChild(tpl.content.cloneNode(true));
-                }
-              })();
-            </script>
           </div>
 
           <!-- Контейнер для карточек с лайкнутыми котами -->
           <div
-            id="user-likes"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 opacity-0 transition-opacity duration-500">
-            <!-- Сюда будут добавляться карточки лайкнутых котов -->
+            x-show="!loading && filteredLikes.length > 0"
+            x-cloak
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-500"
+          >
+            <template x-for="cat in filteredLikes" :key="cat.id">
+              <div
+                class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-indigo-500/50 transition-all duration-300 hover:-translate-y-1 group"
+              >
+                <div class="relative h-48 overflow-hidden">
+                  <img
+                    :src="cat.url"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div
+                    class="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4"
+                  >
+                    <a
+                      :href="'/cat/' + cat.id"
+                      class="text-white hover:text-indigo-300 text-sm font-medium"
+                    >
+                      Подробнее <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3
+                      class="font-bold text-lg text-gray-100 truncate"
+                      x-text="cat.breeds?.[0]?.name || 'Unknown'"
+                    ></h3>
+                    <button
+                      @click="confirmDelete(cat)"
+                      class="text-gray-500 hover:text-red-500 transition-colors p-1"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                  <p
+                    class="text-sm text-gray-400 line-clamp-2"
+                    x-text="cat.breeds?.[0]?.temperament || 'No description'"
+                  ></p>
+
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span
+                      class="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300"
+                      x-show="cat.breeds?.[0]?.origin"
+                      x-text="cat.breeds?.[0]?.origin"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+            </template>
           </div>
 
           <!-- Сообщение об отсутствии лайков -->
           <div
-            id="no-likes"
-            class="text-center py-16 rounded-2xl hidden bg-gradient-to-br from-gray-800/80 to-gray-900/80 border border-dashed border-indigo-500/30">
+            x-show="!loading && likes.length === 0"
+            x-cloak
+            class="text-center py-16 rounded-2xl bg-gradient-to-br from-gray-800/80 to-gray-900/80 border border-dashed border-indigo-500/30"
+          >
             <div
-              class="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-6">
+              class="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-6"
+            >
               <i class="fas fa-heart-broken text-3xl text-red-400"></i>
             </div>
             <h3 class="text-xl font-semibold mb-3">У вас пока нет лайков</h3>
             <p class="text-gray-400 max-w-md mx-auto mb-8">
-              Используйте бота в Telegram, чтобы поставить лайки интересным
-              породам котов и они появятся здесь
+              Используйте бота в Telegram, чтобы поставить лайки интересным породам котов и они
+              появятся здесь
             </p>
             <a
               href="https://t.me/catbotjss_bot"
-              class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium">
+              class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-medium"
+            >
               <i class="fab fa-telegram-plane mr-2"></i> Открыть бота
             </a>
           </div>
 
           <!-- Информация о результатах поиска -->
           <div
-            id="search-results"
-            class="text-center mt-4 text-gray-400 hidden">
-            Найдено <span id="results-count">0</span> котов
+            x-show="!loading && likes.length > 0 && filteredLikes.length === 0"
+            x-cloak
+            class="text-center mt-4 text-gray-400"
+          >
+            Ничего не найдено по запросу "<span x-text="search"></span>"
           </div>
         </div>
       </div>
@@ -193,45 +227,47 @@
 
     <!-- Модальное окно подтверждения удаления -->
     <div
-      id="confirmation-modal"
+      x-show="confirmModalOpen"
+      x-cloak
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
-      style="display: none">
+      @click.self="confirmModalOpen = false"
+    >
       <div
-        class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all">
+        class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl transform transition-all"
+      >
         <div class="text-center mb-6">
           <div
-            class="w-16 h-16 bg-red-900 bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4">
+            class="w-16 h-16 bg-red-900 bg-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
             <i class="fas fa-heart-broken text-red-500 text-2xl"></i>
           </div>
           <h3 class="text-xl font-bold mb-2">Удалить лайк?</h3>
           <p class="text-gray-400">
             Вы действительно хотите удалить лайк для
-            <span id="modal-breed-name" class="text-white">этой породы</span>?
+            <span
+              x-text="catToDelete?.breeds?.[0]?.name || 'этой породы'"
+              class="text-white font-bold"
+            ></span
+            >?
           </p>
         </div>
         <div class="flex gap-3">
           <button
-            id="modal-cancel"
-            class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors">
+            @click="confirmModalOpen = false"
+            class="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+          >
             Отмена
           </button>
           <button
-            id="modal-confirm"
-            class="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+            @click="deleteLike()"
+            class="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+          >
             Удалить
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Toast-уведомления -->
-    <div
-      id="toast-container"
-      class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
-    <script src="/js/navigation.js" defer></script>
-    <script type="module" src="/js/api.js"></script>
-    <script type="module" src="/js/utils.js"></script>
-    <script type="module" src="/js/toast.js"></script>
-    <script type="module" src="/js/pages/profilePage.js"></script>
+    <script type="module" src="/js/app.js"></script>
   </body>
 </html>

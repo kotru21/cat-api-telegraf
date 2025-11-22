@@ -1,17 +1,17 @@
-import { EnvSchema } from "./schema.js";
+import { EnvSchema } from './schema.js';
 
 // dotenv.config() is not needed in Bun
 
 const parsed = EnvSchema.safeParse(process.env);
 if (!parsed.success) {
-  console.error("Config validation error:", parsed.error.flatten());
+  console.error('Config validation error:', parsed.error.flatten());
   process.exit(1);
 }
 
 const env = parsed.data;
 
 const PORT = env.PORT;
-const WEBSITE_URL = env.WEBSITE_URL.replace(/\/$/, "");
+const WEBSITE_URL = env.WEBSITE_URL.replace(/\/$/, '');
 
 const config = {
   BOT_TOKEN: env.BOT_TOKEN,
@@ -39,10 +39,8 @@ const config = {
 };
 
 // В проде дополнительно проверим SESSION_SECRET, даже несмотря на валидацию zod
-if (config.NODE_ENV === "production" && !config.SESSION_SECRET) {
-  console.error(
-    "Config validation error: SESSION_SECRET is required in production"
-  );
+if (config.NODE_ENV === 'production' && !config.SESSION_SECRET) {
+  console.error('Config validation error: SESSION_SECRET is required in production');
   process.exit(1);
 }
 

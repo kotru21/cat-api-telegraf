@@ -1,5 +1,5 @@
-import showToast from "../../toast";
-import { mapError } from "./errorMapper";
+import showToast from '../../toast';
+import { mapError } from './errorMapper';
 
 let lastMsg: string | null = null;
 let lastTs = 0;
@@ -12,7 +12,7 @@ export function notifyError(err: any, { prefix }: { prefix?: string } = {}) {
   if (full === lastMsg && now - lastTs < DEDUP_WINDOW) return;
   lastMsg = full;
   lastTs = now;
-  showToast(full, "error");
+  showToast(full, 'error');
 }
 
 export function notifySuccess(message: string, { dedup = false } = {}) {
@@ -20,7 +20,7 @@ export function notifySuccess(message: string, { dedup = false } = {}) {
   if (dedup && message === lastMsg && now - lastTs < 1000) return;
   lastMsg = message;
   lastTs = now;
-  showToast(message, "success");
+  showToast(message, 'success');
 }
 
 export default { notifyError, notifySuccess };

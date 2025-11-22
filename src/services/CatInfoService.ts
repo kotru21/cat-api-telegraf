@@ -1,6 +1,6 @@
-import { CatApiClient } from "../api/CatApiClient.js";
-import { CatRepository } from "../database/CatRepository.js";
-import { msg as Cat } from "@prisma/client";
+import { CatApiClient } from '../api/CatApiClient.js';
+import { CatRepository } from '../database/CatRepository.js';
+import { Cat } from '@prisma/client';
 
 export class CatInfoService {
   private catApiClient: CatApiClient;
@@ -24,7 +24,7 @@ export class CatInfoService {
 
       // Проверяем наличие данных о породе
       if (!catDetails?.breeds?.[0]) {
-        throw new Error("Нет данных о породе кота");
+        throw new Error('Нет данных о породе кота');
       }
 
       const breed = catDetails.breeds[0];
@@ -60,21 +60,18 @@ export class CatInfoService {
     return this.repository.getCatById(id);
   }
 
-  async getCatsByFeature(
-    feature: string,
-    value: string | number
-  ): Promise<Cat[]> {
+  async getCatsByFeature(feature: string, value: string | number): Promise<Cat[]> {
     if (!feature || !value) {
-      throw new Error("Feature and value are required");
+      throw new Error('Feature and value are required');
     }
 
     // Проверяем, что feature — допустимое поле
     const allowedFeatures = [
-      "origin",
-      "temperament",
-      "life_span",
-      "weight_imperial",
-      "weight_metric",
+      'origin',
+      'temperament',
+      'life_span',
+      'weight_imperial',
+      'weight_metric',
     ];
 
     if (!allowedFeatures.includes(feature)) {

@@ -1,12 +1,12 @@
 export default {
-  testEnvironment: "jsdom",
-  roots: ["<rootDir>/tests"],
-  moduleFileExtensions: ["js", "mjs"],
+  testEnvironment: 'jsdom',
+  roots: ['<rootDir>/tests'],
+  moduleFileExtensions: ['js', 'mjs'],
   transform: {},
-  testMatch: ["**/*.test.js"],
+  testMatch: ['**/*.test.js'],
   verbose: true,
-  setupFilesAfterEnv: ["<rootDir>/tests/setup/setupEnv.js"],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup/setupEnv.js'],
   moduleNameMapper: {
-    "^/js/(.*)$": "<rootDir>/src/web/public/js/$1",
+    '^/js/(.*)$': '<rootDir>/src/web/public/js/$1',
   },
 };

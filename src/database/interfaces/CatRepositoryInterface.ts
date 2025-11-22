@@ -1,4 +1,4 @@
-import { msg as Cat } from "@prisma/client";
+import { Cat } from '@prisma/client';
 
 export interface CatRepositoryInterface {
   saveCatDetails(catData: Partial<Cat>): Promise<void>;

@@ -1,4 +1,4 @@
-import { Composer } from "telegraf";
+import { Composer } from 'telegraf';
 
 export abstract class BaseCommand {
   protected name: string;

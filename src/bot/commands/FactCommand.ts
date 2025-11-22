@@ -1,8 +1,9 @@
-import { Markup, Context } from "telegraf";
-import { BaseCommand } from "./BaseCommand.js";
-import logger from "../../utils/logger.js";
-import { CatInfoService } from "../../services/CatInfoService.js";
-import { LikeService } from "../../services/LikeService.js";
+import { Markup, Context } from 'telegraf';
+import { BaseCommand } from './BaseCommand.js';
+import logger from '../../utils/logger.js';
+import { CatInfoService } from '../../services/CatInfoService.js';
+import { LikeService } from '../../services/LikeService.js';
+import { Keyboards } from '../keyboards/index.js';
 
 export class FactCommand extends BaseCommand {
   private catInfoService: CatInfoService;
@@ -15,7 +16,7 @@ export class FactCommand extends BaseCommand {
     catInfoService: CatInfoService;
     likeService: LikeService;
   }) {
-    super("fact", "Получить факт о кошке");
+    super('fact', 'Получить факт о кошке');
     this.catInfoService = catInfoService;
     this.likeService = likeService;
     this.register();
@@ -31,29 +32,15 @@ export class FactCommand extends BaseCommand {
         await ctx.replyWithPhoto(
           { url: catData.url },
           {
-            parse_mode: "Markdown",
+            parse_mode: 'Markdown',
             caption: `_${breed.name}_\n${breed.description}`,
-            ...this.createKeyboard(breed.wikipedia_url, likes || 0, catData.id),
-          }
+            ...Keyboards.catDetails(breed.wikipedia_url, likes || 0, catData.id),
+          },
         );
       } catch (error) {
-        logger.error(
-          { err: error, userId: ctx.from?.id },
-          "Failed to fetch random cat fact"
-        );
-        await ctx.reply(
-          "Извините, произошла ошибка при получении информации о породе кошки"
-        );
+        logger.error({ err: error, userId: ctx.from?.id }, 'Failed to fetch random cat fact');
+        await ctx.reply('Извините, произошла ошибка при получении информации о породе кошки');
       }
     });
-  }
-
-  createKeyboard(wikipediaUrl: string, likesCount: number, catId: string) {
-    return Markup.inlineKeyboard([
-      [
-        Markup.button.url("Википедия", wikipediaUrl),
-        Markup.button.callback(`👍 ${likesCount}`, `data-${catId}`),
-      ],
-    ]);
   }
 }

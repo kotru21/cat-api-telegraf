@@ -1,7 +1,7 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response } from 'express';
 
 export function setupDebugRoutes(router: Router) {
-  router.get("/debug-session", (req: Request, res: Response) => {
+  router.get('/debug-session', (req: Request, res: Response) => {
     // Возвращает диагностическую информацию по текущей сессии и запросу
     res.json({
       sessionExists: !!req.session,

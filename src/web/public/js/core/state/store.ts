@@ -52,7 +52,7 @@ const state: AppState = {
 
 function shallowEqual(a: any, b: any) {
   if (Object.is(a, b)) return true;
-  if (typeof a !== "object" || typeof b !== "object" || !a || !b) return false;
+  if (typeof a !== 'object' || typeof b !== 'object' || !a || !b) return false;
   const ka = Object.keys(a);
   const kb = Object.keys(b);
   if (ka.length !== kb.length) return false;
@@ -67,7 +67,7 @@ export function getState() {
 export function setState(patch: Partial<AppState>) {
   const prev = { ...state };
   Object.entries(patch).forEach(([k, v]) => {
-    if (v && typeof v === "object" && !Array.isArray(v) && state[k]) {
+    if (v && typeof v === 'object' && !Array.isArray(v) && state[k]) {
       state[k] = { ...state[k], ...v };
     } else {
       state[k] = v;
@@ -80,13 +80,13 @@ export function setState(patch: Partial<AppState>) {
       if (!shallowEqual(entry.lastValue, nextSel)) {
         entry.lastValue = Array.isArray(nextSel)
           ? [...nextSel]
-          : nextSel && typeof nextSel === "object"
-          ? { ...nextSel }
-          : nextSel;
+          : nextSel && typeof nextSel === 'object'
+            ? { ...nextSel }
+            : nextSel;
         entry.cb(nextSel, prev);
       }
     } catch (e) {
-      console.error("Store subscriber error", e);
+      console.error('Store subscriber error', e);
     }
   });
 }
@@ -115,7 +115,7 @@ export function emit(eventName: string, payload?: any) {
       try {
         h(payload);
       } catch (e) {
-        console.error("Event handler error", e);
+        console.error('Event handler error', e);
       }
     });
   }

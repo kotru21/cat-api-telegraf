@@ -1,28 +1,27 @@
-import { Express } from "express";
-import session from "express-session";
-import { createClient as createRedisClient } from "redis";
-import { RedisStore } from "connect-redis";
-import logger from "../../utils/logger.js";
+import { Express } from 'express';
+import session from 'express-session';
+import { createClient as createRedisClient } from 'redis';
+import { RedisStore } from 'connect-redis';
+import logger from '../../utils/logger.js';
 
 export function setupSession(app: Express, config: any) {
   // Production requires explicit secret
-  if (process.env.NODE_ENV === "production" && !config.SESSION_SECRET) {
+  if (process.env.NODE_ENV === 'production' && !config.SESSION_SECRET) {
     throw new Error(
-      "SESSION_SECRET is required in production. Please set it via environment variable."
+      'SESSION_SECRET is required in production. Please set it via environment variable.',
     );
   }
-  const isProd = process.env.NODE_ENV === "production";
+  const isProd = process.env.NODE_ENV === 'production';
 
   let store;
   if (isProd) {
     if (!process.env.REDIS_URL && !config.REDIS_URL) {
-      throw new Error("REDIS_URL is required in production for session store.");
+      throw new Error('REDIS_URL is required in production for session store.');
     }
     const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
     const allowSelfSigned =
-      config.REDIS_ALLOW_SELF_SIGNED ||
-      process.env.REDIS_ALLOW_SELF_SIGNED === "true";
-    const isRediss = redisUrl.startsWith("rediss://");
+      config.REDIS_ALLOW_SELF_SIGNED || process.env.REDIS_ALLOW_SELF_SIGNED === 'true';
+    const isRediss = redisUrl.startsWith('rediss://');
     // Поведение redis@5: если URL rediss:// — TLS включается автоматически.
     // Ошибка "tls socket option is set ... mismatch with protocol" возникает при одновременном указании rediss:// и несовместимых tls опций.
     // Стратегия:
@@ -34,9 +33,9 @@ export function setupSession(app: Express, config: any) {
 
     // Если разрешены самоподписанные сертификаты, отключаем проверку TLS глобально
     if (allowSelfSigned && isRediss) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       logger.warn(
-        "TLS certificate verification disabled globally for Redis connection. This should only be used temporarily."
+        'TLS certificate verification disabled globally for Redis connection. This should only be used temporarily.',
       );
     }
 
@@ -54,41 +53,34 @@ export function setupSession(app: Express, config: any) {
         {
           redisUrl,
           securityWarning:
-            "TLS certificate verification is DISABLED for Redis (self-signed allowed). Do NOT use this permanently in production.",
+            'TLS certificate verification is DISABLED for Redis (self-signed allowed). Do NOT use this permanently in production.',
         },
-        "Redis session client: self-signed certificate allowed"
+        'Redis session client: self-signed certificate allowed',
       );
-      if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === "0") {
+      if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
         logger.warn(
-          "Process-wide TLS verification disabled (NODE_TLS_REJECT_UNAUTHORIZED=0). Consider removing after debugging."
+          'Process-wide TLS verification disabled (NODE_TLS_REJECT_UNAUTHORIZED=0). Consider removing after debugging.',
         );
       }
     }
-    redisClient.on("ready", () => logger.info("Redis session client ready"));
-    redisClient.on("error", (err) => {
-      if (
-        err &&
-        err.code === "SELF_SIGNED_CERT_IN_CHAIN" &&
-        isRediss &&
-        !allowSelfSigned
-      ) {
+    redisClient.on('ready', () => logger.info('Redis session client ready'));
+    redisClient.on('error', (err) => {
+      if (err && err.code === 'SELF_SIGNED_CERT_IN_CHAIN' && isRediss && !allowSelfSigned) {
         logger.error(
           {
             err,
-            hint: "Detected self-signed certificate from Redis. If this is intentional (dev tunnel), set REDIS_ALLOW_SELF_SIGNED=true temporarily. Prefer configuring a proper CA cert instead.",
+            hint: 'Detected self-signed certificate from Redis. If this is intentional (dev tunnel), set REDIS_ALLOW_SELF_SIGNED=true temporarily. Prefer configuring a proper CA cert instead.',
           },
-          "Redis session client error"
+          'Redis session client error',
         );
       } else {
-        logger.error({ err }, "Redis session client error");
+        logger.error({ err }, 'Redis session client error');
       }
     });
-    redisClient.on("reconnecting", () =>
-      logger.warn("Redis session client reconnecting")
-    );
-    redisClient.on("end", () => logger.warn("Redis session client ended"));
+    redisClient.on('reconnecting', () => logger.warn('Redis session client reconnecting'));
+    redisClient.on('end', () => logger.warn('Redis session client ended'));
 
-    store = new RedisStore({ client: redisClient, prefix: "sess:" });
+    store = new RedisStore({ client: redisClient, prefix: 'sess:' });
   }
 
   app.use(
@@ -100,10 +92,10 @@ export function setupSession(app: Express, config: any) {
         secure: isProd,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: 'lax',
       },
       proxy: true,
       store,
-    })
+    }),
   );
 }

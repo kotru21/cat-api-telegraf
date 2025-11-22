@@ -1,27 +1,27 @@
-import config from "./config/index.js";
+import config from './config/index.js';
 
-import { buildContainer } from "./di/container.js";
-import { setAppContainer } from "./application/context.js";
+import { buildContainer } from './di/container.js';
+import { setAppContainer } from './application/context.js';
 
-import { BotService } from "./bot/BotService.js";
-import { WebServer } from "./web/WebServer.js";
-import logger from "./utils/logger.js";
-import getPrisma from "./database/prisma/PrismaClient.js";
+import { BotService } from './bot/BotService.js';
+import { WebServer } from './web/WebServer.js';
+import logger from './utils/logger.js';
+import getPrisma from './database/prisma/PrismaClient.js';
 
 // Process diagnostics
-process.on("uncaughtException", (err) => {
-  logger.fatal({ err }, "Uncaught exception");
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught exception');
   process.exit(1);
 });
-process.on("unhandledRejection", (reason) => {
-  logger.fatal({ err: reason }, "Unhandled promise rejection");
+process.on('unhandledRejection', (reason) => {
+  logger.fatal({ err: reason }, 'Unhandled promise rejection');
   process.exit(1);
 });
-process.on("exit", (code) => {
-  logger.info({ code }, "Process exit");
+process.on('exit', (code) => {
+  logger.info({ code }, 'Process exit');
 });
 
-import { AwilixContainer } from "awilix";
+import { AwilixContainer } from 'awilix';
 
 class Application {
   private config: any;
@@ -36,15 +36,13 @@ class Application {
     // Устанавливаем контейнер приложения глобально для use-cases/web
     setAppContainer(this.container);
     this.dbService = null; // Prisma is initialized lazily via getPrisma
-    this.botService = this.container.resolve("botService");
+    this.botService = this.container.resolve('botService');
     this.webServer = null;
 
     if (this.config.WEB_ENABLED !== false) {
-      this.webServer = this.container.resolve("webServer");
+      this.webServer = this.container.resolve('webServer');
     } else {
-      logger.info(
-        "Web server is disabled by configuration (WEB_ENABLED=false)"
-      );
+      logger.info('Web server is disabled by configuration (WEB_ENABLED=false)');
     }
   }
 
@@ -52,7 +50,7 @@ class Application {
     try {
       // Start web server if enabled
       if (this.webServer) {
-        logger.info("Starting web server...");
+        logger.info('Starting web server...');
         this.webServer.initialize();
         await this.webServer.start();
       }
@@ -61,21 +59,21 @@ class Application {
       if (this.config.BOT_ENABLED !== false) {
         await this.botService.launch();
       } else {
-        logger.info("Bot is disabled by configuration (BOT_ENABLED=false)");
+        logger.info('Bot is disabled by configuration (BOT_ENABLED=false)');
       }
 
       this.setupShutdownHandlers();
 
       return true;
     } catch (error) {
-      logger.error({ err: error }, "Application startup error");
+      logger.error({ err: error }, 'Application startup error');
       return false;
     }
   }
 
   setupShutdownHandlers() {
     const shutdown = async () => {
-      logger.info("Shutting down application...");
+      logger.info('Shutting down application...');
       this.botService.stop();
 
       if (this.webServer) {
@@ -86,22 +84,22 @@ class Application {
         const prisma = getPrisma();
         if (prisma && prisma.$disconnect) {
           await prisma.$disconnect();
-          logger.info("Prisma client disconnected");
+          logger.info('Prisma client disconnected');
         }
       } catch (e) {
-        logger.warn({ err: e }, "Failed to disconnect Prisma client");
+        logger.warn({ err: e }, 'Failed to disconnect Prisma client');
       }
       process.exit(0);
     };
 
-    process.once("SIGINT", shutdown);
-    process.once("SIGTERM", shutdown);
+    process.once('SIGINT', shutdown);
+    process.once('SIGTERM', shutdown);
   }
 }
 
 // Запуск приложения
 const app = new Application();
 app.initialize().catch((error) => {
-  logger.error({ err: error }, "Critical startup error");
+  logger.error({ err: error }, 'Critical startup error');
   process.exit(1);
 });

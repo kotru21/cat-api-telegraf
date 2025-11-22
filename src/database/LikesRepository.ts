@@ -1,10 +1,7 @@
-import {
-  LikesRepositoryInterface,
-  UserLikeDTO,
-} from "./interfaces/LikesRepositoryInterface.js";
-import logger from "../utils/logger.js";
-import getPrisma from "./prisma/PrismaClient.js";
-import { PrismaClient } from "@prisma/client";
+import { LikesRepositoryInterface, UserLikeDTO } from './interfaces/LikesRepositoryInterface.js';
+import logger from '../utils/logger.js';
+import getPrisma from './prisma/PrismaClient.js';
+import { PrismaClient } from '@prisma/client';
 
 export class LikesRepository implements LikesRepositoryInterface {
   private prisma: PrismaClient;
@@ -21,7 +18,7 @@ export class LikesRepository implements LikesRepositoryInterface {
       });
       return !!liked;
     } catch (err) {
-      logger.error({ err }, "Error checking like existence (Prisma)");
+      logger.error({ err }, 'Error checking like existence (Prisma)');
       throw err;
     }
   }
@@ -35,7 +32,7 @@ export class LikesRepository implements LikesRepositoryInterface {
         });
 
         // Увеличиваем счётчик у кота; если записи нет, ничего не делаем
-        await tx.msg.updateMany({
+        await tx.cat.updateMany({
           where: { id: catId },
           data: { count: { increment: 1 } },
         });
@@ -46,19 +43,16 @@ export class LikesRepository implements LikesRepositoryInterface {
       return result;
     } catch (err: any) {
       // Уникальный дубликат (лайк уже есть)
-      if (err && err.code === "P2002") {
+      if (err && err.code === 'P2002') {
         return false;
       }
-      logger.error({ err }, "Failed to add like (Prisma)");
+      logger.error({ err }, 'Failed to add like (Prisma)');
       throw err;
     }
   }
 
   async removeLike(catId: string, userId: string): Promise<boolean> {
-    logger.debug(
-      { catId, userId },
-      "LikesRepository (Prisma): removeLike called"
-    );
+    logger.debug({ catId, userId }, 'LikesRepository (Prisma): removeLike called');
     try {
       const result = await this.prisma.$transaction(async (tx) => {
         const deleted = await tx.user_likes.deleteMany({
@@ -69,7 +63,7 @@ export class LikesRepository implements LikesRepositoryInterface {
           return false;
         }
 
-        await tx.msg.updateMany({
+        await tx.cat.updateMany({
           where: { id: catId, count: { gt: 0 } },
           data: { count: { decrement: 1 } },
         });
@@ -78,20 +72,20 @@ export class LikesRepository implements LikesRepositoryInterface {
 
       return result;
     } catch (err) {
-      logger.error({ err }, "Failed to remove like (Prisma)");
+      logger.error({ err }, 'Failed to remove like (Prisma)');
       throw err;
     }
   }
 
   async getLikes(catId: string): Promise<number> {
     try {
-      const row = await this.prisma.msg.findUnique({
+      const row = await this.prisma.cat.findUnique({
         where: { id: catId },
         select: { count: true },
       });
       return row ? row.count || 0 : 0;
     } catch (err) {
-      logger.error({ err }, "Error fetching likes for cat (Prisma)");
+      logger.error({ err }, 'Error fetching likes for cat (Prisma)');
       throw err;
     }
   }
@@ -100,7 +94,7 @@ export class LikesRepository implements LikesRepositoryInterface {
     try {
       const rows = await this.prisma.user_likes.findMany({
         where: { user_id: userId },
-        orderBy: { created_at: "desc" },
+        orderBy: { created_at: 'desc' },
         include: {
           cat: {
             select: {
@@ -122,7 +116,7 @@ export class LikesRepository implements LikesRepositoryInterface {
         created_at: r.created_at,
       }));
     } catch (err) {
-      logger.error({ err }, "Error fetching user likes (Prisma)");
+      logger.error({ err }, 'Error fetching user likes (Prisma)');
       throw err;
     }
   }
@@ -133,7 +127,7 @@ export class LikesRepository implements LikesRepositoryInterface {
         where: { user_id: userId },
       });
     } catch (err) {
-      logger.error({ err }, "Error fetching user likes count (Prisma)");
+      logger.error({ err }, 'Error fetching user likes count (Prisma)');
       throw err;
     }
   }

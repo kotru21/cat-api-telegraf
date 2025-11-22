@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
   <head>
     <title>Cat Details</title>
@@ -7,178 +7,206 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <!-- Стиль перенесен в utility-классы Tailwind -->
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+    </style>
   </head>
-  <body class="bg-gray-900 text-gray-100 font-inter">
+  <body
+    class="bg-gray-900 text-gray-100 font-inter"
+    x-data="catDetails(window.location.pathname.split('/').pop())"
+  >
     <!-- INCLUDE_NAVIGATION -->
 
     <!-- Основной контент -->
     <div class="container mx-auto px-4 pt-24 pb-16">
+      <!-- Error State -->
+      <div x-show="error" x-cloak class="max-w-4xl mx-auto text-center py-12">
+        <div class="text-red-500 text-xl mb-4">
+          <i class="fas fa-exclamation-circle mr-2"></i> <span x-text="error"></span>
+        </div>
+        <a href="/" class="text-indigo-400 hover:text-indigo-300">Вернуться на главную</a>
+      </div>
+
       <!-- Скелетон контент -->
-      <div id="skeleton-content" class="max-w-4xl mx-auto">
+      <div x-show="loading" class="max-w-4xl mx-auto">
         <!-- Заголовок -->
-        <div
-          class="relative overflow-hidden rounded-lg h-10 w-2/3 mb-8 bg-gray-800">
+        <div class="relative overflow-hidden rounded-lg h-10 w-2/3 mb-8 bg-gray-800">
           <div
-            class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+            class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+          ></div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Изображение -->
           <div class="md:col-span-2">
-            <div
-              class="relative overflow-hidden rounded-xl aspect-[4/3] bg-gray-800">
+            <div class="relative overflow-hidden rounded-xl aspect-[4/3] bg-gray-800">
               <div
-                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+              ></div>
             </div>
             <!-- Описание параграфы -->
             <div class="mt-6 space-y-3">
-              <div
-                class="h-4 w-5/6 rounded bg-gray-800 relative overflow-hidden">
+              <div class="h-4 w-5/6 rounded bg-gray-800 relative overflow-hidden">
                 <div
-                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                ></div>
               </div>
-              <div
-                class="h-4 w-full rounded bg-gray-800 relative overflow-hidden">
+              <div class="h-4 w-full rounded bg-gray-800 relative overflow-hidden">
                 <div
-                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                ></div>
               </div>
-              <div
-                class="h-4 w-11/12 rounded bg-gray-800 relative overflow-hidden">
+              <div class="h-4 w-11/12 rounded bg-gray-800 relative overflow-hidden">
                 <div
-                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-              </div>
-              <div
-                class="h-4 w-2/3 rounded bg-gray-800 relative overflow-hidden">
-                <div
-                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
+                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                ></div>
               </div>
             </div>
           </div>
           <!-- Боковые карточки -->
           <div class="md:col-span-1 space-y-4">
-            <div class="h-20 rounded-lg relative overflow-hidden bg-gray-800">
-              <div
-                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-            </div>
-            <div class="h-20 rounded-lg relative overflow-hidden bg-gray-800">
-              <div
-                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-            </div>
-            <div class="h-20 rounded-lg relative overflow-hidden bg-gray-800">
-              <div
-                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-            </div>
-            <div class="h-20 rounded-lg relative overflow-hidden bg-gray-800">
-              <div
-                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-            </div>
-            <div class="h-16 rounded-lg relative overflow-hidden bg-gray-800">
-              <div
-                class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"></div>
-            </div>
+            <template x-for="i in 5">
+              <div class="h-20 rounded-lg relative overflow-hidden bg-gray-800">
+                <div
+                  class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                ></div>
+              </div>
+            </template>
           </div>
         </div>
       </div>
 
       <!-- Реальный контент -->
       <div
-        id="cat-content"
-        class="max-w-4xl mx-auto opacity-0 transition-opacity duration-500 hidden animate-fade-in">
+        x-show="!loading && cat"
+        x-cloak
+        class="max-w-4xl mx-auto transition-opacity duration-500"
+      >
         <h1
-          id="breed-name"
-          class="text-4xl font-bold mb-8 text-center md:text-left">
-          Loading...
-        </h1>
+          class="text-4xl font-bold mb-8 text-center md:text-left"
+          x-text="cat?.breeds?.[0]?.name || 'Unknown Breed'"
+        ></h1>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Изображение и основная информация -->
           <div class="md:col-span-2">
-            <div
-              class="relative aspect-[4/3] overflow-hidden rounded-xl shadow-2xl">
-              <img
-                id="cat-image"
-                class="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.03]"
-                src=""
-                alt="Cat image"
-                data-fallback="https://via.placeholder.com/800x600?text=Image+Not+Available" />
-
+            <div class="relative aspect-[4/3] overflow-hidden rounded-xl shadow-2xl bg-gray-800">
+              <img :src="cat?.url" alt="Cat" class="w-full h-full object-cover" />
+              <!-- Like Button Overlay -->
               <button
-                id="likeBtn"
-                type="button"
-                class="absolute bottom-4 right-4 bg-gray-800/70 backdrop-blur-sm px-3 py-2 rounded-full flex items-center gap-2 cursor-pointer transition-all duration-200 border border-gray-600/60 hover:bg-indigo-600">
-                <i class="fas fa-heart text-red-500"></i>
-                <span id="likes-count">0</span>
+                @click="toggleLike()"
+                class="absolute bottom-4 right-4 w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center group hover:bg-white/20 transition-all duration-300 border border-white/20 shadow-lg"
+                :class="{'scale-110': likeLocked}"
+              >
+                <i
+                  class="fas fa-heart text-2xl text-white group-hover:text-red-500 transition-colors duration-300"
+                  :class="{'text-red-500': likesCount > 0}"
+                ></i>
               </button>
             </div>
 
-            <div class="mt-6">
-              <h2 class="text-2xl font-semibold mb-4 flex items-center">
-                <i class="fas fa-info-circle text-indigo-400 mr-2"></i> О породе
+            <!-- Описание -->
+            <div
+              class="mt-8 bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 backdrop-blur-sm"
+            >
+              <h2 class="text-xl font-semibold mb-4 flex items-center text-indigo-400">
+                <i class="fas fa-info-circle mr-2"></i> О породе
               </h2>
-              <p id="description" class="text-gray-300 leading-relaxed"></p>
+              <p
+                class="text-gray-300 leading-relaxed text-lg"
+                x-text="cat?.breeds?.[0]?.description || 'No description available.'"
+              ></p>
             </div>
           </div>
 
-          <div class="md:col-span-1">
-            <div class="space-y-4">
+          <!-- Характеристики (Sidebar) -->
+          <div class="md:col-span-1 space-y-4">
+            <!-- Вес -->
+            <div
+              class="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 hover:border-indigo-500/50 transition-colors cursor-pointer group"
+              @click="cat?.breeds?.[0]?.weight?.metric && navigateSimilar('weight_metric', cat.breeds[0].weight.metric)"
+            >
               <div
-                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
-                data-feature="origin">
-                <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
-                  Происхождение
-                </h3>
-                <p id="origin" class="font-medium flex items-center">
-                  <span class="flex-grow"></span>
-                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
-                </p>
+                class="flex items-center mb-2 text-gray-400 group-hover:text-indigo-400 transition-colors"
+              >
+                <i class="fas fa-weight-hanging mr-2"></i>
+                <span class="text-sm font-medium uppercase tracking-wider">Вес</span>
               </div>
-
-              <div
-                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
-                data-feature="temperament">
-                <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
-                  Темперамент
-                </h3>
-                <p id="temperament" class="font-medium flex items-center">
-                  <span class="flex-grow"></span>
-                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
-                </p>
-              </div>
-
-              <div
-                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
-                data-feature="life_span">
-                <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
-                  Продолжительность жизни (лет)
-                </h3>
-                <p id="life-span" class="font-medium flex items-center">
-                  <span class="flex-grow"></span>
-                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
-                </p>
-              </div>
-
-              <div
-                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 cursor-pointer"
-                data-feature="weight_metric">
-                <h3 class="text-sm text-gray-400 uppercase tracking-wider mb-1">
-                  Вес
-                </h3>
-                <p id="weight" class="font-medium flex items-center">
-                  <span class="flex-grow"></span>
-                  <i class="fas fa-search text-indigo-400 ml-2 text-sm"></i>
-                </p>
-              </div>
-
-              <a
-                id="wiki-link"
-                href=""
-                target="_blank"
-                class="bg-gray-800/80 backdrop-blur-md rounded-lg p-4 border border-gray-600/50 transition-all duration-300 hover:border-indigo-500 hover:-translate-y-0.5 block text-center font-medium">
-                <i class="fab fa-wikipedia-w mr-2"></i> Узнать больше на
-                Википедии
-              </a>
+              <p class="text-xl font-bold text-gray-100">
+                <span x-text="cat?.breeds?.[0]?.weight?.metric || '?'"></span> кг
+              </p>
             </div>
+
+            <!-- Происхождение -->
+            <div
+              class="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 hover:border-indigo-500/50 transition-colors cursor-pointer group"
+              @click="cat?.breeds?.[0]?.origin && navigateSimilar('origin', cat.breeds[0].origin)"
+            >
+              <div
+                class="flex items-center mb-2 text-gray-400 group-hover:text-indigo-400 transition-colors"
+              >
+                <i class="fas fa-globe-americas mr-2"></i>
+                <span class="text-sm font-medium uppercase tracking-wider">Происхождение</span>
+              </div>
+              <p
+                class="text-xl font-bold text-gray-100"
+                x-text="cat?.breeds?.[0]?.origin || 'Unknown'"
+              ></p>
+            </div>
+
+            <!-- Продолжительность жизни -->
+            <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+              <div class="flex items-center mb-2 text-gray-400">
+                <i class="fas fa-heartbeat mr-2"></i>
+                <span class="text-sm font-medium uppercase tracking-wider">Жизнь</span>
+              </div>
+              <p class="text-xl font-bold text-gray-100">
+                <span x-text="cat?.breeds?.[0]?.life_span || '?'"></span> лет
+              </p>
+            </div>
+
+            <!-- Темперамент -->
+            <div
+              class="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50 hover:border-indigo-500/50 transition-colors cursor-pointer group"
+              @click="cat?.breeds?.[0]?.temperament && navigateSimilar('temperament', cat.breeds[0].temperament)"
+            >
+              <div
+                class="flex items-center mb-2 text-gray-400 group-hover:text-indigo-400 transition-colors"
+              >
+                <i class="fas fa-brain mr-2"></i>
+                <span class="text-sm font-medium uppercase tracking-wider">Характер</span>
+              </div>
+              <p
+                class="text-gray-300 text-sm leading-relaxed"
+                x-text="cat?.breeds?.[0]?.temperament || 'Unknown'"
+              ></p>
+            </div>
+
+            <!-- Лайки -->
+            <div
+              class="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 p-4 rounded-xl border border-indigo-500/30"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center text-indigo-400">
+                  <i class="fas fa-heart mr-2"></i>
+                  <span class="text-sm font-medium uppercase tracking-wider">Лайки</span>
+                </div>
+                <span class="text-2xl font-bold text-white" x-text="likesCount"></span>
+              </div>
+            </div>
+
+            <!-- Wiki Link -->
+            <a
+              x-show="cat?.breeds?.[0]?.wikipedia_url"
+              :href="cat?.breeds?.[0]?.wikipedia_url"
+              target="_blank"
+              class="block w-full py-3 px-4 bg-gray-700 hover:bg-gray-600 text-center rounded-xl transition-colors text-gray-200 font-medium"
+            >
+              <i class="fab fa-wikipedia-w mr-2"></i> Википедия
+            </a>
           </div>
         </div>
 
@@ -186,16 +214,14 @@
         <div class="mt-10 text-center md:text-left">
           <a
             href="/"
-            class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
+            class="inline-flex items-center px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+          >
             <i class="fas fa-arrow-left mr-2"></i> Вернуться к списку
           </a>
         </div>
       </div>
     </div>
 
-    <script src="/js/navigation.js" defer></script>
-    <script type="module" src="/js/api.js"></script>
-    <script type="module" src="/js/utils.js"></script>
-    <script type="module" src="/js/pages/catDetailsPage.js"></script>
+    <script type="module" src="/js/app.js"></script>
   </body>
 </html>

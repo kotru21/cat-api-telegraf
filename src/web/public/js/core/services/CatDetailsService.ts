@@ -1,6 +1,6 @@
-import store, { emit } from "../state/store";
-import { getCatDetails } from "../../api";
-import { sanitize } from "../../utils";
+import store, { emit } from '../state/store';
+import { getCatDetails } from '../../api';
+import { sanitize } from '../../utils';
 
 interface RawCatDetails {
   id: string;
@@ -38,15 +38,15 @@ export function normalizeCatDetails(raw: RawCatDetails): CatDetails | null {
   if (!raw) return null;
   return {
     id: raw.id,
-    breedName: raw.breed_name || "Unknown",
-    description: raw.description || "—",
+    breedName: raw.breed_name || 'Unknown',
+    description: raw.description || '—',
     likes: raw.count ?? 0,
     wikipediaUrl: raw.wikipedia_url || null,
-    origin: raw.origin || "—",
-    temperament: raw.temperament || "—",
-    lifeSpan: raw.life_span || "—",
-    weightMetric: raw.weight_metric || "?",
-    weightImperial: raw.weight_imperial || "?",
+    origin: raw.origin || '—',
+    temperament: raw.temperament || '—',
+    lifeSpan: raw.life_span || '—',
+    weightMetric: raw.weight_metric || '?',
+    weightImperial: raw.weight_imperial || '?',
     imageUrl: raw.image_url || null,
   };
 }
@@ -60,14 +60,14 @@ export async function loadCatDetails(catId: string, { force = false } = {}) {
       catDetails: normalizeCatDetails(cached.data),
       loading: { ...store.getState().loading, catDetails: false },
     });
-    emit("catDetails:loaded");
+    emit('catDetails:loaded');
     return cached.data;
   }
   store.setState({
     loading: { ...store.getState().loading, catDetails: true },
     errors: { ...store.getState().errors, catDetails: null },
   });
-  emit("catDetails:loading");
+  emit('catDetails:loading');
   try {
     const data = await getCatDetails(catId);
     cache.set(catId, { data, ts: now });
@@ -75,14 +75,14 @@ export async function loadCatDetails(catId: string, { force = false } = {}) {
       catDetails: normalizeCatDetails(data),
       loading: { ...store.getState().loading, catDetails: false },
     });
-    emit("catDetails:loaded");
+    emit('catDetails:loaded');
     return data;
   } catch (err) {
     store.setState({
       errors: { ...store.getState().errors, catDetails: err },
       loading: { ...store.getState().loading, catDetails: false },
     });
-    emit("catDetails:error");
+    emit('catDetails:error');
     throw err;
   }
 }

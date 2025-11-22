@@ -6,9 +6,9 @@ export class WebSocketService {
   constructor(
     server,
     path = "/wss",
-    { catService, enablePolling = false } = {}
+    { leaderboardService, enablePolling = false } = {}
   ) {
-    this.catService = catService;
+    this.leaderboardService = leaderboardService;
     // WebSocket server with basic limits
     this.wss = new WebSocketServer({
       server,
@@ -46,7 +46,7 @@ export class WebSocketService {
   // Обновляет хеш рейтинга и возвращает true, если он изменился
   async updateLeaderboardHash() {
     try {
-      const leaderboard = await this.catService.getLeaderboard();
+      const leaderboard = await this.leaderboardService.getLeaderboard();
       // naive hash of leaderboard items
       const newHash = JSON.stringify(
         leaderboard.map((item) => `${item.id}-${item.count}`)

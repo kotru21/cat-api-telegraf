@@ -55,7 +55,7 @@ export class WebServer {
     // WebSocket setup
     const appCtx = createAppContext(this.dependencies);
     this.wsService = new WebSocketService(this.server, "/wss", {
-      catService: appCtx.catService,
+      leaderboardService: appCtx.leaderboardService,
       enablePolling: false,
     });
 

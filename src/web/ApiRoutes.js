@@ -8,8 +8,7 @@ import { setupDebugRoutes } from "./routes/debugRoutes.js";
 import { createAppContext } from "../application/context.js";
 
 export function setupApiRoutes(app, dependencies = {}) {
-  const { catService: overrideCatService } = dependencies;
-  const appCtx = createAppContext({ catService: overrideCatService });
+  const appCtx = createAppContext(dependencies);
 
   const router = express.Router();
 
@@ -24,19 +23,19 @@ export function setupApiRoutes(app, dependencies = {}) {
 
   // Category routes
   setupCatRoutes(router, {
-    catService: appCtx.catService,
+    catInfoService: appCtx.catInfoService,
+    likeService: appCtx.likeService,
+    leaderboardService: appCtx.leaderboardService,
     requireAuth,
     leaderboardLimiter,
   });
 
   setupUserRoutes(router, {
-    catService: appCtx.catService,
+    likeService: appCtx.likeService,
     requireAuth,
   });
 
-  setupAuthRoutes(router, {
-    catService: appCtx.catService,
-  });
+  setupAuthRoutes(router);
 
   setupDebugRoutes(router);
 

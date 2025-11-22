@@ -1,9 +1,5 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
-import {
-  getUserLikes,
-  getCatDetails,
-} from "../../application/use-cases/index.js";
 import logger from "../../utils/logger.js";
 
 // Простая in-memory кэш структура для лайков пользователя
@@ -99,11 +95,8 @@ export class MyLikesCommand extends BaseCommand {
     this.composer.action(/^like_details:(.+)$/, async (ctx) => {
       try {
         const catId = ctx.match[1];
-        const catDetails = await this.executeUseCase(
-          getCatDetails,
-          { id: catId },
-          ctx
-        );
+        const appCtx = this.createAppContext();
+        const catDetails = await appCtx.catInfoService.getCatById(catId);
 
         if (!catDetails) {
           await ctx.answerCbQuery("Информация о коте не найдена");
@@ -235,8 +228,9 @@ export class MyLikesCommand extends BaseCommand {
     if (cached && now - cached.ts < USER_LIKES_TTL_MS) {
       return cached.data;
     }
-    // Обновляем из use-case (через executeUseCase для логгирования и консистентности)
-    const data = await this.executeUseCase(getUserLikes, { userId }, ctx);
+    // Обновляем из сервиса
+    const appCtx = this.createAppContext();
+    const data = await appCtx.likeService.getUserLikes(userId);
     userLikesCache.set(userId, { data, ts: now });
     return data;
   }

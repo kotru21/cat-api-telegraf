@@ -42,8 +42,7 @@ class Application {
     this.webServer = null;
 
     if (this.config.WEB_ENABLED !== false) {
-      const catService = this.container.resolve("catService");
-      this.webServer = new WebServer(this.config, { catService });
+      this.webServer = new WebServer(this.config, {});
     } else {
       logger.info(
         "Web server is disabled by configuration (WEB_ENABLED=false)"

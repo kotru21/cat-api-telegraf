@@ -1,9 +1,5 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
-import {
-  getRandomCat,
-  getLikesForCat,
-} from "../../application/use-cases/index.js";
 import logger from "../../utils/logger.js";
 
 export class FactCommand extends BaseCommand {
@@ -15,13 +11,10 @@ export class FactCommand extends BaseCommand {
   register() {
     this.composer.command(this.name, async (ctx) => {
       try {
-        const catData = await this.executeUseCase(getRandomCat, {}, ctx);
+        const appCtx = this.createAppContext();
+        const catData = await appCtx.catInfoService.getRandomCat();
         const breed = catData.breeds[0];
-        const [likes] = await this.executeUseCase(
-          getLikesForCat,
-          { catId: catData.id },
-          ctx
-        );
+        const [likes] = await appCtx.likeService.getLikesForCat(catData.id);
 
         await ctx.replyWithPhoto(
           { url: catData.url },

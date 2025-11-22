@@ -1,13 +1,6 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
 import config from "../../config/index.js";
-import {
-  getRandomCat,
-  getLikesForCat,
-  getUserLikes,
-  getLeaderboard,
-  getCatDetails,
-} from "../../application/use-cases/index.js";
 import logger from "../../utils/logger.js";
 
 export class MenuCommand extends BaseCommand {
@@ -35,13 +28,10 @@ export class MenuCommand extends BaseCommand {
       await ctx.reply("Получаю случайного кота...");
       // Имитируем обработку команды /fact
       try {
-        const catData = await this.executeUseCase(getRandomCat, {}, ctx);
+        const appCtx = this.createAppContext();
+        const catData = await appCtx.catInfoService.getRandomCat();
         const breed = catData.breeds[0];
-        const [likes] = await this.executeUseCase(
-          getLikesForCat,
-          { catId: catData.id },
-          ctx
-        );
+        const [likes] = await appCtx.likeService.getLikesForCat(catData.id);
 
         await ctx.replyWithPhoto(
           { url: catData.url },
@@ -72,11 +62,8 @@ export class MenuCommand extends BaseCommand {
       // Прямой вызов кода обработки команды
       try {
         const userId = ctx.from.id.toString();
-        const userLikes = await this.executeUseCase(
-          getUserLikes,
-          { userId },
-          ctx
-        );
+        const appCtx = this.createAppContext();
+        const userLikes = await appCtx.likeService.getUserLikes(userId);
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.reply("Вы еще не поставили ни одного лайка 😿");
@@ -97,11 +84,8 @@ export class MenuCommand extends BaseCommand {
       await ctx.reply("Загружаю рейтинг...");
       // Прямой вызов кода обработки команды
       try {
-        const topCats = await this.executeUseCase(
-          getLeaderboard,
-          { limit: 10 },
-          ctx
-        );
+        const appCtx = this.createAppContext();
+        const topCats = await appCtx.leaderboardService.getLeaderboard(10);
 
         if (!topCats || topCats.length === 0) {
           await ctx.reply("Пока нет популярных пород в рейтинге 😿");
@@ -171,11 +155,8 @@ export class MenuCommand extends BaseCommand {
     this.composer.action(/^like_nav:(prev|next):(\d+)$/, async (ctx) => {
       try {
         const userId = ctx.from.id.toString();
-        const userLikes = await this.executeUseCase(
-          getUserLikes,
-          { userId },
-          ctx
-        );
+        const appCtx = this.createAppContext();
+        const userLikes = await appCtx.likeService.getUserLikes(userId);
 
         if (!userLikes || userLikes.length === 0) {
           await ctx.answerCbQuery("Список лайков пуст");
@@ -203,11 +184,8 @@ export class MenuCommand extends BaseCommand {
     this.composer.action(/^like_details:(.+)$/, async (ctx) => {
       try {
         const catId = ctx.match[1];
-        const catDetails = await this.executeUseCase(
-          getCatDetails,
-          { id: catId },
-          ctx
-        );
+        const appCtx = this.createAppContext();
+        const catDetails = await appCtx.catInfoService.getCatById(catId);
 
         if (!catDetails) {
           await ctx.answerCbQuery("Информация о коте не найдена");

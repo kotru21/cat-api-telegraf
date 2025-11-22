@@ -1,6 +1,5 @@
 import { Markup } from "telegraf";
 import { BaseCommand } from "./BaseCommand.js";
-import { getLeaderboard } from "../../application/use-cases/index.js";
 import logger from "../../utils/logger.js";
 
 export class TopCommand extends BaseCommand {
@@ -13,7 +12,7 @@ export class TopCommand extends BaseCommand {
     this.composer.command(this.name, async (ctx) => {
       try {
         const appCtx = this.createAppContext();
-        const topCats = await getLeaderboard(appCtx, { limit: 10 }); // получаем топ-10 пород
+        const topCats = await appCtx.leaderboardService.getLeaderboard(10); // получаем топ-10 пород
 
         if (!topCats || topCats.length === 0) {
           await ctx.reply("Пока нет популярных пород в рейтинге 😿");

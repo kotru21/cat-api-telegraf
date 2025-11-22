@@ -1,5 +1,4 @@
 import { Composer, Markup } from "telegraf";
-import { likeCat, getLikesForCat } from "../../application/use-cases/index.js";
 import logger from "../../utils/logger.js";
 
 class LikeAction {
@@ -20,7 +19,6 @@ class LikeAction {
       );
     }
     return {
-      catService: this.container.resolve("catService"),
       likeService: this.container.resolve("likeService"),
       leaderboardService: this.container.resolve("leaderboardService"),
       catInfoService: this.container.resolve("catInfoService"),
@@ -35,8 +33,8 @@ class LikeAction {
         const message = ctx.update.callback_query.message;
 
         const appCtx = this.createAppContext();
-        // like via use-case
-        const likeAdded = await likeCat(appCtx, { catId, userId });
+        // like via service
+        const likeAdded = await appCtx.likeService.addLikeToCat(catId, userId);
 
         if (!likeAdded) {
           // Если лайк уже был поставлен этим пользователем
@@ -44,7 +42,7 @@ class LikeAction {
           return;
         }
 
-        const [likes] = await getLikesForCat(appCtx, { catId });
+        const [likes] = await appCtx.likeService.getLikesForCat(catId);
 
         // Обновляем клавиатуру с новым числом лайков
         await ctx.editMessageReplyMarkup({

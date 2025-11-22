@@ -1,33 +1,15 @@
-import { executeUseCase } from "../../application/context.js";
 import logger from "../../utils/logger.js";
-import {
-  likeCat,
-  unlikeCat,
-  getCatDetails,
-  getLeaderboard,
-  getCatsByFeature,
-  getRandomImages,
-  getUserLikes,
-  getUserLikesCount,
-} from "../../application/use-cases/index.js";
+
 export function setupCatRoutes(
   router,
-  { catService, requireAuth, leaderboardLimiter }
+  {
+    catInfoService,
+    likeService,
+    leaderboardService,
+    requireAuth,
+    leaderboardLimiter,
+  }
 ) {
-  const appCtx = { catService };
-
-  /**
-   * Безопасное выполнение use-case для веб-роутов
-   */
-  const executeUseCaseWeb = async (useCaseFn, params, req) => {
-    const meta = {
-      userId: req.session?.user?.id,
-      userAgent: req.headers["user-agent"],
-      ip: req.ip,
-      route: req.route?.path,
-    };
-    return executeUseCase(useCaseFn, appCtx, params, meta);
-  };
   // GET /cat/:id — fetch cat by id
   router.get("/cat/:id", async (req, res, next) => {
     try {
@@ -36,7 +18,10 @@ export function setupCatRoutes(
         return res.status(400).json({ error: "Invalid ID format" });
       }
 
-      const catData = await executeUseCaseWeb(getCatDetails, { id }, req);
+      const catData = await catInfoService.getCatById(id);
+      if (!catData) {
+        return res.status(404).json({ error: "Cat not found" });
+      }
       res.json(catData);
     } catch (err) {
       next(err);
@@ -46,7 +31,7 @@ export function setupCatRoutes(
   // GET /leaderboard — fetch leaderboard
   router.get("/leaderboard", leaderboardLimiter, async (req, res, next) => {
     try {
-      const rows = await executeUseCaseWeb(getLeaderboard, {}, req);
+      const rows = await leaderboardService.getLeaderboard(10);
       res.json(rows);
     } catch (err) {
       next(err);
@@ -62,14 +47,7 @@ export function setupCatRoutes(
         return res.status(400).json({ error: "Missing required parameters" });
       }
 
-      const cats = await executeUseCaseWeb(
-        getCatsByFeature,
-        {
-          feature,
-          value,
-        },
-        req
-      );
+      const cats = await catInfoService.getCatsByFeature(feature, value);
       res.json(cats);
     } catch (err) {
       next(err);
@@ -80,7 +58,7 @@ export function setupCatRoutes(
   router.get("/random-images", async (req, res, next) => {
     try {
       const count = parseInt(req.query.count) || 3;
-      const images = await executeUseCaseWeb(getRandomImages, { count }, req);
+      const images = await catInfoService.getRandomImages(count);
       res.json(images);
     } catch (err) {
       next(err);
@@ -99,7 +77,7 @@ export function setupCatRoutes(
 
       logger.debug({ catId, userId }, "Attempt to remove like");
 
-      const result = await executeUseCaseWeb(unlikeCat, { catId, userId }, req);
+      const result = await likeService.removeLikeFromCat(catId, userId);
 
       if (result === false) {
         return res

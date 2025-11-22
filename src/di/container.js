@@ -2,7 +2,6 @@ import { createContainer, asValue, asClass, InjectionMode } from "awilix";
 import config from "../config/index.js";
 
 // Services & repositories (классы)
-import { CatService } from "../services/CatService.js";
 import { LikeService } from "../services/LikeService.js";
 import { LeaderboardService } from "../services/LeaderboardService.js";
 import { CatInfoService } from "../services/CatInfoService.js";
@@ -27,7 +26,6 @@ export function buildContainer() {
     likeService: asClass(LikeService).singleton(),
     leaderboardService: asClass(LeaderboardService).singleton(),
     catInfoService: asClass(CatInfoService).singleton(),
-    catService: asClass(CatService).singleton(),
   });
 
   return container;

@@ -2,20 +2,21 @@
   "name": "tg-bot-telegraph",
   "version": "5.0.0",
   "description": "Telegraf.js cats bot with web panel",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run scripts/init-db.js && bun src/index.js",
-    "smoke": "bun scripts/smoke.js",
-    "prisma:check": "bun scripts/check-prisma.js",
-    "test": "bun test --preload ./tests/setup/setupEnv.js",
+    "start": "bun run scripts/init-db.ts && bun src/index.ts",
+    "smoke": "bun scripts/smoke.ts",
+    "prisma:check": "bun scripts/check-prisma.ts",
+    "test": "bun test --preload ./tests/setup/setupEnv.ts",
     "prisma:generate": "bunx prisma generate",
     "prisma:generate:dev": "bunx prisma generate --schema=prisma/schema.sqlite.prisma",
     "prisma:migrate:dev": "bunx prisma migrate dev --name init",
     "prisma:migrate:dev:sqlite": "bunx prisma migrate dev --schema=prisma/schema.sqlite.prisma --name init",
     "prisma:migrate:deploy": "bunx prisma migrate deploy",
     "prisma:migrate:reset": "bunx prisma migrate reset --force",
-    "prisma:studio": "bunx prisma studio"
+    "prisma:studio": "bunx prisma studio",
+    "build": "bun build ./src/web/public/js/pages/*.ts --outdir ./src/web/public/dist --target browser"
   },
   "author": "kotru21",
   "license": "ISC",
@@ -45,10 +46,17 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "prisma": "^7.0.0",
-    "jest": "^30.2.0",
     "@jest/environment": "^30.2.0",
     "@jest/globals": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0"
+    "@types/bun": "^1.3.3",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^24.10.1",
+    "@types/ws": "^8.18.1",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "prisma": "^7.0.0",
+    "typescript": "^5.9.3"
   }
 }

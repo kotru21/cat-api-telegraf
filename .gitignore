@@ -1,5 +1,6 @@
 prisma/main.db
 prisma/prisma/main.db
+prisma/schema.prisma
 node_modules
 .env
 main.db

@@ -147,6 +147,16 @@ npm run prisma:migrate:dev
 
 # Запуск Prisma Studio (GUI для БД)
 npm run prisma:studio
+
+Если вы запускаете локально в режиме `development` с SQLite (значение `DATABASE_URL=file:./prisma/main.db` в `.env`), можно использовать удобные dev-скрипты:
+
+```bash
+# Генерация клиента для sqlite (использует prisma/schema.sqlite.prisma)
+npm run prisma:generate:dev
+
+# Создание / применение миграций локально в sqlite (внутри prisma/main.db)
+npm run prisma:migrate:dev:sqlite
+```
 ```
 
 ## 📊 API Документация

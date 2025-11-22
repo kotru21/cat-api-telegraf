@@ -31,15 +31,7 @@ export const EnvSchema = z
     REDIS_URL: z.string().url().optional(),
     // Разрешить отключение проверки TLS для self-signed (rediss://). Использовать ТОЛЬКО временно.
     REDIS_ALLOW_SELF_SIGNED: BOOL_ENV.optional(),
-    DATABASE_URL: z
-      .string()
-      .min(1, "DATABASE_URL is required")
-      .refine(
-        (v) => v.startsWith("postgres://") || v.startsWith("postgresql://"),
-        {
-          message: "DATABASE_URL must start with postgres:// or postgresql://",
-        }
-      ),
+    DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   })
   .superRefine((env, ctx) => {
     const botEnabled = env.BOT_ENABLED ?? true;
@@ -51,6 +43,16 @@ export const EnvSchema = z
       });
     }
     if (env.NODE_ENV === "production") {
+      // in production we must use Postgres and non-default session secret
+      const v = env.DATABASE_URL || "";
+      if (!v.startsWith("postgres://") && !v.startsWith("postgresql://")) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "DATABASE_URL must start with postgres:// or postgresql:// in production",
+          path: ["DATABASE_URL"],
+        });
+      }
+
       if (
         !env.SESSION_SECRET ||
         env.SESSION_SECRET === "your-secret-key-here"

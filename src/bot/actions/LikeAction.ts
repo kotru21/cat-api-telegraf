@@ -49,7 +49,7 @@ class LikeAction {
           return;
         }
 
-        const [likes] = await appCtx.likeService.getLikesForCat(catId);
+        const likes = await appCtx.likeService.getLikesForCat(catId);
 
         // Обновляем клавиатуру с новым числом лайков
         // @ts-ignore
@@ -62,9 +62,7 @@ class LikeAction {
         if (firstButton && firstButton.url) {
           buttons.push(Markup.button.url("Википедия", firstButton.url));
         }
-        buttons.push(
-          Markup.button.callback(`👍 ${likes.count}`, `data-${catId}`)
-        );
+        buttons.push(Markup.button.callback(`👍 ${likes}`, `data-${catId}`));
 
         await ctx.editMessageReplyMarkup({
           inline_keyboard: [buttons],

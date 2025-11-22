@@ -1,18 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { createClient } from "@libsql/client";
 
 // Singleton Prisma client
 let prisma: PrismaClient;
 
 export function getPrisma(): PrismaClient {
   if (!prisma) {
-    const libsql = createClient({
-      url: process.env.DATABASE_URL || "file:./dev.db",
+    // Use new libSQL adapter API (v6.6.0+) - no need to call createClient
+    const adapter = new PrismaLibSql({
+      url: process.env.DATABASE_URL || "file:./prisma/main.db",
       authToken: process.env.TURSO_AUTH_TOKEN,
     });
 
-    const adapter = new PrismaLibSql(libsql as any);
     prisma = new PrismaClient({ adapter });
   }
   return prisma;

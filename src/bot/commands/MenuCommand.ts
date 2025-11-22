@@ -31,7 +31,7 @@ export class MenuCommand extends BaseCommand {
         const appCtx = this.createAppContext();
         const catData = await appCtx.catInfoService.getRandomCat();
         const breed = catData.breeds[0];
-        const [likes] = await appCtx.likeService.getLikesForCat(catData.id);
+        const likes = await appCtx.likeService.getLikesForCat(catData.id);
 
         await ctx.replyWithPhoto(
           { url: catData.url },
@@ -42,7 +42,7 @@ export class MenuCommand extends BaseCommand {
               [
                 Markup.button.url("Википедия", breed.wikipedia_url),
                 Markup.button.callback(
-                  `👍 ${likes?.count || 0}`,
+                  `👍 ${likes || 0}`,
                   `data-${catData.id}`
                 ),
               ],

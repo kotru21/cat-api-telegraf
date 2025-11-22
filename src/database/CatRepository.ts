@@ -35,7 +35,6 @@ export class CatRepository implements CatRepositoryInterface {
           count: 0,
         },
         update: {
-          // Обновляет метаданные, count не трогает, чтобы сохранить существующие лайки
           breed_name: breed.name,
           image_url: catData.url,
           description: breed.description,

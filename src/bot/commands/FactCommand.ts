@@ -14,18 +14,14 @@ export class FactCommand extends BaseCommand {
         const appCtx = this.createAppContext();
         const catData = await appCtx.catInfoService.getRandomCat();
         const breed = catData.breeds[0];
-        const [likes] = await appCtx.likeService.getLikesForCat(catData.id);
+        const likes = await appCtx.likeService.getLikesForCat(catData.id);
 
         await ctx.replyWithPhoto(
           { url: catData.url },
           {
             parse_mode: "Markdown",
             caption: `_${breed.name}_\n${breed.description}`,
-            ...this.createKeyboard(
-              breed.wikipedia_url,
-              likes?.count || 0,
-              catData.id
-            ),
+            ...this.createKeyboard(breed.wikipedia_url, likes || 0, catData.id),
           }
         );
       } catch (error) {

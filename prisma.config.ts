@@ -1,5 +1,5 @@
 /* eslint-env node */
-/* eslint-disable no-undef */
+
 import 'dotenv/config';
 import { defineConfig } from 'prisma/config';
 

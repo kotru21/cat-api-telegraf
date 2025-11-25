@@ -93,7 +93,7 @@ export class MenuCommand extends BaseCommand {
 
         let message = '🏆 *Топ популярных пород котов*\n\n';
 
-        topCats.forEach((cat: any, index: number) => {
+        topCats.forEach((cat, index) => {
           const medal =
             index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
           message += `${medal} *${cat.breed_name}* - ${cat.count} ❤️\n`;
@@ -205,25 +205,32 @@ export class MenuCommand extends BaseCommand {
   }
 
   // Вспомогательный метод для MyLikesCommand
-  async sendLikeInfo(ctx: Context, userLikes: any[], index: number, isEdit = false) {
+  async sendLikeInfo(
+    ctx: Context,
+    userLikes: Array<{ cat_id: string; breed_name?: string | null; image_url?: string | null }>,
+    index: number,
+    isEdit = false,
+  ) {
     const likeInfo = userLikes[index];
     const total = userLikes.length;
     const keyboard = Keyboards.likesNavigation(index, likeInfo.cat_id);
+    const imageUrl = likeInfo.image_url || '';
 
     const caption = `*${likeInfo.breed_name}*\n\n👍 Лайк ${index + 1} из ${total}`;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- telegraf callbackQuery types
     if (isEdit && ctx.callbackQuery && (ctx.callbackQuery as any).message) {
       try {
         await ctx.editMessageMedia(
           {
             type: 'photo',
-            media: likeInfo.image_url,
+            media: imageUrl,
             caption: caption,
             parse_mode: 'Markdown',
           },
           { reply_markup: keyboard.reply_markup },
         );
-      } catch (error) {
+      } catch {
         // Если не удалось отредактировать (например, фото такое же), просто обновляем подпись
         await ctx.editMessageCaption(caption, {
           parse_mode: 'Markdown',
@@ -232,7 +239,7 @@ export class MenuCommand extends BaseCommand {
       }
     } else {
       await ctx.replyWithPhoto(
-        { url: likeInfo.image_url },
+        { url: imageUrl },
         {
           caption: caption,
           parse_mode: 'Markdown',

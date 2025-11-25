@@ -1,4 +1,5 @@
 // Generic frontend utilities
+/* eslint-disable @typescript-eslint/no-explicit-any -- browser utilities need flexible types */
 
 export function sanitize(text: string | null | undefined): string {
   if (text == null) return '';

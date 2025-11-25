@@ -1,6 +1,5 @@
 import store, { emit } from '../state/store';
 import { getCatDetails } from '../../api';
-import { sanitize } from '../../utils';
 
 interface RawCatDetails {
   id: string;

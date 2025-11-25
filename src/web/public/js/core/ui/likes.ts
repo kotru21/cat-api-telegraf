@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend UI with flexible callback types */
 import { PLACEHOLDER, sanitize } from '../../utils';
 import overlayImageWithSkeleton from '../../components/overlayImage';
 

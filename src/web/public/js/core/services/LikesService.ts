@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend service with flexible types */
 import { getUserLikes, getUserLikesCount, deleteLike } from '../../api';
-import store, { setState, emit, getState } from '../state/store';
+import { setState, emit, getState } from '../state/store';
 
 export function normalizeLike(row: any) {
   return {
@@ -31,7 +32,7 @@ export async function loadLikes({ force = false } = {}) {
       const { count } = await getUserLikesCount();
       setState({ likesCount: count });
       emit('likes:count', count);
-    } catch (_) {
+    } catch {
       // ignore
     }
     return data;

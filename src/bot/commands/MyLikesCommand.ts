@@ -6,7 +6,13 @@ import { CatInfoService } from '../../services/CatInfoService.js';
 
 // Простая in-memory кэш структура для лайков пользователя
 // key: userId -> { data: [...], ts: number }
-const userLikesCache = new Map<string, { data: any[]; ts: number }>();
+interface UserLikeCache {
+  cat_id: string;
+  breed_name?: string | null;
+  image_url?: string | null;
+  likes_count?: number;
+}
+const userLikesCache = new Map<string, { data: UserLikeCache[]; ts: number }>();
 const USER_LIKES_TTL_MS = 30_000; // 30 секунд
 
 // Защита от спама навигационными callback (userId -> boolean processing)
@@ -161,7 +167,17 @@ export class MyLikesCommand extends BaseCommand {
     });
   }
 
-  async sendLikeInfo(ctx: Context, userLikes: any[], index: number, isEdit = false) {
+  async sendLikeInfo(
+    ctx: Context,
+    userLikes: Array<{
+      cat_id: string;
+      breed_name?: string | null;
+      image_url?: string | null;
+      likes_count?: number;
+    }>,
+    index: number,
+    isEdit = false,
+  ) {
     const likeInfo = userLikes[index];
     if (!likeInfo) return;
     const total = userLikes.length;
@@ -174,6 +190,7 @@ export class MyLikesCommand extends BaseCommand {
 
     const keyboard = this.buildNavigationKeyboard(index, likeInfo.cat_id);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- telegraf callbackQuery types
     if (isEdit && ctx.callbackQuery && (ctx.callbackQuery as any).message) {
       try {
         await ctx.editMessageMedia(
@@ -185,7 +202,7 @@ export class MyLikesCommand extends BaseCommand {
           },
           { reply_markup: keyboard.reply_markup },
         );
-      } catch (error) {
+      } catch {
         await ctx.editMessageCaption(caption, {
           parse_mode: 'Markdown',
           reply_markup: keyboard.reply_markup,
@@ -219,7 +236,7 @@ export class MyLikesCommand extends BaseCommand {
     return 'https://placekitten.com/600/400'; // универсальный fallback
   }
 
-  async getCachedUserLikes(userId: string, ctx: Context) {
+  async getCachedUserLikes(userId: string, _ctx: Context) {
     const now = Date.now();
     const cached = userLikesCache.get(userId);
     if (cached && now - cached.ts < USER_LIKES_TTL_MS) {

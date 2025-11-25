@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- test file with flexible types */
 import { describe, it, expect } from '@jest/globals';
 import store, { subscribe } from '../../src/web/public/js/core/state/store.ts';
 

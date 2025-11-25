@@ -1,13 +1,13 @@
-import crypto from 'crypto';
 import { Express, Request, Response } from 'express';
 import logger from '../../utils/logger.js';
 import { AuthService, TelegramAuthData } from '../../services/AuthService.js';
+import { Config } from '../../config/types.js';
 
 export class AuthController {
-  private config: any;
+  private config: Config;
   private authService: AuthService;
 
-  constructor({ config, authService }: { config: any; authService: AuthService }) {
+  constructor({ config, authService }: { config: Config; authService: AuthService }) {
     this.config = config;
     this.authService = authService;
   }
@@ -48,6 +48,7 @@ export class AuthController {
       }
 
       // После успешной авторизации
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
       (req.session as any).user = {
         id,
         first_name,
@@ -74,11 +75,13 @@ export class AuthController {
         ]);
         logger.info({ elapsed: Date.now() - startTs }, 'Auth callback session saved');
         return res.redirect('/profile');
-      } catch (e: any) {
+      } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- error handling
+        const err = e as any;
         logger.error({ err: e }, 'Auth callback session save failed');
         return res.redirect(
           `/login?error=${
-            e.message === 'session_save_timeout' ? 'session_timeout' : 'session_error'
+            err.message === 'session_save_timeout' ? 'session_timeout' : 'session_error'
           }`,
         );
       }
@@ -117,6 +120,7 @@ export class AuthController {
       }
 
       // После успешной авторизации
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
       (req.session as any).user = {
         id,
         first_name,
@@ -142,10 +146,12 @@ export class AuthController {
         ]);
         logger.info({ elapsed: Date.now() - startTs }, 'Auth callback POST session saved');
         return res.status(200).json({ success: true, redirect: '/profile' });
-      } catch (e: any) {
+      } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- error handling
+        const err = e as any;
         logger.error({ err: e }, 'Auth callback POST session save failed');
         return res.status(500).json({
-          error: e.message === 'session_save_timeout' ? 'session_timeout' : 'session_error',
+          error: err.message === 'session_save_timeout' ? 'session_timeout' : 'session_error',
         });
       }
     } catch (error) {

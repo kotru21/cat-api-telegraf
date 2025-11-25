@@ -41,6 +41,7 @@ export function initSearchAndSort({
       likesCount:
         parseInt(card.querySelector('.likes-badge')?.textContent?.split(' ')[0] || '0') || 0,
     }));
+    // eslint-disable-next-line no-console -- debug output
     console.log(`Snapshot: found ${allCats.length} cats`); // для отладки
   }
 

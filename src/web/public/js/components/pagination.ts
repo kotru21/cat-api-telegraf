@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend component with flexible callback types */
 import { createEl } from '../utils';
 
 interface PaginationOptions {

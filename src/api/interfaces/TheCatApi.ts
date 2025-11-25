@@ -6,6 +6,7 @@ export interface CatBreed {
   description?: string;
   life_span?: string;
   wikipedia_url?: string;
+  weight?: { metric: string; imperial: string };
   [key: string]: unknown;
 }
 

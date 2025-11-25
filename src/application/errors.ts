@@ -1,7 +1,7 @@
 export class AppError extends Error {
   public code: string;
   public status: number;
-  public cause?: any;
+  public cause?: unknown;
 
   constructor(
     message: string,
@@ -9,7 +9,7 @@ export class AppError extends Error {
       code = 'APP_ERROR',
       status = 500,
       cause,
-    }: { code?: string; status?: number; cause?: any } = {},
+    }: { code?: string; status?: number; cause?: unknown } = {},
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -20,9 +20,9 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  public details: any;
+  public details: unknown;
 
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, { code: 'VALIDATION_ERROR', status: 400 });
     this.details = details;
   }

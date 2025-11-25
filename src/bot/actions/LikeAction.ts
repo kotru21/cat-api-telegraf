@@ -1,10 +1,10 @@
-import { Composer, Markup, Context } from 'telegraf';
+import { Composer, Context } from 'telegraf';
 import logger from '../../utils/logger.js';
 import { LikeService } from '../../services/LikeService.js';
 import { Keyboards } from '../keyboards/index.js';
 
 export class LikeAction {
-  private composer: Composer<any>;
+  private composer: Composer<Context>;
   private likeService: LikeService;
 
   constructor({ likeService }: { likeService: LikeService }) {

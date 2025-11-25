@@ -4,8 +4,6 @@
 // внутри этого модуля НЕ создаются, чтобы избежать рассинхронизации синглтонов.
 
 import { AwilixContainer } from 'awilix';
-import logger from '../utils/logger.js';
-import { AppError, ValidationError, NotFoundError } from './errors.js';
 
 let appContainer: AwilixContainer | null = null;
 
@@ -20,7 +18,7 @@ export function getContainer() {
   return appContainer;
 }
 
-export function createAppContext(overrides: any = {}) {
+export function createAppContext(overrides: Record<string, unknown> = {}) {
   const c = getContainer();
   return {
     catInfoService: overrides.catInfoService || c.resolve('catInfoService'),

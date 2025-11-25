@@ -22,11 +22,11 @@ process.on('exit', (code) => {
 });
 
 import { AwilixContainer } from 'awilix';
+import { Config } from './config/types.js';
 
 class Application {
-  private config: any;
+  private config: Config;
   private container: AwilixContainer;
-  private dbService: any;
   private botService: BotService;
   private webServer: WebServer | null;
 
@@ -35,7 +35,7 @@ class Application {
     this.container = buildContainer();
     // Устанавливаем контейнер приложения глобально для use-cases/web
     setAppContainer(this.container);
-    this.dbService = null; // Prisma is initialized lazily via getPrisma
+    // Prisma is initialized lazily via getPrisma
     this.botService = this.container.resolve('botService');
     this.webServer = null;
 

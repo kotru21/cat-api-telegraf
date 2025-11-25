@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-explicit-any */
 // Simple smoke test for health endpoints
 import http from 'http';
 

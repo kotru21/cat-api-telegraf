@@ -1,4 +1,8 @@
-import { user_likes as UserLike, Cat } from '@prisma/client';
+import type { user_likes as UserLike, Cat } from '@prisma/client';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for type documentation
+type _UserLike = UserLike;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- imported for type documentation
+type _Cat = Cat;
 
 export interface UserLikeDTO {
   cat_id: string;

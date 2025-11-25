@@ -60,6 +60,7 @@ export function setupSecurity(app: Express) {
     xPoweredBy: false,
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- helmet options type is complex
   app.use(helmet(helmetOpts as any));
 
   app.use(cors({ origin: true, credentials: true }));

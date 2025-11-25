@@ -1,4 +1,4 @@
-import { Markup, Context } from 'telegraf';
+import { Context } from 'telegraf';
 import { BaseCommand } from './BaseCommand.js';
 import logger from '../../utils/logger.js';
 import { CatInfoService } from '../../services/CatInfoService.js';

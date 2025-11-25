@@ -18,7 +18,9 @@ export function setupCatRoutes(
     catInfoService: CatInfoService;
     likeService: LikeService;
     leaderboardService: LeaderboardService;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express middleware type
     requireAuth: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express middleware type
     leaderboardLimiter: any;
   },
 ) {
@@ -85,6 +87,7 @@ export function setupCatRoutes(
   router.post('/like', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { catId } = req.body;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
       const userId = (req.session as any).user.id.toString();
 
       if (!catId) {
@@ -111,6 +114,7 @@ export function setupCatRoutes(
   router.delete('/like', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { catId } = req.body;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
       const userId = (req.session as any).user.id.toString();
 
       if (!catId) {

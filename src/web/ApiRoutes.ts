@@ -64,7 +64,7 @@ export class ApiRouter {
 }
 
 // Legacy export for backward compatibility if needed (but we are refactoring)
-export function setupApiRoutes(app: Express, dependencies: any = {}) {
+export function setupApiRoutes(app: Express, _dependencies: Record<string, unknown> = {}) {
   // This function is deprecated and replaced by ApiRouter class
   throw new Error('Use ApiRouter class instead');
 }

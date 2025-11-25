@@ -14,7 +14,7 @@ export function getPrisma(): PrismaClient {
       // are fatal for app startup so rethrow afterwards.
       // Avoid importing the project's logger here to keep this module
       // small and dependency-clean during startup.
-      // eslint-disable-next-line no-console
+
       console.error('Failed to initialize Prisma client:', err);
       throw err;
     }

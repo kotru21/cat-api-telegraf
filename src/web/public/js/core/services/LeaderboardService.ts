@@ -1,5 +1,5 @@
 import { getLeaderboard } from '../../api';
-import store, { setState, emit, getState } from '../state/store';
+import { setState, emit, getState } from '../state/store';
 
 interface LeaderboardRow {
   id?: string;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend component with flexible types */
 import { getRandomImages } from '../api';
 import { PLACEHOLDER } from '../utils';
 import overlayImageWithSkeleton from './overlayImage';

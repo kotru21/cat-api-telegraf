@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-explicit-any */
 // Connectivity check for Prisma/SQLite without starting the app
 import { PrismaClient } from '@prisma/client';
 

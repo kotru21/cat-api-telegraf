@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import logger from '../utils/logger.js';
+import { Config } from '../config/types.js';
 
 export interface TelegramAuthData {
   id: string;
@@ -9,13 +10,13 @@ export interface TelegramAuthData {
   photo_url?: string;
   auth_date: string;
   hash: string;
-  [key: string]: any;
+  [key: string]: string | undefined;
 }
 
 export class AuthService {
-  private config: any;
+  private config: Config;
 
-  constructor({ config }: { config: any }) {
+  constructor({ config }: { config: Config }) {
     this.config = config;
   }
 
@@ -23,13 +24,13 @@ export class AuthService {
     const { hash, ...otherData } = data;
 
     // Проверка hash
-    const botToken = this.config.BOT_TOKEN;
+    const botToken = this.config.BOT_TOKEN || '';
     const secretKey = crypto.createHash('sha256').update(botToken).digest();
 
-    const filteredData: Record<string, any> = {};
+    const filteredData: Record<string, string> = {};
     for (const key in otherData) {
       if (otherData[key] !== undefined && otherData[key] !== null) {
-        filteredData[key] = otherData[key];
+        filteredData[key] = String(otherData[key]);
       }
     }
 

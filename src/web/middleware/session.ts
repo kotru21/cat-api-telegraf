@@ -3,8 +3,9 @@ import session from 'express-session';
 import { createClient as createRedisClient } from 'redis';
 import { RedisStore } from 'connect-redis';
 import logger from '../../utils/logger.js';
+import { Config } from '../../config/types.js';
 
-export function setupSession(app: Express, config: any) {
+export function setupSession(app: Express, config: Config) {
   // Production requires explicit secret
   if (process.env.NODE_ENV === 'production' && !config.SESSION_SECRET) {
     throw new Error(

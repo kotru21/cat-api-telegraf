@@ -29,9 +29,9 @@ export function configureViews(app: Express) {
       }
 
       callback(null, content);
-    } catch (err: any) {
+    } catch (err) {
       logger.error({ err, filePath }, `Error reading template file`);
-      return callback(err);
+      return callback(err as Error);
     }
   });
 

@@ -6,7 +6,14 @@ export interface LeaderboardEntryDto {
   breed_name?: string | null;
 }
 
-export function toLeaderboardDto(rows: any[]): LeaderboardEntryDto[] {
+interface LeaderboardRow {
+  id: string;
+  image_url: string;
+  count: number;
+  breed_name?: string | null;
+}
+
+export function toLeaderboardDto(rows: LeaderboardRow[]): LeaderboardEntryDto[] {
   return rows.map((row, index) => ({
     catId: row.id,
     url: row.image_url,

@@ -1,9 +1,9 @@
-import { Composer } from 'telegraf';
+import { Composer, Context } from 'telegraf';
 
 export abstract class BaseCommand {
   protected name: string;
   protected description: string;
-  protected composer: Composer<any>;
+  protected composer: Composer<Context>;
 
   constructor(name: string, description: string) {
     this.name = name;

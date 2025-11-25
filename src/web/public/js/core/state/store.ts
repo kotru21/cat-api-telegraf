@@ -4,10 +4,12 @@
 // store.subscribe(s => s.leaderboard, data => { ... })
 // store.emit('leaderboard:loading')
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend store is intentionally loosely typed */
+
 interface AppState {
-  leaderboard: any[];
-  likes: any[];
-  profile: any | null;
+  leaderboard: unknown[];
+  likes: unknown[];
+  profile: unknown | null;
   likesCount: number;
   loading: {
     leaderboard?: boolean;
@@ -16,14 +18,14 @@ interface AppState {
     catDetails?: boolean;
   };
   errors: {
-    leaderboard?: any | null;
-    likes?: any | null;
-    profile?: any | null;
-    catDetails?: any | null;
+    leaderboard?: unknown | null;
+    likes?: unknown | null;
+    profile?: unknown | null;
+    catDetails?: unknown | null;
   };
-  meta: Record<string, any>;
-  catDetails?: any | null;
-  [key: string]: any; // Allow dynamic keys for now to fix TS7053
+  meta: Record<string, unknown>;
+  catDetails?: unknown | null;
+  [key: string]: unknown; // Allow dynamic keys for now to fix TS7053
 }
 
 type Selector<T> = (state: AppState) => T;
@@ -35,9 +37,9 @@ interface ListenerEntry<T> {
   lastValue: T;
 }
 
-type EventHandler = (payload?: any) => void;
+type EventHandler = (payload?: unknown) => void;
 
-const listeners = new Set<ListenerEntry<any>>(); // selector-based subscribers
+const listeners = new Set<ListenerEntry<unknown>>(); // selector-based subscribers
 const eventMap = new Map<string, Set<EventHandler>>(); // eventName -> Set(handlers)
 
 const state: AppState = {

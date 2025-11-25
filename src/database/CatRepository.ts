@@ -2,6 +2,7 @@ import { CatRepositoryInterface } from './interfaces/CatRepositoryInterface.js';
 import logger from '../utils/logger.js';
 import getPrisma from './prisma/PrismaClient.js';
 import { PrismaClient, Cat } from '@prisma/client';
+import { CatApiImage } from '../api/interfaces/TheCatApi.js';
 
 export class CatRepository implements CatRepositoryInterface {
   private prisma: PrismaClient;
@@ -10,7 +11,7 @@ export class CatRepository implements CatRepositoryInterface {
     this.prisma = prisma;
   }
 
-  async saveCatDetails(catData: any): Promise<void> {
+  async saveCatDetails(catData: CatApiImage): Promise<void> {
     if (!catData?.breeds?.[0]) {
       throw new Error('No breed data provided for the cat');
     }

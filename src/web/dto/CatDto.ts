@@ -16,7 +16,35 @@ export interface CatDto {
   }[];
 }
 
-export function toCatDto(data: any): CatDto {
+interface CatLikeInput {
+  id: string;
+  url?: string;
+  image_url?: string;
+  width?: number;
+  height?: number;
+  count?: number;
+  breed_id?: string;
+  breed_name?: string;
+  temperament?: string;
+  origin?: string;
+  description?: string;
+  life_span?: string;
+  wikipedia_url?: string;
+  weight_metric?: string;
+  weight_imperial?: string;
+  breeds?: Array<{
+    id: string;
+    name?: string;
+    temperament?: string;
+    origin?: string;
+    description?: string;
+    life_span?: string;
+    wikipedia_url?: string;
+    weight?: { metric: string; imperial: string };
+  }>;
+}
+
+export function toCatDto(data: CatLikeInput): CatDto {
   // Handle Prisma Cat object (flat structure)
   if (!data.breeds && data.breed_name) {
     return {
@@ -49,7 +77,7 @@ export function toCatDto(data: any): CatDto {
     height: data.height,
     likes: data.count || 0,
     breeds: Array.isArray(data.breeds)
-      ? data.breeds.map((b: any) => ({
+      ? data.breeds.map((b) => ({
           id: b.id,
           name: b.name || 'Unknown',
           temperament: b.temperament,

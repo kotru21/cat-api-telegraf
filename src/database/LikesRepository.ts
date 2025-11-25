@@ -41,9 +41,9 @@ export class LikesRepository implements LikesRepositoryInterface {
       });
 
       return result;
-    } catch (err: any) {
+    } catch (err) {
       // Уникальный дубликат (лайк уже есть)
-      if (err && err.code === 'P2002') {
+      if (err && typeof err === 'object' && 'code' in err && err.code === 'P2002') {
         return false;
       }
       logger.error({ err }, 'Failed to add like (Prisma)');

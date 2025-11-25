@@ -18,7 +18,7 @@ export async function loadProfile({ force = false } = {}) {
       const { count } = await getUserLikesCount();
       setState({ likesCount: count });
       emit('likes:count', count);
-    } catch (_) {
+    } catch {
       // ignore
     }
     return profile;

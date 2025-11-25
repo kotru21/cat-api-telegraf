@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend component with flexible types */
 import { getLeaderboard } from '../api';
 import { preloadImages, PLACEHOLDER } from '../utils';
 import { LeaderboardEntry } from '../types';

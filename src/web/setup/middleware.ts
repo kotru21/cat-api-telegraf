@@ -17,7 +17,7 @@ export function configureMiddleware(app: Express, config: Config) {
   app.use(
     pinoHttp({
       logger,
-      genReqId: (req: IncomingMessage, res: ServerResponse) => {
+      genReqId: (req: IncomingMessage, _res: ServerResponse) => {
         const id = req.headers['x-request-id'];
         if (typeof id === 'string') return id;
         if (Array.isArray(id)) return id[0];

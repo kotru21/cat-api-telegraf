@@ -1,6 +1,7 @@
 import { CatApiClient } from '../api/CatApiClient.js';
 import { CatRepository } from '../database/CatRepository.js';
 import { Cat } from '@prisma/client';
+import { CatApiImage } from '../api/interfaces/TheCatApi.js';
 
 export class CatInfoService {
   private catApiClient: CatApiClient;
@@ -18,7 +19,7 @@ export class CatInfoService {
     this.repository = catRepository;
   }
 
-  async getRandomCat(retryCount = 0): Promise<any> {
+  async getRandomCat(retryCount = 0): Promise<CatApiImage> {
     try {
       const catDetails = await this.catApiClient.getRandomCatWithBreed();
 

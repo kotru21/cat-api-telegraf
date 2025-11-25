@@ -1,3 +1,4 @@
+/* eslint-disable no-console, @typescript-eslint/no-explicit-any */
 // Basic polyfills or globals for tests
 import '@jest/globals';
 import { JSDOM } from 'jsdom';

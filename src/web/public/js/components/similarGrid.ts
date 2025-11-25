@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend component with flexible types */
 import { preloadImages, PLACEHOLDER, sanitize } from '../utils';
 import overlayImageWithSkeleton from './overlayImage';
 

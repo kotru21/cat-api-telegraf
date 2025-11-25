@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- frontend UI with flexible types */
 import { PLACEHOLDER } from '../../utils';
 
 interface CatDetailsData {

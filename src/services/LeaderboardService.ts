@@ -1,5 +1,4 @@
 import { CatRepository } from '../database/CatRepository.js';
-import { LikesRepositoryInterface } from '../database/interfaces/LikesRepositoryInterface';
 import { Cat } from '@prisma/client';
 
 export class LeaderboardService {

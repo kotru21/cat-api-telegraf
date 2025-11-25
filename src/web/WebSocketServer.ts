@@ -113,7 +113,7 @@ export class WebSocketService {
         ws.isAlive = true;
       });
 
-      ws.on('message', (message: any) => {
+      ws.on('message', (_message: Buffer) => {
         messageCount++;
         if (messageCount > 10) {
           ws.close(1008, 'Message flood');
@@ -165,7 +165,7 @@ export class WebSocketService {
     };
   }
 
-  sendDataToClient(client: WebSocket, additionalData: any = {}) {
+  sendDataToClient(client: WebSocket, additionalData: Record<string, unknown> = {}) {
     if (client.readyState === client.OPEN) {
       client.send(
         JSON.stringify({
@@ -176,7 +176,7 @@ export class WebSocketService {
     }
   }
 
-  broadcastData(additionalData: any = {}) {
+  broadcastData(additionalData: Record<string, unknown> = {}) {
     this.wss.clients.forEach((client: WebSocket) => this.sendDataToClient(client, additionalData));
   }
 

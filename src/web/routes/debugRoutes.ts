@@ -6,6 +6,7 @@ export function setupDebugRoutes(router: Router) {
     res.json({
       sessionExists: !!req.session,
       sessionID: req.sessionID,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
       sessionUser: (req.session as any).user,
       cookieSettings: req.session.cookie,
       headers: req.headers,

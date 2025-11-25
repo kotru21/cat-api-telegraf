@@ -24,7 +24,7 @@ export class TopCommand extends BaseCommand {
 
         let message = '🏆 *Топ популярных пород котов*\n\n';
 
-        topCats.forEach((cat: any, index: number) => {
+        topCats.forEach((cat, index) => {
           const medal =
             index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
           message += `${medal} *${cat.breed_name}* - ${cat.count} ❤️\n`;

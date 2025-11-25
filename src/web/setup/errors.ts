@@ -3,7 +3,7 @@ import { AppError } from '../../application/errors.js';
 import logger from '../../utils/logger.js';
 
 export function configureErrorHandling(app: Express) {
-  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof AppError) {
       logger.warn({ err }, 'AppError');
       return res.status(err.status).json({ error: err.message, code: err.code });

@@ -1,5 +1,5 @@
 import { Telegraf, Context, Middleware } from 'telegraf';
-import RateLimitMiddleware from 'telegraf-ratelimit';
+import rateLimit from 'telegraf-ratelimit';
 import { incrementMessageCount } from '../utils/messageCounter.js';
 import logger from '../utils/logger.js';
 import { z } from 'zod';
@@ -37,7 +37,7 @@ export class BotService {
       },
     };
 
-    this.bot.use(new RateLimitMiddleware(limitConfig).middleware());
+    this.bot.use(rateLimit(limitConfig));
 
     // Message counter middleware
     this.bot.use((ctx, next) => {

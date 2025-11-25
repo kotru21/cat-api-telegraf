@@ -7,13 +7,15 @@ declare module 'telegraf-ratelimit' {
     /** Максимальное количество сообщений в окне */
     limit: number;
     /** Callback при превышении лимита */
-    onLimitExceeded?: (ctx: Context) => void | Promise<void>;
+    onLimitExceeded?: (ctx: Context, next: () => Promise<void>) => void | Promise<void>;
     /** Ключ для идентификации пользователя (по умолчанию ctx.from.id) */
     keyGenerator?: (ctx: Context) => string | number | undefined;
   }
 
-  export default class RateLimitMiddleware {
-    constructor(config: RateLimitConfig);
-    middleware(): Middleware<Context>;
-  }
+  /**
+   * Creates a rate limiting middleware for Telegraf
+   */
+  function rateLimit(config: RateLimitConfig): Middleware<Context>;
+
+  export default rateLimit;
 }

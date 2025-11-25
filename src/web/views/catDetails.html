@@ -13,7 +13,7 @@
   </head>
   <body
     class="bg-gray-900 text-gray-100 font-inter"
-    x-data="catDetails(window.location.pathname.split('/').pop())"
+    x-data="catDetails(new URLSearchParams(window.location.search).get('id'))"
   >
     <!-- INCLUDE_NAVIGATION -->
 

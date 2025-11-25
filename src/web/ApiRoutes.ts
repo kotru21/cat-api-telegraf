@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import { Hono } from 'hono';
 import { createRateLimiters } from './middleware/rateLimiters.js';
 import { setupAuthMiddleware } from './middleware/authMiddleware.js';
 import { setupCatRoutes } from './routes/catRoutes.js';
@@ -33,20 +33,21 @@ export class ApiRouter {
     this.authService = authService;
   }
 
-  setup(app: Express) {
-    const router = express.Router();
+  setup(app: Hono) {
+    // Create a sub-router for /api
+    const apiRouter = new Hono();
 
     // Request rate limiters
     const { apiLimiter, leaderboardLimiter } = createRateLimiters();
 
     // Global API limiter
-    router.use(apiLimiter);
+    apiRouter.use('*', apiLimiter);
 
     // Auth middleware
     const { requireAuth } = setupAuthMiddleware();
 
     // Category routes
-    setupCatRoutes(router, {
+    setupCatRoutes(apiRouter, {
       catInfoService: this.catInfoService,
       likeService: this.likeService,
       leaderboardService: this.leaderboardService,
@@ -54,16 +55,16 @@ export class ApiRouter {
       leaderboardLimiter,
     });
 
-    setupUserRoutes(router, {
+    setupUserRoutes(apiRouter, {
       likeService: this.likeService,
       requireAuth,
     });
 
-    setupAuthRoutes(router, { authService: this.authService });
+    setupAuthRoutes(apiRouter, { authService: this.authService });
 
-    setupDebugRoutes(router);
+    setupDebugRoutes(apiRouter);
 
     // Mount router at /api
-    app.use('/api', router);
+    app.route('/api', apiRouter);
   }
 }

@@ -1,7 +1,8 @@
-import { Express, Request, Response } from 'express';
+import { Hono, Context } from 'hono';
 import logger from '../../utils/logger.js';
 import { AuthService, TelegramAuthData } from '../../services/AuthService.js';
 import { Config } from '../../config/types.js';
+import { SessionData } from '../../types/hono.js';
 
 type AuthResponseType = 'redirect' | 'json';
 
@@ -20,7 +21,7 @@ export class AuthController {
     this.authService = authService;
   }
 
-  setupRoutes(app: Express) {
+  setupRoutes(app: Hono) {
     app.get('/auth/telegram/callback', this.handleTelegramCallback.bind(this));
     app.post('/auth/telegram/callback', this.handleTelegramCallbackPost.bind(this));
   }
@@ -29,7 +30,7 @@ export class AuthController {
    * Core authentication logic shared between GET and POST handlers
    */
   private async processAuth(
-    req: Request,
+    c: Context,
     authData: TelegramAuthData,
     responseType: AuthResponseType,
     route: string,
@@ -40,7 +41,7 @@ export class AuthController {
       {
         route,
         dataKeys: Object.keys(authData),
-        hasSession: !!req.session,
+        hasSession: !!c.get('session'),
       },
       'Auth callback received',
     );
@@ -53,78 +54,57 @@ export class AuthController {
     }
 
     // Set user session
-    req.session.user = {
+    const session = (c.get('session') as SessionData) || {};
+    session.user = {
       id: authData.id,
       first_name: authData.first_name,
       last_name: authData.last_name ?? undefined,
       username: authData.username ?? undefined,
       photo_url: authData.photo_url ?? undefined,
     };
+    c.set('session', session);
 
-    // Save session with timeout
-    const timeoutMs = 5000;
-    try {
-      await this.saveSessionWithTimeout(req, timeoutMs);
-      logger.info({ elapsed: Date.now() - startTs }, `Auth callback session saved (${route})`);
-      return { success: true, redirect: '/profile' };
-    } catch (e) {
-      const err = e as Error;
-      logger.error({ err: e }, `Auth callback session save failed (${route})`);
-      const errorCode =
-        err.message === 'session_save_timeout' ? 'session_timeout' : 'session_error';
-      return { success: false, error: errorCode };
-    }
+    logger.info({ elapsed: Date.now() - startTs }, `Auth callback session saved (${route})`);
+    return { success: true, redirect: '/profile' };
   }
 
-  /**
-   * Saves session with a timeout to prevent hanging
-   */
-  private saveSessionWithTimeout(req: Request, timeoutMs: number): Promise<void> {
-    return Promise.race([
-      new Promise<void>((resolve, reject) => {
-        req.session.save((err) => {
-          if (err) return reject(err);
-          resolve();
-        });
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('session_save_timeout')), timeoutMs),
-      ),
-    ]);
-  }
-
-  async handleTelegramCallback(req: Request, res: Response) {
+  async handleTelegramCallback(c: Context) {
     try {
-      const authData = req.query as unknown as TelegramAuthData;
-      const result = await this.processAuth(
-        req,
-        authData,
-        'redirect',
-        'GET /auth/telegram/callback',
-      );
+      // Get auth data from query parameters
+      const authData: TelegramAuthData = {
+        id: c.req.query('id') || '',
+        first_name: c.req.query('first_name'),
+        last_name: c.req.query('last_name'),
+        username: c.req.query('username'),
+        photo_url: c.req.query('photo_url'),
+        auth_date: c.req.query('auth_date') || '',
+        hash: c.req.query('hash') || '',
+      };
+
+      const result = await this.processAuth(c, authData, 'redirect', 'GET /auth/telegram/callback');
 
       if (!result.success) {
-        return res.redirect(`/login?error=${result.error}`);
+        return c.redirect(`/login?error=${result.error}`);
       }
-      return res.redirect(result.redirect!);
+      return c.redirect(result.redirect!);
     } catch (error) {
       logger.error({ err: error }, 'Auth callback fatal error');
-      res.redirect('/login?error=auth_failed');
+      return c.redirect('/login?error=auth_failed');
     }
   }
 
-  async handleTelegramCallbackPost(req: Request, res: Response) {
+  async handleTelegramCallbackPost(c: Context) {
     try {
-      const authData = req.body as TelegramAuthData;
-      const result = await this.processAuth(req, authData, 'json', 'POST /auth/telegram/callback');
+      const authData = (await c.req.json()) as TelegramAuthData;
+      const result = await this.processAuth(c, authData, 'json', 'POST /auth/telegram/callback');
 
       if (!result.success) {
-        return res.status(403).json({ error: result.error });
+        return c.json({ error: result.error }, 403);
       }
-      return res.status(200).json({ success: true, redirect: result.redirect });
+      return c.json({ success: true, redirect: result.redirect });
     } catch (error) {
       logger.error({ err: error }, 'Auth callback POST fatal error');
-      res.status(500).json({ error: 'auth_failed' });
+      return c.json({ error: 'auth_failed' }, 500);
     }
   }
 }

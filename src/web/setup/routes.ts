@@ -1,49 +1,110 @@
-import express, { Express } from 'express';
+import { Hono, Context } from 'hono';
+import { serveStatic } from 'hono/bun';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from '../../utils/logger.js';
+import { SessionData } from '../../types/hono.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export function configureRoutes(app: Express) {
-  // Static files
-  app.use('/static', express.static(path.join(__dirname, '../public')));
-  app.use('/js', express.static(path.join(__dirname, '../public/dist')));
-  app.use('/media', express.static(path.join(__dirname, '../public/media')));
+// Simple HTML template renderer using Bun's file API
+async function renderHtml(templatePath: string): Promise<string> {
+  try {
+    let content = await Bun.file(templatePath).text();
 
-  // Views
-  app.get('/', (req, res) => res.render('index'));
-  app.get('/catDetails', (req, res) => res.render('catDetails'));
-  app.get('/similar', (req, res) => res.render('similar'));
+    // Include navigation partial if marker exists
+    if (content.includes('<!-- INCLUDE_NAVIGATION -->')) {
+      const navPath = path.join(__dirname, '../views/partials/navigation.html');
+
+      try {
+        const navFile = Bun.file(navPath);
+        if (await navFile.exists()) {
+          const navContent = await navFile.text();
+          content = content.replace('<!-- INCLUDE_NAVIGATION -->', navContent);
+        } else {
+          logger.warn({ navPath }, 'Navigation partial not found');
+        }
+      } catch (err) {
+        logger.error({ err }, 'Error reading navigation.html');
+      }
+    }
+
+    return content;
+  } catch (err) {
+    logger.error({ err, templatePath }, 'Error reading template file');
+    throw err;
+  }
+}
+
+export function configureRoutes(app: Hono) {
+  const publicDir = path.join(__dirname, '../public');
+  const viewsDir = path.join(__dirname, '../views');
+
+  // Static files using Bun's native static file serving
+  app.get(
+    '/static/*',
+    serveStatic({ root: publicDir, rewriteRequestPath: (p) => p.replace('/static', '') }),
+  );
+  app.get(
+    '/js/*',
+    serveStatic({
+      root: path.join(publicDir, 'dist'),
+      rewriteRequestPath: (p) => p.replace('/js', ''),
+    }),
+  );
+  app.get(
+    '/media/*',
+    serveStatic({
+      root: path.join(publicDir, 'media'),
+      rewriteRequestPath: (p) => p.replace('/media', ''),
+    }),
+  );
+
+  // HTML views
+  app.get('/', async (c: Context) => {
+    const html = await renderHtml(path.join(viewsDir, 'index.html'));
+    return c.html(html);
+  });
+
+  app.get('/catDetails', async (c: Context) => {
+    const html = await renderHtml(path.join(viewsDir, 'catDetails.html'));
+    return c.html(html);
+  });
+
+  app.get('/similar', async (c: Context) => {
+    const html = await renderHtml(path.join(viewsDir, 'similar.html'));
+    return c.html(html);
+  });
 
   // Health checks
-  app.get('/healthz', (req, res) => res.status(200).json({ status: 'ok' }));
-  app.get('/readyz', (req, res) => res.status(200).json({ status: 'ready' }));
+  app.get('/healthz', (c: Context) => c.json({ status: 'ok' }));
+  app.get('/readyz', (c: Context) => c.json({ status: 'ready' }));
 
   // User profile view (requires session)
-  app.get('/profile', (req, res) => {
-    if (!req.session.user) {
-      res.redirect('/login');
-      return;
+  app.get('/profile', async (c: Context) => {
+    const session = c.get('session') as SessionData | undefined;
+    if (!session?.user) {
+      return c.redirect('/login');
     }
-    res.render('profile');
+    const html = await renderHtml(path.join(viewsDir, 'profile.html'));
+    return c.html(html);
   });
 
   // Login page
-  app.get('/login', (req, res) => {
-    if (req.session.user) {
-      res.redirect('/profile');
-      return;
+  app.get('/login', async (c: Context) => {
+    const session = c.get('session') as SessionData | undefined;
+    if (session?.user) {
+      return c.redirect('/profile');
     }
-    res.render('login');
+    const html = await renderHtml(path.join(viewsDir, 'login.html'));
+    return c.html(html);
   });
 
   // Logout
-  app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) logger.error({ err }, 'Session destroy error');
-      res.redirect('/');
-    });
+  app.get('/logout', (c: Context) => {
+    // Clear session by setting empty object
+    c.set('session', {} as SessionData);
+    return c.redirect('/');
   });
 }

@@ -1,13 +1,16 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Context, Next, MiddlewareHandler } from 'hono';
+import { SessionData } from '../../types/hono.js';
 
-export function setupAuthMiddleware(): { requireAuth: RequestHandler } {
+export function setupAuthMiddleware(): { requireAuth: MiddlewareHandler } {
   // Middleware для проверки авторизации
-  const requireAuth: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session || !req.session.user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
+  const requireAuth: MiddlewareHandler = async (c: Context, next: Next) => {
+    const session = c.get('session') as SessionData | undefined;
+
+    if (!session || !session.user) {
+      return c.json({ error: 'Unauthorized' }, 401);
     }
-    next();
+
+    await next();
   };
 
   return { requireAuth };

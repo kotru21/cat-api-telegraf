@@ -32,6 +32,8 @@ export function setupSecurity(app: Express) {
           scriptSrc: [
             "'self'",
             `'nonce-${nonce}'`,
+            // Alpine.js requires unsafe-eval for dynamic expression evaluation
+            "'unsafe-eval'",
             'cdnjs.cloudflare.com',
             'telegram.org',
             '*.telegram.org',
@@ -40,8 +42,9 @@ export function setupSecurity(app: Express) {
           ],
           styleSrc: [
             "'self'",
-            // Allow inline styles only with nonce or use external stylesheets
-            `'nonce-${nonce}'`,
+            // Tailwind and Alpine.js dynamic styles require unsafe-inline
+            // Note: nonce is NOT included here because it would disable unsafe-inline
+            "'unsafe-inline'",
             'cdnjs.cloudflare.com',
             '*.telegram.org',
           ],

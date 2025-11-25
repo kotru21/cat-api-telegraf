@@ -204,7 +204,7 @@ export class CatRepository implements CatRepositoryInterface {
     });
   }
 
-  async getRandomImages(count = 3): Promise<string[]> {
+  async getRandomImages(count = 3): Promise<{ id: string; url: string }[]> {
     try {
       // Используем Prisma для случайной выборки
       // Для SQLite используем orderBy: { id: "asc" } с skip случайного количества записей
@@ -223,12 +223,14 @@ export class CatRepository implements CatRepositoryInterface {
         where: {
           AND: [{ image_url: { not: null } }, { image_url: { not: '' } }],
         },
-        select: { image_url: true },
+        select: { id: true, image_url: true },
         skip: randomOffset,
         take: count,
       });
 
-      return rows.map((r) => r.image_url).filter((url): url is string => url !== null);
+      return rows
+        .filter((r) => r.image_url !== null)
+        .map((r) => ({ id: r.id, url: r.image_url as string }));
     } catch (err) {
       logger.error({ err }, 'Error fetching random images (Prisma)');
       throw err;

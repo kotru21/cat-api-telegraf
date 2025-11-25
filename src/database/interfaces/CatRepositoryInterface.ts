@@ -1,6 +1,11 @@
 import { Cat } from '@prisma/client';
 import { CatApiImage } from '../../api/interfaces/TheCatApi.js';
 
+export interface RandomCatImage {
+  id: string;
+  url: string;
+}
+
 export interface CatRepositoryInterface {
   /**
    * Save cat details from TheCatApi response
@@ -10,5 +15,5 @@ export interface CatRepositoryInterface {
   getCatById(catId: string): Promise<Cat | null>;
   getLeaderboard(limit: number): Promise<Cat[]>;
   getCatsByFeature(feature: string, value: string | number): Promise<Cat[]>;
-  getRandomImages(count: number): Promise<string[]>;
+  getRandomImages(count: number): Promise<RandomCatImage[]>;
 }

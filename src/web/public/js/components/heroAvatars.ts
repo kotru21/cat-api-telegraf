@@ -36,7 +36,7 @@ export async function initHeroAvatars({
         height: 40,
         shape: 'circle',
         borderClass: 'border-2 border-indigo-600',
-        wrapperClass: 'mr-[-0.5rem] first:ml-0', // для наложения (-space-x)
+        wrapperClass: '-mr-2 first:ml-0', // для наложения (-space-x)
         alreadyLoaded: result.loaded,
         placeholder: PLACEHOLDER.SMALL,
       });

@@ -11,7 +11,6 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     />
     <script type="module" src="/js/app.js"></script>
-    <!-- Все стили переведены в Tailwind utilities -->
   </head>
   <body class="bg-gray-900 text-gray-100 font-inter antialiased">
     <div class="relative">
@@ -192,7 +191,7 @@
           class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
         >
           <div
-            class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
+            class="relative left-[calc(50%-11rem)] aspect-1155/678 w-xl -translate-x-1/2 rotate-30 bg-linear-to-tr from-indigo-500/40 to-purple-400/30 opacity-30 sm:left-[calc(50%-30rem)] sm:w-6xl [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
           ></div>
         </div>
         <!-- Радиальный градиент поверх -->
@@ -242,7 +241,7 @@
                       class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800"
                     >
                       <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                       ></div>
                     </div>
                   </div>
@@ -251,7 +250,7 @@
                       class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800"
                     >
                       <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                       ></div>
                     </div>
                   </div>
@@ -260,7 +259,7 @@
                       class="absolute inset-0 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800"
                     >
                       <div
-                        class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                        class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                       ></div>
                     </div>
                   </div>
@@ -268,7 +267,7 @@
               </template>
               <template x-for="(cat, index) in avatars" :key="cat.id ?? index">
                 <div
-                  class="relative w-10 h-10 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800 mr-[-0.5rem] first:ml-0"
+                  class="relative w-10 h-10 rounded-full border-2 border-indigo-600 overflow-hidden bg-gray-800 -mr-2 first:ml-0"
                 >
                   <img
                     :src="cat.url || cat.image_url"
@@ -300,7 +299,7 @@
                     class="text-center h-14 flex items-center justify-center rounded-md border border-gray-600/40 bg-gray-700/40 relative overflow-hidden"
                   >
                     <div
-                      class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                      class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                     ></div>
                   </div>
                 </template>
@@ -334,7 +333,7 @@
               <div x-show="loading" class="flex items-end h-[56px]">
                 <div class="relative h-10 w-16 rounded-md bg-gray-800 overflow-hidden">
                   <div
-                    class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                    class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                   ></div>
                 </div>
               </div>
@@ -386,7 +385,7 @@
           class="pointer-events-none absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-25rem)]"
         >
           <div
-            class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72rem] [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
+            class="relative left-[calc(50%+3rem)] aspect-1155/678 w-xl -translate-x-1/2 bg-linear-to-tr from-indigo-500/30 to-purple-400/20 opacity-30 sm:left-[calc(50%+36rem)] sm:w-6xl [clip-path:polygon(74.1%_44.1%,100%_61.6%,97.5%_26.9%,85.5%_0.1%,80.7%_2%,72.5%_32.5%,60.2%_62.4%,52.4%_68.1%,47.5%_58.3%,45.2%_34.5%,27.5%_76.7%,0.1%_64.9%,17.9%_100%,27.6%_76.8%,76.1%_97.7%,74.1%_44.1%)]"
           ></div>
         </div>
       </div>
@@ -441,7 +440,7 @@
                         class="relative w-8 h-8 rounded-full overflow-hidden bg-indigo-900/40 flex items-center justify-center"
                       >
                         <div
-                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                          class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                         ></div>
                       </div>
                     </td>
@@ -452,7 +451,7 @@
                         class="relative w-24 h-24 mx-auto rounded-lg overflow-hidden bg-gray-800/40"
                       >
                         <div
-                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                          class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                         ></div>
                       </div>
                     </td>
@@ -463,7 +462,7 @@
                         class="relative h-5 w-40 max-w-full rounded-md overflow-hidden bg-gray-800/60"
                       >
                         <div
-                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                          class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                         ></div>
                       </div>
                     </td>
@@ -474,7 +473,7 @@
                         class="relative inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-900/40 overflow-hidden"
                       >
                         <div
-                          class="absolute inset-0 animate-pulse bg-gradient-to-r from-gray-700 via-gray-600/40 to-gray-700"
+                          class="absolute inset-0 animate-pulse bg-linear-to-r from-gray-700 via-gray-600/40 to-gray-700"
                         ></div>
                         <div class="h-4 w-12"></div>
                       </div>
@@ -516,7 +515,7 @@
                     class="px-4 py-4 border-b border-gray-800 bg-gray-800/40 text-left align-middle"
                   >
                     <a
-                      :href="`/cat-details.html?id=${item.example_cat_id || item.catId}`"
+                      :href="`/catDetails?id=${item.example_cat_id || item.catId}`"
                       class="text-lg font-medium text-white hover:text-indigo-400 transition-colors flex items-center gap-2"
                     >
                       <span x-text="item.breed_name"></span>

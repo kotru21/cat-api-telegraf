@@ -82,7 +82,7 @@ export class CatInfoService {
     return this.repository.getCatsByFeature(feature, value);
   }
 
-  async getRandomImages(count = 3): Promise<string[]> {
+  async getRandomImages(count = 3): Promise<{ id: string; url: string }[]> {
     return this.repository.getRandomImages(count);
   }
 }

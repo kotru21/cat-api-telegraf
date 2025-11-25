@@ -1,4 +1,6 @@
 import Alpine from 'alpinejs';
+import '../css/tailwind.css';
+
 import {
   getLeaderboard,
   getProfile,

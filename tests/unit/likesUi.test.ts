@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- test file with flexible types */
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'bun:test';
 import { renderLikes } from '../../src/web/public/js/core/ui/likes.ts';
-import '../setup/setupEnv';
 
 describe('renderLikes', () => {
   it('renders list of like cards', () => {
@@ -23,7 +21,7 @@ describe('renderLikes', () => {
 
   it('returns empty if no container', () => {
     const cards = renderLikes({
-      container: null as any,
+      container: null as unknown as HTMLElement,
       data: [],
       onRemove: () => {},
     });

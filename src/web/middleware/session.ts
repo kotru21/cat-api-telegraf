@@ -20,23 +20,26 @@ export function setupSession(app: Express, config: Config) {
       throw new Error('REDIS_URL is required in production for session store.');
     }
     const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
+    if (!redisUrl) {
+      throw new Error('REDIS_URL is required in production for session store.');
+    }
     const allowSelfSigned =
       config.REDIS_ALLOW_SELF_SIGNED || process.env.REDIS_ALLOW_SELF_SIGNED === 'true';
     const isRediss = redisUrl.startsWith('rediss://');
-    // Поведение redis@5: если URL rediss:// — TLS включается автоматически.
-    // Ошибка "tls socket option is set ... mismatch with protocol" возникает при одновременном указании rediss:// и несовместимых tls опций.
-    // Стратегия:
-    // 1. Если strict TLS (по умолчанию) — НЕ указывать socket.tls вообще.
-    // 2. Если разрешён self-signed — указываем socket.tls = { rejectUnauthorized:false }.
-    const socketOptions = {
+
+    // TLS configuration for Redis
+    // For rediss:// URLs, TLS is automatically enabled
+    // If self-signed certificates are allowed, configure TLS options properly
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Redis socket options type mismatch
+    const socketOptions: any = {
       reconnectStrategy: (r: number) => Math.min(r * 50, 2000),
     };
 
-    // Если разрешены самоподписанные сертификаты, отключаем проверку TLS глобально
+    // Configure TLS for self-signed certificates at connection level only
     if (allowSelfSigned && isRediss) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      socketOptions.tls = { rejectUnauthorized: false };
       logger.warn(
-        'TLS certificate verification disabled globally for Redis connection. This should only be used temporarily.',
+        'TLS certificate verification disabled for Redis connection only. This should only be used temporarily in development.',
       );
     }
 
@@ -58,11 +61,6 @@ export function setupSession(app: Express, config: Config) {
         },
         'Redis session client: self-signed certificate allowed',
       );
-      if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
-        logger.warn(
-          'Process-wide TLS verification disabled (NODE_TLS_REJECT_UNAUTHORIZED=0). Consider removing after debugging.',
-        );
-      }
     }
     redisClient.on('ready', () => logger.info('Redis session client ready'));
     redisClient.on('error', (err) => {

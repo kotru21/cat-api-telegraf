@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- test file with flexible types */
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'bun:test';
 import store, { subscribe } from '../../src/web/public/js/core/state/store.ts';
+import type { AppState } from '../../src/web/public/js/core/state/store.ts';
 
 describe('store basic', () => {
   it('updates state and notifies subscriber when selected slice changes', () => {
-    const events: any[] = [];
+    const events: Array<AppState['meta']> = [];
     const unsub = subscribe(
-      (s: any) => s.meta,
-      (val: any) => {
+      (s) => s.meta,
+      (val) => {
         events.push(val);
       },
     );
@@ -19,7 +19,7 @@ describe('store basic', () => {
   it('does not notify if slice unchanged', () => {
     let count = 0;
     const unsub = subscribe(
-      (s: any) => s.meta,
+      (s) => s.meta,
       () => {
         count++;
       },

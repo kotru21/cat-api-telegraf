@@ -15,11 +15,26 @@ export class CatApiClient {
     this.retries = 2;
   }
 
+  /**
+   * Default headers for all API requests
+   * API key is passed via header instead of query string for security
+   */
+  private getHeaders(): HeadersInit {
+    return {
+      'x-api-key': this.apiKey,
+      'Content-Type': 'application/json',
+    };
+  }
+
   async fetchJson<T>(url: string, options: RequestInit = {}, attempt = 0): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
-      const res = await fetch(url, { ...options, signal: controller.signal });
+      const res = await fetch(url, {
+        ...options,
+        headers: { ...this.getHeaders(), ...options.headers },
+        signal: controller.signal,
+      });
       if (!res.ok) {
         const text = await res.text().catch(() => '');
         throw new Error(`HTTP ${res.status}: ${text}`);
@@ -40,19 +55,17 @@ export class CatApiClient {
 
   async getRandomCatWithBreed(): Promise<CatApiImage> {
     const [randomCat] = await this.fetchJson<CatApiImage[]>(
-      `${this.baseUrl}/images/search?has_breeds=1&api_key=${this.apiKey}`,
+      `${this.baseUrl}/images/search?has_breeds=1`,
     );
 
     if (!randomCat) {
       throw new Error('No cat found');
     }
 
-    return await this.fetchJson<CatApiImage>(
-      `${this.baseUrl}/images/${randomCat.id}?api_key=${this.apiKey}`,
-    );
+    return await this.fetchJson<CatApiImage>(`${this.baseUrl}/images/${randomCat.id}`);
   }
 
   async getCatById(catId: string): Promise<CatApiImage> {
-    return this.fetchJson<CatApiImage>(`${this.baseUrl}/images/${catId}?api_key=${this.apiKey}`);
+    return this.fetchJson<CatApiImage>(`${this.baseUrl}/images/${catId}`);
   }
 }

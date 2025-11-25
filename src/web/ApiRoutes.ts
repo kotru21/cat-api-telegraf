@@ -8,24 +8,29 @@ import { setupDebugRoutes } from './routes/debugRoutes.js';
 import { CatInfoService } from '../services/CatInfoService.js';
 import { LikeService } from '../services/LikeService.js';
 import { LeaderboardService } from '../services/LeaderboardService.js';
+import { AuthService } from '../services/AuthService.js';
 
 export class ApiRouter {
   private catInfoService: CatInfoService;
   private likeService: LikeService;
   private leaderboardService: LeaderboardService;
+  private authService: AuthService;
 
   constructor({
     catInfoService,
     likeService,
     leaderboardService,
+    authService,
   }: {
     catInfoService: CatInfoService;
     likeService: LikeService;
     leaderboardService: LeaderboardService;
+    authService: AuthService;
   }) {
     this.catInfoService = catInfoService;
     this.likeService = likeService;
     this.leaderboardService = leaderboardService;
+    this.authService = authService;
   }
 
   setup(app: Express) {
@@ -54,17 +59,11 @@ export class ApiRouter {
       requireAuth,
     });
 
-    setupAuthRoutes(router);
+    setupAuthRoutes(router, { authService: this.authService });
 
     setupDebugRoutes(router);
 
     // Mount router at /api
     app.use('/api', router);
   }
-}
-
-// Legacy export for backward compatibility if needed (but we are refactoring)
-export function setupApiRoutes(app: Express, _dependencies: Record<string, unknown> = {}) {
-  // This function is deprecated and replaced by ApiRouter class
-  throw new Error('Use ApiRouter class instead');
 }

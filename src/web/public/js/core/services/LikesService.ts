@@ -45,7 +45,7 @@ export async function loadLikes({ force = false } = {}) {
 }
 
 export async function removeLike(catId: string) {
-  const prev = getState().likes;
+  const prev = getState().likes as Array<{ catId: string | number }>;
   const next = prev.filter((l) => String(l.catId) !== String(catId));
   setState({ likes: next, likesCount: Math.max(0, getState().likesCount - 1) });
   emit('like:removed', { catId });

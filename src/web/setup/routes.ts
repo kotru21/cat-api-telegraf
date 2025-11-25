@@ -23,18 +23,18 @@ export function configureRoutes(app: Express) {
 
   // User profile view (requires session)
   app.get('/profile', (req, res) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
-    if (!(req.session as any).user) {
-      return res.redirect('/login');
+    if (!req.session.user) {
+      res.redirect('/login');
+      return;
     }
     res.render('profile');
   });
 
   // Login page
   app.get('/login', (req, res) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
-    if ((req.session as any).user) {
-      return res.redirect('/profile');
+    if (req.session.user) {
+      res.redirect('/profile');
+      return;
     }
     res.render('login');
   });

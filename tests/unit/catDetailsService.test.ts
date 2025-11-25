@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- test file with flexible types */
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'bun:test';
 import { normalizeCatDetails } from '../../src/web/public/js/core/services/CatDetailsService.ts';
 
 describe('normalizeCatDetails', () => {
@@ -27,6 +26,8 @@ describe('normalizeCatDetails', () => {
     });
   });
   it('handles null gracefully', () => {
-    expect(normalizeCatDetails(null as any)).toBeNull();
+    // Test null input handling - normalizeCatDetails checks for null/undefined
+    // @ts-expect-error - testing null input for runtime safety
+    expect(normalizeCatDetails(null)).toBeNull();
   });
 });

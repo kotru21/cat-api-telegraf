@@ -8,6 +8,7 @@ import { LikeService } from '../services/LikeService.js';
 import { LeaderboardService } from '../services/LeaderboardService.js';
 import { CatInfoService } from '../services/CatInfoService.js';
 import { AuthService } from '../services/AuthService.js';
+import { CacheService } from '../services/CacheService.js';
 import { CatRepository } from '../database/CatRepository.js';
 import { LikesRepository } from '../database/LikesRepository.js';
 import { CatApiClient } from '../api/CatApiClient.js';
@@ -30,6 +31,7 @@ export interface Cradle {
   config: Config;
   prisma: PrismaClient;
   catApiClient: CatApiClient;
+  cacheService: CacheService;
   catRepository: CatRepository;
   likesRepository: LikesRepository;
   likeService: LikeService;
@@ -52,11 +54,20 @@ export function buildContainer(): AwilixContainer<Cradle> {
   // Используем PROXY, чтобы инжектить единый объект cradle и забирать из него зависимости
   const container = createContainer<Cradle>({ injectionMode: InjectionMode.PROXY });
 
+  // Create cache service with config
+  const cacheService = new CacheService({
+    redisUrl: config.REDIS_URL,
+    allowSelfSigned: config.REDIS_ALLOW_SELF_SIGNED,
+    defaultTtl: 300,
+    keyPrefix: 'catbot:',
+  });
+
   container.register({
     config: asValue(config),
     prisma: asValue(getPrisma()),
     // Low-level deps: фиксируем инстанс, чтобы избежать автопередачи cradle
     catApiClient: asValue(new CatApiClient()),
+    cacheService: asValue(cacheService),
 
     // Repositories как синглтоны
     catRepository: asClass(CatRepository).singleton(),

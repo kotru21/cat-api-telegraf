@@ -1,5 +1,4 @@
 import { Telegraf, Context, Middleware } from 'telegraf';
-// @ts-expect-error telegraf-ratelimit types are missing
 import RateLimitMiddleware from 'telegraf-ratelimit';
 import { incrementMessageCount } from '../utils/messageCounter.js';
 import logger from '../utils/logger.js';
@@ -33,11 +32,12 @@ export class BotService {
     const limitConfig = {
       window: 3000,
       limit: 3,
-      onLimitExceeded: (ctx: Context) =>
-        ctx.reply('Пожалуйста, не отправляйте команды так часто 🙏'),
+      onLimitExceeded: async (ctx: Context) => {
+        await ctx.reply('Пожалуйста, не отправляйте команды так часто 🙏');
+      },
     };
 
-    this.bot.use(new RateLimitMiddleware(limitConfig));
+    this.bot.use(new RateLimitMiddleware(limitConfig).middleware());
 
     // Message counter middleware
     this.bot.use((ctx, next) => {

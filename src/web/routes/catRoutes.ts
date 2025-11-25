@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction, RequestHandler } from 'express';
 import logger from '../../utils/logger.js';
 import { CatInfoService } from '../../services/CatInfoService.js';
 import { LikeService } from '../../services/LikeService.js';
@@ -18,10 +18,8 @@ export function setupCatRoutes(
     catInfoService: CatInfoService;
     likeService: LikeService;
     leaderboardService: LeaderboardService;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express middleware type
-    requireAuth: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express middleware type
-    leaderboardLimiter: any;
+    requireAuth: RequestHandler;
+    leaderboardLimiter: RequestHandler;
   },
 ) {
   // GET /cat/:id — fetch cat by id
@@ -87,8 +85,7 @@ export function setupCatRoutes(
   router.post('/like', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { catId } = req.body;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
-      const userId = (req.session as any).user.id.toString();
+      const userId = req.session.user!.id.toString();
 
       if (!catId) {
         return res.status(400).json({ error: 'catId is required' });
@@ -114,8 +111,7 @@ export function setupCatRoutes(
   router.delete('/like', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { catId } = req.body;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
-      const userId = (req.session as any).user.id.toString();
+      const userId = req.session.user!.id.toString();
 
       if (!catId) {
         return res.status(400).json({ error: 'catId is required' });

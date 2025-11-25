@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'bun:test';
 import { normalizeRow } from '../../src/web/public/js/core/services/LeaderboardService.ts';
 
 describe('normalizeRow', () => {

@@ -6,6 +6,8 @@ import { CatInfoService } from '../../services/CatInfoService.js';
 import { LikeService } from '../../services/LikeService.js';
 import { LeaderboardService } from '../../services/LeaderboardService.js';
 import { Keyboards } from '../keyboards/index.js';
+import { sendLikeInfo } from './utils/likeInfoUtils.js';
+import { sendCatPhoto, CAT_FETCH_ERROR_MESSAGE } from '../utils/sendCatPhoto.js';
 
 export class MenuCommand extends BaseCommand {
   private catInfoService: CatInfoService;
@@ -39,23 +41,17 @@ export class MenuCommand extends BaseCommand {
     // Обработчики текстовых команд меню - прямые обработчики
     this.composer.hears('🐾 Случайный кот', async (ctx: Context) => {
       await ctx.reply('Получаю случайного кота...');
-      // Имитируем обработку команды /fact
       try {
         const catData = await this.catInfoService.getRandomCat();
-        const breed = catData.breeds[0];
-        const likes = await this.likeService.getLikesForCat(catData.id);
 
-        await ctx.replyWithPhoto(
-          { url: catData.url },
-          {
-            parse_mode: 'Markdown',
-            caption: `_${breed.name}_\n${breed.description}`,
-            ...Keyboards.catDetails(breed.wikipedia_url, likes || 0, catData.id),
-          },
-        );
+        await sendCatPhoto({
+          ctx,
+          catData,
+          likeService: this.likeService,
+        });
       } catch (error) {
         logger.error({ err: error }, 'MenuCommand: failed to fetch random cat');
-        await ctx.reply('Извините, произошла ошибка при получении информации о породе кошки');
+        await ctx.reply(CAT_FETCH_ERROR_MESSAGE);
       }
     });
 
@@ -73,7 +69,7 @@ export class MenuCommand extends BaseCommand {
         }
 
         // Отображаем первую запись с фото и кнопками навигации
-        await this.sendLikeInfo(ctx, userLikes, 0);
+        await sendLikeInfo(ctx, userLikes, 0);
       } catch (error) {
         logger.error({ err: error }, 'MenuCommand: failed to fetch user likes');
         await ctx.reply('Извините, произошла ошибка при получении списка ваших лайков');
@@ -157,7 +153,7 @@ export class MenuCommand extends BaseCommand {
           currentIndex = (currentIndex - 1 + userLikes.length) % userLikes.length;
         }
 
-        await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
+        await sendLikeInfo(ctx, userLikes, currentIndex, true);
         await ctx.answerCbQuery();
       } catch (error) {
         logger.error({ err: error }, 'MenuCommand: likes navigation error');
@@ -202,51 +198,6 @@ export class MenuCommand extends BaseCommand {
         await ctx.answerCbQuery('Произошла ошибка при получении информации');
       }
     });
-  }
-
-  // Вспомогательный метод для MyLikesCommand
-  async sendLikeInfo(
-    ctx: Context,
-    userLikes: Array<{ cat_id: string; breed_name?: string | null; image_url?: string | null }>,
-    index: number,
-    isEdit = false,
-  ) {
-    const likeInfo = userLikes[index];
-    const total = userLikes.length;
-    const keyboard = Keyboards.likesNavigation(index, likeInfo.cat_id);
-    const imageUrl = likeInfo.image_url || '';
-
-    const caption = `*${likeInfo.breed_name}*\n\n👍 Лайк ${index + 1} из ${total}`;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- telegraf callbackQuery types
-    if (isEdit && ctx.callbackQuery && (ctx.callbackQuery as any).message) {
-      try {
-        await ctx.editMessageMedia(
-          {
-            type: 'photo',
-            media: imageUrl,
-            caption: caption,
-            parse_mode: 'Markdown',
-          },
-          { reply_markup: keyboard.reply_markup },
-        );
-      } catch {
-        // Если не удалось отредактировать (например, фото такое же), просто обновляем подпись
-        await ctx.editMessageCaption(caption, {
-          parse_mode: 'Markdown',
-          reply_markup: keyboard.reply_markup,
-        });
-      }
-    } else {
-      await ctx.replyWithPhoto(
-        { url: imageUrl },
-        {
-          caption: caption,
-          parse_mode: 'Markdown',
-          ...keyboard,
-        },
-      );
-    }
   }
 }
 

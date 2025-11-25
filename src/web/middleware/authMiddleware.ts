@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 
-export function setupAuthMiddleware() {
+export function setupAuthMiddleware(): { requireAuth: RequestHandler } {
   // Middleware для проверки авторизации
-  const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types are not augmented
-    if (!req.session || !(req.session as any).user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+  const requireAuth: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session || !req.session.user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
     }
     next();
   };

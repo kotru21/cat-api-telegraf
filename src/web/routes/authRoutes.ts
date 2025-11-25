@@ -1,17 +1,29 @@
 import { Router, Request, Response } from 'express';
+import { AuthService, TelegramAuthData } from '../../services/AuthService.js';
 
-export function setupAuthRoutes(router: Router) {
+export function setupAuthRoutes(router: Router, { authService }: { authService: AuthService }) {
   router.post('/auth/telegram', (req: Request, res: Response) => {
     try {
       // Извлекаем поля из тела запроса, отправленного Telegram Login Widget
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO: валидация подписи hash
-      const { id, first_name, username, photo_url, auth_date: _auth_date, hash: _hash } = req.body;
+      const { id, first_name, username, photo_url, auth_date, hash } = req.body as TelegramAuthData;
 
-      // TODO: валидация подписи hash согласно Bot API (см. AuthController.validateTelegramData)
+      // Валидация подписи hash согласно Bot API
+      const validation = authService.validateTelegramData({
+        id,
+        first_name,
+        username,
+        photo_url,
+        auth_date,
+        hash,
+      });
+
+      if (!validation.isValid) {
+        res.status(401).json({ error: validation.error || 'Invalid authentication data' });
+        return;
+      }
 
       // Сохраняем пользователя в сессии
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types are not augmented
-      (req.session as any).user = {
+      req.session.user = {
         id,
         first_name,
         username,
@@ -21,9 +33,10 @@ export function setupAuthRoutes(router: Router) {
       // Принудительно сохраняем сессию и отвечаем клиенту
       req.session.save((err: Error | null) => {
         if (err) {
-          return res.status(500).json({ error: 'Session save failed' });
+          res.status(500).json({ error: 'Session save failed' });
+          return;
         }
-        return res.json({ success: true, redirect: '/profile' });
+        res.json({ success: true, redirect: '/profile' });
       });
     } catch (error) {
       res.status(400).json({ error: (error as Error).message });

@@ -3,6 +3,7 @@ import { BaseCommand } from './BaseCommand.js';
 import logger from '../../utils/logger.js';
 import { LikeService } from '../../services/LikeService.js';
 import { CatInfoService } from '../../services/CatInfoService.js';
+import { sendLikeInfo, mdEscape, LikeInfo } from './utils/likeInfoUtils.js';
 
 // Простая in-memory кэш структура для лайков пользователя
 // key: userId -> { data: [...], ts: number }
@@ -14,15 +15,22 @@ interface UserLikeCache {
 }
 const userLikesCache = new Map<string, { data: UserLikeCache[]; ts: number }>();
 const USER_LIKES_TTL_MS = 30_000; // 30 секунд
+const CACHE_CLEANUP_INTERVAL_MS = 60_000; // 1 минута
+
+// Периодическая очистка устаревших записей кэша для предотвращения memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [userId, entry] of userLikesCache.entries()) {
+    if (now - entry.ts > USER_LIKES_TTL_MS) {
+      userLikesCache.delete(userId);
+    }
+  }
+}, CACHE_CLEANUP_INTERVAL_MS);
 
 // Защита от спама навигационными callback (userId -> boolean processing)
 const navigationLocks = new Map<string, boolean>();
 
-// Базовый санитайзер для Markdown (Telegram classic) — экранируем спецсимволы
-function mdEscape(str: string | number | null | undefined) {
-  if (!str) return '';
-  return String(str).replace(/([_*\\`[\]()~>#+\-=|{}.!])/g, '\\$1');
-}
+const FALLBACK_IMAGE_URL = 'https://placekitten.com/600/400';
 
 export class MyLikesCommand extends BaseCommand {
   private likeService: LikeService;
@@ -53,7 +61,7 @@ export class MyLikesCommand extends BaseCommand {
           return;
         }
 
-        await this.sendLikeInfo(ctx, userLikes, 0);
+        await sendLikeInfo(ctx, userLikes, 0);
       } catch (error) {
         logger.error({ err: error, userId: ctx.from?.id }, 'MyLikesCommand: failed to fetch likes');
         await ctx.reply('Извините, произошла ошибка при получении списка ваших лайков');
@@ -96,7 +104,7 @@ export class MyLikesCommand extends BaseCommand {
           'MyLikesCommand: navigation',
         );
 
-        await this.sendLikeInfo(ctx, userLikes, currentIndex, true);
+        await sendLikeInfo(ctx, userLikes, currentIndex, true);
         await ctx.answerCbQuery();
         navigationLocks.delete(userId);
       } catch (error) {
@@ -141,7 +149,7 @@ export class MyLikesCommand extends BaseCommand {
           `*Количество лайков:* ${catDetails.count}\n\n` +
           (catDetails.wikipedia_url ? `[Подробнее на Википедии](${catDetails.wikipedia_url})` : '');
 
-        const photoUrl = catDetails.image_url || this.getFallbackImage();
+        const photoUrl = catDetails.image_url || FALLBACK_IMAGE_URL;
 
         try {
           await ctx.replyWithPhoto(
@@ -167,76 +175,7 @@ export class MyLikesCommand extends BaseCommand {
     });
   }
 
-  async sendLikeInfo(
-    ctx: Context,
-    userLikes: Array<{
-      cat_id: string;
-      breed_name?: string | null;
-      image_url?: string | null;
-      likes_count?: number;
-    }>,
-    index: number,
-    isEdit = false,
-  ) {
-    const likeInfo = userLikes[index];
-    if (!likeInfo) return;
-    const total = userLikes.length;
-    const photoUrl = likeInfo.image_url || this.getFallbackImage();
-
-    const caption =
-      `*${mdEscape(likeInfo.breed_name || 'Без названия')}*\n\n` +
-      `👍 Запись ${index + 1} из ${total}` +
-      (likeInfo.likes_count !== undefined ? `\n❤️ Всего лайков: ${likeInfo.likes_count}` : '');
-
-    const keyboard = this.buildNavigationKeyboard(index, likeInfo.cat_id);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- telegraf callbackQuery types
-    if (isEdit && ctx.callbackQuery && (ctx.callbackQuery as any).message) {
-      try {
-        await ctx.editMessageMedia(
-          {
-            type: 'photo',
-            media: photoUrl,
-            caption,
-            parse_mode: 'Markdown',
-          },
-          { reply_markup: keyboard.reply_markup },
-        );
-      } catch {
-        await ctx.editMessageCaption(caption, {
-          parse_mode: 'Markdown',
-          reply_markup: keyboard.reply_markup,
-        });
-      }
-    } else {
-      try {
-        await ctx.replyWithPhoto(
-          { url: photoUrl },
-          { caption, parse_mode: 'Markdown', ...keyboard },
-        );
-      } catch (err) {
-        logger.warn({ err }, 'MyLikesCommand: failed to send photo, fallback to text');
-        await ctx.reply(caption, { parse_mode: 'Markdown' });
-      }
-    }
-  }
-
-  buildNavigationKeyboard(index: number, catId: string) {
-    return Markup.inlineKeyboard([
-      [
-        Markup.button.callback('◀️ Предыдущий', `like_nav:prev:${index}`),
-        Markup.button.callback('Следующий ▶️', `like_nav:next:${index}`),
-      ],
-      [Markup.button.callback('📝 Подробнее', `like_details:${catId}`)],
-    ]);
-  }
-
-  getFallbackImage() {
-    // Можно заменить на внешний URL или статику, если бот деплоится без public
-    return 'https://placekitten.com/600/400'; // универсальный fallback
-  }
-
-  async getCachedUserLikes(userId: string, _ctx: Context) {
+  async getCachedUserLikes(userId: string, _ctx: Context): Promise<LikeInfo[]> {
     const now = Date.now();
     const cached = userLikesCache.get(userId);
     if (cached && now - cached.ts < USER_LIKES_TTL_MS) {

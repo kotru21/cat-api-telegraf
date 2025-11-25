@@ -140,11 +140,13 @@
 При запуске `npm start` или `bun start` приложение **автоматически**:
 
 **Development (SQLite):**
+
 - Копирует `schema.sqlite.prisma` → `schema.prisma`
 - Генерирует Prisma Client
 - **Создаёт таблицы напрямую через SQL** (если их нет)
 
 **Production (PostgreSQL):**
+
 - Копирует `schema.postgres.prisma` → `schema.prisma`
 - Генерирует Prisma Client
 - **Применяет миграции из `prisma/migrations/`** через `prisma migrate deploy`

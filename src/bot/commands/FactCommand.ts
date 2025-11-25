@@ -3,7 +3,7 @@ import { BaseCommand } from './BaseCommand.js';
 import logger from '../../utils/logger.js';
 import { CatInfoService } from '../../services/CatInfoService.js';
 import { LikeService } from '../../services/LikeService.js';
-import { Keyboards } from '../keyboards/index.js';
+import { sendCatPhoto, CAT_FETCH_ERROR_MESSAGE } from '../utils/sendCatPhoto.js';
 
 export class FactCommand extends BaseCommand {
   private catInfoService: CatInfoService;
@@ -26,20 +26,15 @@ export class FactCommand extends BaseCommand {
     this.composer.command(this.name, async (ctx: Context) => {
       try {
         const catData = await this.catInfoService.getRandomCat();
-        const breed = catData.breeds[0];
-        const likes = await this.likeService.getLikesForCat(catData.id);
 
-        await ctx.replyWithPhoto(
-          { url: catData.url },
-          {
-            parse_mode: 'Markdown',
-            caption: `_${breed.name}_\n${breed.description}`,
-            ...Keyboards.catDetails(breed.wikipedia_url, likes || 0, catData.id),
-          },
-        );
+        await sendCatPhoto({
+          ctx,
+          catData,
+          likeService: this.likeService,
+        });
       } catch (error) {
         logger.error({ err: error, userId: ctx.from?.id }, 'Failed to fetch random cat fact');
-        await ctx.reply('Извините, произошла ошибка при получении информации о породе кошки');
+        await ctx.reply(CAT_FETCH_ERROR_MESSAGE);
       }
     });
   }

@@ -4,6 +4,27 @@ import getPrisma from './prisma/PrismaClient.js';
 import { PrismaClient, Cat } from '@prisma/client';
 import { CatApiImage } from '../api/interfaces/TheCatApi.js';
 
+/**
+ * Allowed features for filtering cats
+ * This whitelist prevents injection attacks
+ */
+export const ALLOWED_CAT_FEATURES = [
+  'origin',
+  'temperament',
+  'life_span',
+  'weight_imperial',
+  'weight_metric',
+] as const;
+
+export type AllowedCatFeature = (typeof ALLOWED_CAT_FEATURES)[number];
+
+/**
+ * Type guard to check if a string is an allowed feature
+ */
+export function isAllowedFeature(feature: string): feature is AllowedCatFeature {
+  return ALLOWED_CAT_FEATURES.includes(feature as AllowedCatFeature);
+}
+
 export class CatRepository implements CatRepositoryInterface {
   private prisma: PrismaClient;
 
@@ -84,6 +105,14 @@ export class CatRepository implements CatRepositoryInterface {
   async getCatsByFeature(feature: string, value: string | number): Promise<Cat[]> {
     if (!feature || !value) {
       throw new Error('Feature and value are required');
+    }
+
+    // Validate feature against whitelist
+    if (!isAllowedFeature(feature)) {
+      logger.warn({ feature }, 'Attempted to filter by non-allowed feature');
+      throw new Error(
+        `Invalid feature: ${feature}. Allowed features: ${ALLOWED_CAT_FEATURES.join(', ')}`,
+      );
     }
 
     try {

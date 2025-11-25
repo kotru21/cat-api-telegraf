@@ -6,7 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- frontend store is intentionally loosely typed */
 
-interface AppState {
+export interface AppState {
   leaderboard: unknown[];
   likes: unknown[];
   profile: unknown | null;
@@ -94,7 +94,7 @@ export function setState(patch: Partial<AppState>) {
 }
 
 export function subscribe<T>(selector: Selector<T>, cb: SubscriberCallback<T>) {
-  const entry: ListenerEntry<T> = { selector, cb, lastValue: selector(state) };
+  const entry = { selector, cb, lastValue: selector(state) } as ListenerEntry<unknown>;
   listeners.add(entry);
   return () => listeners.delete(entry);
 }

@@ -3,6 +3,14 @@ import logger from '../../utils/logger.js';
 import { AuthService, TelegramAuthData } from '../../services/AuthService.js';
 import { Config } from '../../config/types.js';
 
+type AuthResponseType = 'redirect' | 'json';
+
+interface AuthResult {
+  success: boolean;
+  error?: string;
+  redirect?: string;
+}
+
 export class AuthController {
   private config: Config;
   private authService: AuthService;
@@ -17,74 +25,88 @@ export class AuthController {
     app.post('/auth/telegram/callback', this.handleTelegramCallbackPost.bind(this));
   }
 
-  async handleTelegramCallback(req: Request, res: Response) {
+  /**
+   * Core authentication logic shared between GET and POST handlers
+   */
+  private async processAuth(
+    req: Request,
+    authData: TelegramAuthData,
+    responseType: AuthResponseType,
+    route: string,
+  ): Promise<AuthResult> {
+    const startTs = Date.now();
+
+    logger.info(
+      {
+        route,
+        dataKeys: Object.keys(authData),
+        hasSession: !!req.session,
+      },
+      'Auth callback received',
+    );
+
+    const validation = this.authService.validateTelegramData(authData);
+
+    if (!validation.isValid) {
+      logger.warn({ reason: validation.error }, `Auth callback validation failed (${route})`);
+      return { success: false, error: validation.error ?? undefined };
+    }
+
+    // Set user session
+    req.session.user = {
+      id: authData.id,
+      first_name: authData.first_name,
+      last_name: authData.last_name ?? undefined,
+      username: authData.username ?? undefined,
+      photo_url: authData.photo_url ?? undefined,
+    };
+
+    // Save session with timeout
+    const timeoutMs = 5000;
     try {
-      const { id, first_name, last_name, username, photo_url, auth_date, hash } =
-        req.query as unknown as TelegramAuthData;
+      await this.saveSessionWithTimeout(req, timeoutMs);
+      logger.info({ elapsed: Date.now() - startTs }, `Auth callback session saved (${route})`);
+      return { success: true, redirect: '/profile' };
+    } catch (e) {
+      const err = e as Error;
+      logger.error({ err: e }, `Auth callback session save failed (${route})`);
+      const errorCode =
+        err.message === 'session_save_timeout' ? 'session_timeout' : 'session_error';
+      return { success: false, error: errorCode };
+    }
+  }
 
-      const startTs = Date.now();
-      logger.info(
-        {
-          route: 'GET /auth/telegram/callback',
-          queryKeys: Object.keys(req.query),
-          hasSession: !!req.session,
-        },
-        'Auth callback received',
-      );
-
-      const validation = this.authService.validateTelegramData({
-        id,
-        first_name,
-        last_name,
-        username,
-        photo_url,
-        auth_date,
-        hash,
-      });
-
-      if (!validation.isValid) {
-        logger.warn({ reason: validation.error }, 'Auth callback validation failed');
-        return res.redirect(`/login?error=${validation.error}`);
-      }
-
-      // После успешной авторизации
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
-      (req.session as any).user = {
-        id,
-        first_name,
-        last_name,
-        username,
-        photo_url,
-      };
-
-      // Обёртка с таймаутом чтобы не висеть 30s из-за store
-      const savePromise = new Promise<void>((resolve, reject) => {
+  /**
+   * Saves session with a timeout to prevent hanging
+   */
+  private saveSessionWithTimeout(req: Request, timeoutMs: number): Promise<void> {
+    return Promise.race([
+      new Promise<void>((resolve, reject) => {
         req.session.save((err) => {
           if (err) return reject(err);
           resolve();
         });
-      });
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('session_save_timeout')), timeoutMs),
+      ),
+    ]);
+  }
 
-      const timeoutMs = 5000;
-      try {
-        await Promise.race([
-          savePromise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('session_save_timeout')), timeoutMs),
-          ),
-        ]);
-        logger.info({ elapsed: Date.now() - startTs }, 'Auth callback session saved');
-        return res.redirect('/profile');
-      } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- error handling
-        const err = e as any;
-        logger.error({ err: e }, 'Auth callback session save failed');
-        return res.redirect(
-          `/login?error=${
-            err.message === 'session_save_timeout' ? 'session_timeout' : 'session_error'
-          }`,
-        );
+  async handleTelegramCallback(req: Request, res: Response) {
+    try {
+      const authData = req.query as unknown as TelegramAuthData;
+      const result = await this.processAuth(
+        req,
+        authData,
+        'redirect',
+        'GET /auth/telegram/callback',
+      );
+
+      if (!result.success) {
+        return res.redirect(`/login?error=${result.error}`);
       }
+      return res.redirect(result.redirect!);
     } catch (error) {
       logger.error({ err: error }, 'Auth callback fatal error');
       res.redirect('/login?error=auth_failed');
@@ -93,67 +115,13 @@ export class AuthController {
 
   async handleTelegramCallbackPost(req: Request, res: Response) {
     try {
-      const { id, first_name, last_name, username, photo_url, auth_date, hash } = req.body;
-      const startTs = Date.now();
-      logger.info(
-        {
-          route: 'POST /auth/telegram/callback',
-          bodyKeys: Object.keys(req.body || {}),
-          hasSession: !!req.session,
-        },
-        'Auth callback POST received',
-      );
+      const authData = req.body as TelegramAuthData;
+      const result = await this.processAuth(req, authData, 'json', 'POST /auth/telegram/callback');
 
-      const validation = this.authService.validateTelegramData({
-        id,
-        first_name,
-        last_name,
-        username,
-        photo_url,
-        auth_date,
-        hash,
-      });
-
-      if (!validation.isValid) {
-        logger.warn({ reason: validation.error }, 'Auth callback POST validation failed');
-        return res.status(403).json({ error: validation.error });
+      if (!result.success) {
+        return res.status(403).json({ error: result.error });
       }
-
-      // После успешной авторизации
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- express-session types
-      (req.session as any).user = {
-        id,
-        first_name,
-        last_name,
-        username,
-        photo_url,
-      };
-
-      const savePromise = new Promise<void>((resolve, reject) => {
-        req.session.save((err) => {
-          if (err) return reject(err);
-          resolve();
-        });
-      });
-
-      const timeoutMs = 5000;
-      try {
-        await Promise.race([
-          savePromise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('session_save_timeout')), timeoutMs),
-          ),
-        ]);
-        logger.info({ elapsed: Date.now() - startTs }, 'Auth callback POST session saved');
-        return res.status(200).json({ success: true, redirect: '/profile' });
-      } catch (e) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- error handling
-        const err = e as any;
-        logger.error({ err: e }, 'Auth callback POST session save failed');
-        return res.status(500).json({
-          error: err.message === 'session_save_timeout' ? 'session_timeout' : 'session_error',
-        });
-      }
+      return res.status(200).json({ success: true, redirect: result.redirect });
     } catch (error) {
       logger.error({ err: error }, 'Auth callback POST fatal error');
       res.status(500).json({ error: 'auth_failed' });

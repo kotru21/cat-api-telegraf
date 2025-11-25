@@ -1,23 +1,23 @@
-/* eslint-disable no-console, @typescript-eslint/no-explicit-any */
-// Connectivity check for Prisma/SQLite without starting the app
+/* eslint-disable no-console */
+// Connectivity check for Prisma (MongoDB)
+// Verifies that:
+// 1. Prisma client can connect to the database
+// 2. Models (Cat, user_likes) are accessible
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    // Ensure client can connect and schema has the expected tables
-    const tables =
-      (await prisma.$queryRaw`SELECT name FROM sqlite_master WHERE type='table' AND name IN ('Cat','user_likes')`) as any[];
-    const names = (tables || []).map((t: any) => t.name);
-    const ok = names.includes('Cat') && names.includes('user_likes');
-    if (!ok) {
-      console.error('Prisma check: required tables missing', { names });
-      process.exit(2);
-    }
-    // Quick client call to verify model works
-    const count = await prisma.cat.count();
-    console.log('PRISMA_OK', { tables: names, catCount: count });
+    // Quick client call to verify models work (this also tests connection)
+    const catCount = await prisma.cat.count();
+    const likesCount = await prisma.user_likes.count();
+
+    console.log('PRISMA_OK', {
+      catCount,
+      likesCount,
+      database: 'mongodb',
+    });
     process.exit(0);
   } catch (err) {
     console.error('PRISMA_ERR', err);

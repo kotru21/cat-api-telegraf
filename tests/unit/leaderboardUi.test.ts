@@ -1,10 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- test file with flexible types */
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'bun:test';
 import { createLeaderboardRow } from '../../src/web/public/js/core/ui/leaderboard.ts';
-import '../setup/setupEnv';
-
-// Minimal PLACEHOLDER mock if needed
-(global as any).PLACEHOLDER = { SMALL: '' };
 
 describe('leaderboard UI', () => {
   it('generates link with encoded id', () => {

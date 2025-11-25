@@ -32,8 +32,6 @@ export function setupSecurity(app: Express) {
           scriptSrc: [
             "'self'",
             `'nonce-${nonce}'`,
-            // Tailwind CDN - hash for inline config or use nonce in templates
-            'cdn.tailwindcss.com',
             'cdnjs.cloudflare.com',
             'telegram.org',
             '*.telegram.org',
@@ -44,8 +42,6 @@ export function setupSecurity(app: Express) {
             "'self'",
             // Allow inline styles only with nonce or use external stylesheets
             `'nonce-${nonce}'`,
-            "'unsafe-inline'", // Tailwind CDN generates inline styles
-            'cdn.tailwindcss.com',
             'cdnjs.cloudflare.com',
             '*.telegram.org',
           ],

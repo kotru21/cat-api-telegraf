@@ -46,7 +46,12 @@
 
 **Frontend:**
 
-- Tailwind CSS v3 - стилизация
+- Tailwind CSS (local build) - стилизация (ранее использовался CDN, теперь компилируется локально). Для Tailwind v4 рекомендуется установить плагин Vite:
+
+  ```bash
+  bun install -d tailwindcss @tailwindcss/vite
+  ```
+
 - Vanilla JavaScript - интерактивность
 - WebSocket - real-time обновления
 
@@ -96,8 +101,16 @@
 5. **Запустите приложение:**
 
    ```bash
+   # Запустите сбор локального CSS Tailwind, затем сервер (скрипт уже настроен в package.json)
    npm start
    ```
+
+Дополнительно: локально можно запускать только сбор CSS (при разработке):
+
+```bash
+npm run css:watch   # слежение и сбор tailwind.css
+npm run css:build   # один раз собрать minified tailwind.css
+```
 
 ### Получение API ключей
 

@@ -1,2 +1,2 @@
-release: bunx prisma db push
+release: bun x prisma db push
 web: bun start

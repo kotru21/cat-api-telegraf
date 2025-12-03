@@ -5,7 +5,7 @@ async function initDatabase() {
 
   console.info('Running prisma generate...');
   try {
-    execSync('bunx prisma generate', { stdio: 'inherit' });
+    execSync('bun x prisma generate', { stdio: 'inherit' });
   } catch {
     console.error('Failed to run prisma generate');
     process.exit(1);
@@ -13,7 +13,7 @@ async function initDatabase() {
 
   console.info('Pushing schema to MongoDB...');
   try {
-    execSync('bunx prisma db push', { stdio: 'inherit' });
+    execSync('bun x prisma db push', { stdio: 'inherit' });
   } catch {
     console.error('Failed to push schema to MongoDB');
     process.exit(1);

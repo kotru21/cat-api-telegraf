@@ -54,7 +54,7 @@
     }
   },
   "scripts": {
-    "postdeploy": "bun run prisma:push || bunx prisma db push"
+    "postdeploy": "bun run prisma:push || bun x prisma db push"
   },
   "formation": {
     "web": {

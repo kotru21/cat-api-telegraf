@@ -10,7 +10,7 @@ export function setupAuthRoutes(router: Hono, { authService }: { authService: Au
       const { id, first_name, username, photo_url, auth_date, hash } = body;
 
       // Validate hash signature per Bot API
-      const validation = authService.validateTelegramData({
+      const validation = await authService.validateTelegramData({
         id,
         first_name,
         username,

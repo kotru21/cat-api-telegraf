@@ -2,11 +2,12 @@ import type { Server, ServerWebSocket } from 'bun';
 import { getMessageCount } from '../utils/messageCounter.js';
 import logger from '../utils/logger.js';
 import { LeaderboardService } from '../services/LeaderboardService.js';
+import { Config } from '../config/types.js';
 
 /**
  * WebSocket client data attached to each connection
  */
-interface WebSocketClientData {
+export interface WebSocketClientData {
   ip: string;
   messageCount: number;
   lastMessageReset: number;
@@ -22,6 +23,25 @@ interface StateData {
 }
 
 /**
+ * WebSocket service configuration
+ */
+interface WebSocketServiceConfig {
+  maxConnectionsPerIp: number;
+  messageRateLimit: number;
+  messageRateWindowMs: number;
+  broadcastIntervalMs: number;
+  leaderboardCheckIntervalMs: number;
+}
+
+const DEFAULT_CONFIG: WebSocketServiceConfig = {
+  maxConnectionsPerIp: 5,
+  messageRateLimit: 10,
+  messageRateWindowMs: 5000,
+  broadcastIntervalMs: 1000,
+  leaderboardCheckIntervalMs: 10000,
+};
+
+/**
  * Native Bun WebSocket service
  * Replaces the ws library with Bun's built-in WebSocket support
  */
@@ -32,24 +52,29 @@ export class BunWebSocketService {
   private leaderboardHash: string = '';
   private intervals: Timer[] = [];
   private server: Server<WebSocketClientData> | null = null;
-
-  // Configuration
-  private readonly MAX_CONNECTIONS_PER_IP = 5;
-  private readonly MESSAGE_RATE_LIMIT = 10;
-  private readonly MESSAGE_RATE_WINDOW_MS = 5000;
-  private readonly BROADCAST_INTERVAL_MS = 1000;
-  private readonly LEADERBOARD_CHECK_INTERVAL_MS = 10000;
-  private readonly PING_INTERVAL_MS = 30000;
+  private lastBroadcastData: string = '';
+  private wsConfig: WebSocketServiceConfig;
 
   constructor({
     leaderboardService,
     enablePolling = false,
+    config,
   }: {
     leaderboardService: LeaderboardService;
     enablePolling?: boolean;
+    config?: Config;
   }) {
     this.leaderboardService = leaderboardService;
     this.uptimeDateObject = new Date();
+
+    // Use config values or defaults
+    this.wsConfig = {
+      maxConnectionsPerIp: config?.WS_MAX_CONNECTIONS_PER_IP ?? DEFAULT_CONFIG.maxConnectionsPerIp,
+      messageRateLimit: config?.WS_MESSAGE_RATE_LIMIT ?? DEFAULT_CONFIG.messageRateLimit,
+      messageRateWindowMs: DEFAULT_CONFIG.messageRateWindowMs,
+      broadcastIntervalMs: DEFAULT_CONFIG.broadcastIntervalMs,
+      leaderboardCheckIntervalMs: DEFAULT_CONFIG.leaderboardCheckIntervalMs,
+    };
 
     if (enablePolling) {
       this.startLeaderboardTracking();
@@ -64,6 +89,7 @@ export class BunWebSocketService {
       maxPayloadLength: 1024 * 1024, // 1MB
       idleTimeout: 120,
       sendPings: true,
+      perMessageDeflate: false, // Disable compression for better performance with small messages
 
       open: (ws: ServerWebSocket<WebSocketClientData>) => {
         const ip = ws.data.ip;
@@ -71,7 +97,7 @@ export class BunWebSocketService {
 
         // Check per-IP connection limit
         const currentCount = this.clientIPs.get(ip) || 0;
-        if (currentCount >= this.MAX_CONNECTIONS_PER_IP) {
+        if (currentCount >= this.wsConfig.maxConnectionsPerIp) {
           logger.warn({ ip }, 'Too many WebSocket connections from IP');
           ws.close(1008, 'Too many connections');
           return;
@@ -86,13 +112,13 @@ export class BunWebSocketService {
         const now = Date.now();
 
         // Rate limiting per client
-        if (now - ws.data.lastMessageReset > this.MESSAGE_RATE_WINDOW_MS) {
+        if (now - ws.data.lastMessageReset > this.wsConfig.messageRateWindowMs) {
           ws.data.messageCount = 0;
           ws.data.lastMessageReset = now;
         }
 
         ws.data.messageCount++;
-        if (ws.data.messageCount > this.MESSAGE_RATE_LIMIT) {
+        if (ws.data.messageCount > this.wsConfig.messageRateLimit) {
           logger.warn({ ip: ws.data.ip }, 'WebSocket message flood detected');
           ws.close(1008, 'Message flood');
           return;
@@ -118,10 +144,6 @@ export class BunWebSocketService {
 
         logger.info({ ip, code, reason }, 'WebSocket client disconnected');
       },
-
-      error: (ws: ServerWebSocket<WebSocketClientData>, error: Error) => {
-        logger.error({ ip: ws.data.ip, error }, 'WebSocket error');
-      },
     };
   }
 
@@ -144,7 +166,7 @@ export class BunWebSocketService {
 
     const broadcastInterval = setInterval(() => {
       this.broadcast();
-    }, this.BROADCAST_INTERVAL_MS);
+    }, this.wsConfig.broadcastIntervalMs);
 
     this.intervals.push(broadcastInterval);
   }
@@ -160,7 +182,7 @@ export class BunWebSocketService {
       if (changed) {
         this.broadcast({ leaderboardChanged: true });
       }
-    }, this.LEADERBOARD_CHECK_INTERVAL_MS);
+    }, this.wsConfig.leaderboardCheckIntervalMs);
 
     this.intervals.push(interval);
   }
@@ -216,6 +238,7 @@ export class BunWebSocketService {
 
   /**
    * Broadcasts data to all connected clients
+   * Optimized to skip broadcast if data hasn't changed
    */
   broadcast(additionalData: Record<string, unknown> = {}) {
     if (!this.server) return;
@@ -224,6 +247,12 @@ export class BunWebSocketService {
       ...this.getStateData(),
       ...additionalData,
     });
+
+    // Skip broadcast if data hasn't changed (unless there's additional data)
+    if (Object.keys(additionalData).length === 0 && data === this.lastBroadcastData) {
+      return;
+    }
+    this.lastBroadcastData = data;
 
     // Bun's server.publish for efficient broadcasting
     this.server.publish('broadcast', data);

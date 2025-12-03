@@ -22,7 +22,12 @@ export interface Config {
   FULL_WEBSITE_URL: string;
   SESSION_SECRET: string;
   NODE_ENV: 'development' | 'test' | 'production';
+  // Redis configuration
+  REDIS_ENABLED: boolean;
   REDIS_URL?: string;
   REDIS_ALLOW_SELF_SIGNED?: boolean;
   DATABASE_URL: string;
+  // WebSocket configuration
+  WS_MAX_CONNECTIONS_PER_IP: number;
+  WS_MESSAGE_RATE_LIMIT: number;
 }

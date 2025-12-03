@@ -46,7 +46,7 @@ export class AuthController {
       'Auth callback received',
     );
 
-    const validation = this.authService.validateTelegramData(authData);
+    const validation = await this.authService.validateTelegramData(authData);
 
     if (!validation.isValid) {
       logger.warn({ reason: validation.error }, `Auth callback validation failed (${route})`);

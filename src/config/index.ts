@@ -33,9 +33,14 @@ const config = {
   })(),
   SESSION_SECRET: env.SESSION_SECRET,
   NODE_ENV: env.NODE_ENV,
+  // Redis configuration
+  REDIS_ENABLED: env.REDIS_ENABLED,
   REDIS_URL: env.REDIS_URL,
   REDIS_ALLOW_SELF_SIGNED: env.REDIS_ALLOW_SELF_SIGNED,
   DATABASE_URL: env.DATABASE_URL,
+  // WebSocket configuration
+  WS_MAX_CONNECTIONS_PER_IP: env.WS_MAX_CONNECTIONS_PER_IP,
+  WS_MESSAGE_RATE_LIMIT: env.WS_MESSAGE_RATE_LIMIT,
 };
 
 // В проде дополнительно проверим SESSION_SECRET, даже несмотря на валидацию zod

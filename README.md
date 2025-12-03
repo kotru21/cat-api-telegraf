@@ -27,8 +27,8 @@
 
 **Backend:**
 
-- Node.js v18.18.0+ с ES модулями
-- Express.js v4.18.2 - веб-сервер
+- Bun v1.0+ - JavaScript runtime с встроенным WebSocket
+- Hono v4 - лёгкий веб-фреймворк
 - Telegraf.js v4.11.2 - Telegram Bot Framework
 - Prisma ORM v6.16.2 - типобезопасная работа с БД
 - Awilix v12.0.0 - Dependency Injection
@@ -36,13 +36,14 @@
 **База данных:**
 
 - PostgreSQL (продакшен) / SQLite (dev) через Prisma
-- Redis v5.8.2 - сессии в продакшене
+- Redis v5.8.2 - сессии и rate limiting (опционально)
 
 **Безопасность:**
 
-- Helmet v8.1.0 - HTTP заголовки безопасности
-- CORS v2.8.5 - Cross-Origin Resource Sharing
-- express-rate-limit v7.5.0 - ограничение запросов
+- Web Crypto API - криптография (HMAC, nonce)
+- CSRF защита с timing-safe сравнением
+- Rate limiting с Redis/in-memory fallback
+- CSP, CORS, Security Headers
 
 **Frontend:**
 
@@ -57,6 +58,10 @@
 
 ## 🔧 Установка
 
+### Требования
+
+- [Bun](https://bun.sh/) v1.0.0 или выше
+
 ### Локальная установка
 
 1. **Клонируйте репозиторий:**
@@ -69,47 +74,50 @@
 2. **Установите зависимости:**
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. **Настройте переменные окружения:**
 
-   Создайте файл `.env` в корне проекта:
+   Скопируйте `.env.example` в `.env` и заполните:
 
    ```env
    # Обязательные
    CATAPI_KEY=your-cat-api-key-from-thecatapi.com
+   SESSION_SECRET=your-strong-random-secret-min-10-chars
 
    # Опциональные (значения по умолчанию)
    PORT=5200
    WEBSITE_URL=http://localhost
    WEB_ENABLED=true
-   BOT_ENABLED=true
+   BOT_ENABLED=false
    BOT_TOKEN=your-telegram-bot-token
-   SESSION_SECRET=your-secret-key-here
    NODE_ENV=development
    DATABASE_URL=file:./prisma/main.db
+
+   # Redis (опционально)
+   REDIS_ENABLED=false
+   # REDIS_URL=redis://localhost:6379
    ```
 
 4. **Настройте базу данных:**
 
    ```bash
-   npm run prisma:generate
-   npm run prisma:migrate:dev
+   bun run prisma:generate
+   bun run prisma:migrate:dev
    ```
 
 5. **Запустите приложение:**
 
    ```bash
-   # Запустите сбор локального CSS Tailwind, затем сервер (скрипт уже настроен в package.json)
-   npm start
+   bun start
    ```
 
 Дополнительно: локально можно запускать только сбор CSS (при разработке):
 
 ```bash
-npm run css:watch   # слежение и сбор tailwind.css
-npm run css:build   # один раз собрать minified tailwind.css
+bun run css:watch   # слежение и сбор tailwind.css
+bun run css:build   # один раз собрать minified tailwind.css
 ```
 
 ### Получение API ключей
@@ -238,10 +246,14 @@ GET /readyz                   # Проверка готовности
 NODE_ENV=production
 CATAPI_KEY=your-cat-api-key
 SESSION_SECRET=complex-random-string-min-32-chars
-REDIS_URL=redis://localhost:6379
 DATABASE_URL=postgresql://user:pass@host:5432/db
 
+# Redis (рекомендуется в production)
+REDIS_ENABLED=true
+REDIS_URL=redis://localhost:6379
+
 # Telegram (если нужен бот)
+BOT_ENABLED=true
 BOT_TOKEN=your-production-bot-token
 
 # Безопасность
@@ -341,6 +353,7 @@ heroku config:set NODE_ENV=production
 heroku config:set CATAPI_KEY=your-key
 heroku config:set SESSION_SECRET=your-secret
 heroku config:set BOT_TOKEN=your-bot-token
+heroku config:set REDIS_ENABLED=true
 
 # Деплой
 git push heroku main
@@ -361,5 +374,7 @@ git push heroku main
 ---
 
 ### Changelog (Frontend Refactor Summary)
+
+2025-12: **Bun Migration** - Миграция с Node.js/Express на Bun/Hono. Redis теперь опционален (REDIS_ENABLED), Web Crypto API вместо Node.js crypto, SESSION_SECRET обязателен.
 
 2025-09: Полный рефактор фронтенда (слои services/state/ui, удалены legacy компоненты, введены тесты, устранены inline handlers, консолидация идентификатора `catId`).

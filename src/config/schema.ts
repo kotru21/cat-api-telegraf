@@ -7,6 +7,7 @@ const BOOL_ENV = z
 
 const BOT_ENABLED_SCHEMA = BOOL_ENV.transform((v) => (v === undefined ? true : v));
 const WEB_ENABLED_SCHEMA = BOOL_ENV.transform((v) => (v === undefined ? true : v));
+const REDIS_ENABLED_SCHEMA = BOOL_ENV.transform((v) => (v === undefined ? false : v));
 
 export const EnvSchema = z
   .object({
@@ -20,12 +21,17 @@ export const EnvSchema = z
       .regex(/^\d+$/)
       .transform((v) => parseInt(v, 10))
       .default(5200),
-    SESSION_SECRET: z.string().min(10).default('your-secret-key-here'),
+    SESSION_SECRET: z.string().min(10),
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    // Redis configuration
+    REDIS_ENABLED: REDIS_ENABLED_SCHEMA,
     REDIS_URL: z.string().url().optional(),
     // Разрешить отключение проверки TLS для self-signed (rediss://). Использовать ТОЛЬКО временно.
     REDIS_ALLOW_SELF_SIGNED: BOOL_ENV.optional(),
     DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    // WebSocket configuration
+    WS_MAX_CONNECTIONS_PER_IP: z.coerce.number().int().positive().default(5),
+    WS_MESSAGE_RATE_LIMIT: z.coerce.number().int().positive().default(10),
   })
   .superRefine((env, ctx) => {
     const botEnabled = env.BOT_ENABLED ?? true;
@@ -36,8 +42,18 @@ export const EnvSchema = z
         path: ['BOT_TOKEN'],
       });
     }
+
+    // REDIS_ENABLED=true требует REDIS_URL
+    if (env.REDIS_ENABLED && !env.REDIS_URL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'REDIS_URL is required when REDIS_ENABLED=true',
+        path: ['REDIS_URL'],
+      });
+    }
+
     if (env.NODE_ENV === 'production') {
-      // in production we must use Postgres and non-default session secret
+      // in production we must use Postgres
       const v = env.DATABASE_URL || '';
       if (!v.startsWith('postgres://') && !v.startsWith('postgresql://')) {
         ctx.addIssue({
@@ -47,21 +63,17 @@ export const EnvSchema = z
         });
       }
 
-      if (!env.SESSION_SECRET || env.SESSION_SECRET === 'your-secret-key-here') {
+      // SESSION_SECRET обязателен (нет дефолтного значения)
+      if (!env.SESSION_SECRET) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'SESSION_SECRET must be explicitly set in production (not the default)',
+          message: 'SESSION_SECRET is required',
           path: ['SESSION_SECRET'],
         });
       }
-      if (!env.REDIS_URL) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'REDIS_URL is required in production',
-          path: ['REDIS_URL'],
-        });
-      }
-      // Дополнительных проверок не нужно: уже обязательный и проверен выше
+
+      // В production рекомендуется Redis, но не обязателен
+      // Если REDIS_ENABLED=true, то REDIS_URL уже проверен выше
     }
   });
 

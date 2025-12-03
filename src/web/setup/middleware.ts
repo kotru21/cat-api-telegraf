@@ -1,14 +1,23 @@
 import { Hono, Context, Next } from 'hono';
 import { cors } from 'hono/cors';
-import crypto from 'crypto';
 import logger from '../../utils/logger.js';
 import { setupSession } from '../middleware/session.js';
+import { csrfProtection } from '../middleware/csrf.js';
 import { Config } from '../../config/types.js';
+
+/**
+ * Generates a cryptographically secure nonce using Web Crypto API
+ */
+function generateNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes));
+}
 
 export function configureMiddleware(app: Hono, config: Config) {
   // CSP nonce middleware
   app.use('*', async (c: Context, next: Next) => {
-    const nonce = crypto.randomBytes(16).toString('base64');
+    const nonce = generateNonce();
     c.set('cspNonce', nonce);
     await next();
   });
@@ -52,17 +61,42 @@ export function configureMiddleware(app: Hono, config: Config) {
     await next();
   });
 
-  // CORS
+  // CORS with origin whitelist in production
+  const isProd = process.env.NODE_ENV === 'production';
+  const allowedOrigins = config.FULL_WEBSITE_URL
+    ? [config.FULL_WEBSITE_URL, config.WEBSITE_URL].filter(Boolean)
+    : [];
+
   app.use(
     '*',
     cors({
-      origin: (origin) => origin || '*',
+      origin: (origin) => {
+        // In production, validate against whitelist
+        if (isProd && allowedOrigins.length > 0) {
+          if (!origin) return allowedOrigins[0]; // Default for same-origin requests
+          return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+        }
+        // In development, allow all origins
+        return origin || '*';
+      },
       credentials: true,
     }),
   );
 
   // Session management
   setupSession(app, config);
+
+  // CSRF protection (after session, before routes)
+  // Exclude webhook endpoints and public API endpoints that use other auth
+  app.use(
+    '*',
+    csrfProtection({
+      excludePaths: [
+        '/api/auth/telegram', // Telegram OAuth callback uses its own validation
+        '/wss', // WebSocket endpoint
+      ],
+    }),
+  );
 
   // Request logging - use custom middleware for Hono
   app.use('*', async (c: Context, next: Next) => {

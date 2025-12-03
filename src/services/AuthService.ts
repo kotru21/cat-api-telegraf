@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import logger from '../utils/logger.js';
 import { Config } from '../config/types.js';
 
@@ -13,6 +12,15 @@ export interface TelegramAuthData {
   [key: string]: string | undefined;
 }
 
+/**
+ * Converts Uint8Array to hex string
+ */
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 export class AuthService {
   private config: Config;
 
@@ -20,12 +28,14 @@ export class AuthService {
     this.config = config;
   }
 
-  validateTelegramData(data: TelegramAuthData) {
+  async validateTelegramData(data: TelegramAuthData) {
     const { hash, ...otherData } = data;
 
-    // Проверка hash
+    // Create SHA-256 hash of bot token using Web Crypto API
     const botToken = this.config.BOT_TOKEN || '';
-    const secretKey = crypto.createHash('sha256').update(botToken).digest();
+    const encoder = new TextEncoder();
+    const tokenData = encoder.encode(botToken);
+    const secretKeyBuffer = await crypto.subtle.digest('SHA-256', tokenData);
 
     const filteredData: Record<string, string> = {};
     for (const key in otherData) {
@@ -34,18 +44,29 @@ export class AuthService {
       }
     }
 
-    // Создаем строку для проверки в правильном формате
+    // Create data check string
     const dataCheckString = Object.keys(filteredData)
       .sort()
       .map((key) => `${key}=${filteredData[key]}`)
       .join('\n');
 
-    const hmac = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+    // Create HMAC-SHA256 using Web Crypto API
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      secretKeyBuffer,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(dataCheckString));
+
+    const hmac = bytesToHex(new Uint8Array(signature));
 
     const isHashValid = hmac.toLowerCase() === hash.toLowerCase();
     const isTimeValid = Date.now() / 1000 - parseInt(otherData.auth_date) <= 86400;
 
-    // Детальные логи только в development
+    // Detailed logs only in development
     if (process.env.NODE_ENV !== 'production') {
       logger.debug(
         {

@@ -1,7 +1,6 @@
 import { Hono, Context, Next } from 'hono';
 import { getCookie, setCookie, deleteCookie } from 'hono/cookie';
 import { createClient as createRedisClient, RedisClientType } from 'redis';
-import crypto from 'crypto';
 import logger from '../../utils/logger.js';
 import { Config } from '../../config/types.js';
 import { SessionData } from '../../types/hono.js';
@@ -77,28 +76,20 @@ function createRedisSessionStore(client: RedisClientType): SessionStore {
 }
 
 export function setupSession(app: Hono, config: Config) {
-  const isProd = process.env.NODE_ENV === 'production';
-
-  // Production requires explicit secret
-  if (isProd && !config.SESSION_SECRET) {
-    throw new Error(
-      'SESSION_SECRET is required in production. Please set it via environment variable.',
-    );
+  // Require explicit secret
+  if (!config.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET is required. Please set it via environment variable.');
   }
 
   let store: SessionStore = memorySessionStore;
 
-  // Setup Redis store in production
-  if (isProd) {
-    if (!process.env.REDIS_URL && !config.REDIS_URL) {
-      throw new Error('REDIS_URL is required in production for session store.');
+  // Setup Redis store when REDIS_ENABLED=true
+  if (config.REDIS_ENABLED) {
+    if (!config.REDIS_URL) {
+      throw new Error('REDIS_URL is required when REDIS_ENABLED=true for session store.');
     }
-    const redisUrl = config.REDIS_URL || process.env.REDIS_URL;
-    if (!redisUrl) {
-      throw new Error('REDIS_URL is required in production for session store.');
-    }
-    const allowSelfSigned =
-      config.REDIS_ALLOW_SELF_SIGNED || process.env.REDIS_ALLOW_SELF_SIGNED === 'true';
+    const redisUrl = config.REDIS_URL;
+    const allowSelfSigned = config.REDIS_ALLOW_SELF_SIGNED === true;
     const isRediss = redisUrl.startsWith('rediss://');
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,6 +132,9 @@ export function setupSession(app: Hono, config: Config) {
     redisClient.on('end', () => logger.warn('Redis session client ended'));
 
     store = createRedisSessionStore(redisClient);
+    logger.info('Session store: Redis');
+  } else {
+    logger.info('Session store: In-memory (REDIS_ENABLED=false)');
   }
 
   // Session middleware
@@ -169,6 +163,7 @@ export function setupSession(app: Hono, config: Config) {
 
     // After response, save session if modified
     const updatedSession = c.get('session') as SessionData;
+    const isProd = config.NODE_ENV === 'production';
 
     // Check if session was cleared (logout)
     if (!updatedSession || Object.keys(updatedSession).length === 0) {

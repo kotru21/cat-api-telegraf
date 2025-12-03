@@ -1,14 +1,19 @@
 import { Hono, Context } from 'hono';
 import { SessionData } from '../../types/hono.js';
 
+/**
+ * Setup debug routes (development only)
+ * In production, this function returns without registering any routes
+ */
 export function setupDebugRoutes(router: Hono) {
-  // NOTE: This endpoint exposes sensitive session data.
-  // In production, this endpoint is disabled.
-  router.get('/debug-session', (c: Context) => {
-    if (process.env.NODE_ENV === 'production') {
-      return c.json({ error: 'Debug endpoint disabled in production' }, 403);
-    }
+  // Don't register debug routes in production at all
+  if (process.env.NODE_ENV === 'production') {
+    return;
+  }
 
+  // NOTE: This endpoint exposes sensitive session data.
+  // Only available in development.
+  router.get('/debug-session', (c: Context) => {
     const session = c.get('session') as SessionData | undefined;
     const sessionId = c.get('sessionId') as string | undefined;
 

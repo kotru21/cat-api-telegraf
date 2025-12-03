@@ -8,27 +8,18 @@ import { WebServer } from './web/WebServer.js';
 import logger from './utils/logger.js';
 import getPrisma from './database/prisma/PrismaClient.js';
 
-// Process diagnostics
-process.on('uncaughtException', (err) => {
-  logger.fatal({ err }, 'Uncaught exception');
-  process.exit(1);
-});
-process.on('unhandledRejection', (reason) => {
-  logger.fatal({ err: reason }, 'Unhandled promise rejection');
-  process.exit(1);
-});
-process.on('exit', (code) => {
-  logger.info({ code }, 'Process exit');
-});
-
 import { AwilixContainer } from 'awilix';
 import { Config } from './config/types.js';
+
+// Graceful shutdown timeout in milliseconds
+const SHUTDOWN_TIMEOUT_MS = 30000;
 
 class Application {
   private config: Config;
   private container: AwilixContainer;
   private botService: BotService;
   private webServer: WebServer | null;
+  private isShuttingDown = false;
 
   constructor() {
     this.config = config;
@@ -52,7 +43,7 @@ class Application {
       if (this.webServer) {
         logger.info('Starting web server...');
         this.webServer.initialize();
-        await this.webServer.start();
+        this.webServer.start();
       }
 
       // Launch bot (optional)
@@ -72,32 +63,75 @@ class Application {
   }
 
   setupShutdownHandlers() {
-    const shutdown = async () => {
-      logger.info('Shutting down application...');
-      this.botService.stop();
+    const shutdown = async (signal: string) => {
+      // Prevent multiple shutdown attempts
+      if (this.isShuttingDown) {
+        logger.warn('Shutdown already in progress, ignoring signal');
+        return;
+      }
+      this.isShuttingDown = true;
 
-      if (this.webServer) {
-        await this.webServer.close();
-      }
-      // Gracefully disconnect Prisma singleton
+      logger.info({ signal }, 'Received shutdown signal, starting graceful shutdown...');
+
+      // Create shutdown timeout
+      const forceExitTimeout = setTimeout(() => {
+        logger.error('Graceful shutdown timed out, forcing exit');
+        process.exit(1);
+      }, SHUTDOWN_TIMEOUT_MS);
+
       try {
-        const prisma = getPrisma();
-        if (prisma && prisma.$disconnect) {
-          await prisma.$disconnect();
-          logger.info('Prisma client disconnected');
+        // Stop accepting new bot updates
+        logger.info('Stopping bot...');
+        this.botService.stop();
+
+        // Gracefully close web server (drains connections)
+        if (this.webServer) {
+          logger.info('Closing web server...');
+          await this.webServer.close({ timeout: SHUTDOWN_TIMEOUT_MS - 5000 });
         }
-      } catch (e) {
-        logger.warn({ err: e }, 'Failed to disconnect Prisma client');
+
+        // Disconnect Prisma client
+        logger.info('Disconnecting database...');
+        try {
+          const prisma = getPrisma();
+          if (prisma && prisma.$disconnect) {
+            await prisma.$disconnect();
+            logger.info('Prisma client disconnected');
+          }
+        } catch (e) {
+          logger.warn({ err: e }, 'Failed to disconnect Prisma client');
+        }
+
+        // Clear the force exit timeout
+        clearTimeout(forceExitTimeout);
+
+        logger.info('Graceful shutdown completed');
+        process.exit(0);
+      } catch (error) {
+        clearTimeout(forceExitTimeout);
+        logger.error({ err: error }, 'Error during shutdown');
+        process.exit(1);
       }
-      process.exit(0);
     };
 
-    process.once('SIGINT', shutdown);
-    process.once('SIGTERM', shutdown);
+    // Handle shutdown signals
+    process.once('SIGINT', () => shutdown('SIGINT'));
+    process.once('SIGTERM', () => shutdown('SIGTERM'));
+
+    // Handle uncaught errors
+    process.on('uncaughtException', (err) => {
+      logger.fatal({ err }, 'Uncaught exception');
+      shutdown('uncaughtException');
+    });
+
+    process.on('unhandledRejection', (reason) => {
+      logger.fatal({ err: reason }, 'Unhandled promise rejection');
+      shutdown('unhandledRejection');
+    });
   }
 }
 
-// Запуск приложения
+// Application startup
 const app = new Application();
 app.initialize().catch((error) => {
   logger.error({ err: error }, 'Critical startup error');

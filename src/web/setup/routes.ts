@@ -8,8 +8,20 @@ import { SessionData } from '../../types/hono.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Simple HTML template renderer using Bun's file API
+// HTML template cache (production only)
+const templateCache = new Map<string, string>();
+const isProd = process.env.NODE_ENV === 'production';
+
+// Simple HTML template renderer using Bun's file API with caching
 async function renderHtml(templatePath: string): Promise<string> {
+  // Check cache in production
+  if (isProd) {
+    const cached = templateCache.get(templatePath);
+    if (cached) {
+      return cached;
+    }
+  }
+
   try {
     let content = await Bun.file(templatePath).text();
 
@@ -30,11 +42,25 @@ async function renderHtml(templatePath: string): Promise<string> {
       }
     }
 
+    // Cache in production
+    if (isProd) {
+      templateCache.set(templatePath, content);
+      logger.debug({ templatePath }, 'Template cached');
+    }
+
     return content;
   } catch (err) {
     logger.error({ err, templatePath }, 'Error reading template file');
     throw err;
   }
+}
+
+/**
+ * Clear template cache (useful for hot reload in development)
+ */
+export function clearTemplateCache() {
+  templateCache.clear();
+  logger.info('Template cache cleared');
 }
 
 export function configureRoutes(app: Hono) {

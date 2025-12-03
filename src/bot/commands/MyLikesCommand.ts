@@ -17,15 +17,29 @@ const userLikesCache = new Map<string, { data: UserLikeCache[]; ts: number }>();
 const USER_LIKES_TTL_MS = 30_000; // 30 секунд
 const CACHE_CLEANUP_INTERVAL_MS = 60_000; // 1 минута
 
+// Interval reference for cleanup (to clear on shutdown)
+let cacheCleanupInterval: ReturnType<typeof setInterval> | null = null;
+
 // Периодическая очистка устаревших записей кэша для предотвращения memory leak
-setInterval(() => {
-  const now = Date.now();
-  for (const [userId, entry] of userLikesCache.entries()) {
-    if (now - entry.ts > USER_LIKES_TTL_MS) {
-      userLikesCache.delete(userId);
+function startCacheCleanup() {
+  if (cacheCleanupInterval) return; // Already started
+  cacheCleanupInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [userId, entry] of userLikesCache.entries()) {
+      if (now - entry.ts > USER_LIKES_TTL_MS) {
+        userLikesCache.delete(userId);
+      }
     }
+  }, CACHE_CLEANUP_INTERVAL_MS);
+}
+
+// Stop cache cleanup (call on shutdown)
+export function stopCacheCleanup() {
+  if (cacheCleanupInterval) {
+    clearInterval(cacheCleanupInterval);
+    cacheCleanupInterval = null;
   }
-}, CACHE_CLEANUP_INTERVAL_MS);
+}
 
 // Защита от спама навигационными callback (userId -> boolean processing)
 const navigationLocks = new Map<string, boolean>();
@@ -47,6 +61,8 @@ export class MyLikesCommand extends BaseCommand {
     this.likeService = likeService;
     this.catInfoService = catInfoService;
     this.register();
+    // Start cache cleanup when command is created
+    startCacheCleanup();
   }
 
   register() {

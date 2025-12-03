@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { createServer, Server as HttpServer } from 'http';
-import { WebSocketService } from './WebSocketServer.js';
+import type { Server, ServerWebSocket } from 'bun';
+import { BunWebSocketService, type WebSocketClientData } from './BunWebSocketService.js';
 import { ApiRouter } from './ApiRoutes.js';
 import { AuthController } from './controllers/AuthController.js';
 import { LeaderboardService } from '../services/LeaderboardService.js';
@@ -11,14 +11,19 @@ import { configureErrorHandling } from './setup/errors.js';
 import { Config } from '../config/types.js';
 import logger from '../utils/logger.js';
 
+/**
+ * Web server using native Bun.serve() with WebSocket support
+ */
 export class WebServer {
   private config: Config;
   private app: Hono;
-  private server: HttpServer | null = null;
-  private wsService: WebSocketService | null = null;
+  private server: Server<WebSocketClientData> | null = null;
+  private wsService: BunWebSocketService;
   private authController: AuthController;
   private leaderboardService: LeaderboardService;
   private apiRouter: ApiRouter;
+  private isShuttingDown = false;
+  private activeConnections = new Set<ServerWebSocket<WebSocketClientData>>();
 
   constructor({
     config,
@@ -36,6 +41,13 @@ export class WebServer {
     this.leaderboardService = leaderboardService;
     this.apiRouter = apiRouter;
     this.app = new Hono();
+
+    // Initialize native Bun WebSocket service with config
+    this.wsService = new BunWebSocketService({
+      leaderboardService: this.leaderboardService,
+      enablePolling: false,
+      config: this.config,
+    });
   }
 
   initialize() {
@@ -57,120 +69,152 @@ export class WebServer {
     return this;
   }
 
-  setupLeaderboardEvents() {
+  private setupLeaderboardEvents() {
     AppEvents.on(EVENTS.LEADERBOARD_CHANGED, async () => {
-      if (this.wsService) {
-        const changed = await this.wsService.updateLeaderboardHash();
-        if (changed) {
-          this.wsService.broadcastData({ leaderboardChanged: true });
-        }
+      const changed = await this.wsService.updateLeaderboardHash();
+      if (changed) {
+        this.wsService.broadcast({ leaderboardChanged: true });
       }
     });
   }
 
   start() {
     const port = this.config.expressServerPort;
+    const wsHandlers = this.wsService.getWebSocketHandlers();
 
-    // Create HTTP server from Hono app for WebSocket support
-    this.server = createServer(async (req, res) => {
-      // Convert Node.js IncomingMessage to Fetch Request
-      const url = `http://${req.headers.host}${req.url}`;
-      const headers = new Headers();
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (value) {
-          if (Array.isArray(value)) {
-            value.forEach((v) => headers.append(key, v));
-          } else {
-            headers.set(key, value);
+    // Native Bun.serve() with WebSocket support
+    this.server = Bun.serve<WebSocketClientData>({
+      port,
+
+      fetch: async (req, server) => {
+        // Check for WebSocket upgrade
+        const url = new URL(req.url);
+        if (url.pathname === '/wss') {
+          // Reject new connections during shutdown
+          if (this.isShuttingDown) {
+            return new Response('Server is shutting down', { status: 503 });
           }
+
+          const ip = server.requestIP(req)?.address || 'unknown';
+          const clientData = this.wsService.createClientData(ip);
+
+          const upgraded = server.upgrade(req, {
+            data: clientData,
+          });
+
+          if (upgraded) {
+            return undefined; // Bun handles the upgrade
+          }
+          return new Response('WebSocket upgrade failed', { status: 400 });
         }
-      }
 
-      // Read body for non-GET/HEAD requests
-      let body: BodyInit | null = null;
-      if (req.method !== 'GET' && req.method !== 'HEAD') {
-        const chunks: Buffer[] = [];
-        for await (const chunk of req) {
-          chunks.push(chunk);
-        }
-        body = Buffer.concat(chunks);
-      }
+        // Handle regular HTTP requests through Hono
+        return this.app.fetch(req, { ip: server.requestIP(req)?.address });
+      },
 
-      const request = new Request(url, {
-        method: req.method,
-        headers,
-        body,
-      });
+      websocket: {
+        ...wsHandlers,
 
-      try {
-        const response = await this.app.fetch(request);
+        open: (ws: ServerWebSocket<WebSocketClientData>) => {
+          this.activeConnections.add(ws);
+          this.wsService.subscribeClient(ws);
+          wsHandlers.open(ws);
+        },
 
-        // Set status and headers
-        res.statusCode = response.status;
-        response.headers.forEach((value, key) => {
-          res.setHeader(key, value);
-        });
+        close: (ws: ServerWebSocket<WebSocketClientData>, code: number, reason: string) => {
+          this.activeConnections.delete(ws);
+          wsHandlers.close(ws, code, reason);
+        },
 
-        // Send body
-        if (response.body) {
-          const reader = response.body.getReader();
-          const pump = async () => {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              res.write(value);
-            }
-            res.end();
-          };
-          await pump();
-        } else {
-          res.end();
-        }
-      } catch (err) {
-        logger.error({ err }, 'Request handling error');
-        res.statusCode = 500;
-        res.end('Internal Server Error');
-      }
+        message: wsHandlers.message,
+      },
+
+      error: (error) => {
+        logger.error({ err: error }, 'Bun server error');
+        return new Response('Internal Server Error', { status: 500 });
+      },
     });
 
-    // WebSocket setup
-    this.wsService = new WebSocketService(this.server, '/wss', {
-      leaderboardService: this.leaderboardService,
-      enablePolling: false,
-    });
+    // Start WebSocket broadcasting
+    this.wsService.startBroadcasting(this.server);
 
-    // Leaderboard updates via AppEvents
+    // Setup leaderboard event handlers
     this.setupLeaderboardEvents();
 
-    this.server.listen(port, () => {
-      logger.info({ port }, `Web server running on port ${port}`);
-    });
+    logger.info({ port }, `Bun web server running on port ${port}`);
 
     return this.server;
   }
 
-  async close(): Promise<void> {
-    if (this.wsService) {
-      await this.wsService.close();
+  /**
+   * Graceful shutdown with connection draining
+   */
+  async close(options: { timeout?: number } = {}): Promise<void> {
+    const { timeout = 30000 } = options; // 30 second default timeout
+
+    if (this.isShuttingDown) {
+      logger.warn('Shutdown already in progress');
+      return;
     }
 
-    return new Promise((resolve, reject) => {
-      if (this.server) {
-        this.server.close((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
+    this.isShuttingDown = true;
+    logger.info('Starting graceful shutdown...');
+
+    // Stop accepting new WebSocket connections (handled in fetch)
+    // Close WebSocket service (stops broadcasting)
+    await this.wsService.close();
+
+    // Close all active WebSocket connections gracefully
+    const closePromises: Promise<void>[] = [];
+    for (const ws of this.activeConnections) {
+      closePromises.push(
+        new Promise<void>((resolve) => {
+          try {
+            ws.close(1001, 'Server shutting down');
+          } catch {
+            // Connection may already be closed
+          }
+          resolve();
+        }),
+      );
+    }
+
+    // Wait for connections to close with timeout
+    await Promise.race([
+      Promise.all(closePromises),
+      new Promise<void>((resolve) => setTimeout(resolve, timeout)),
+    ]);
+
+    // Stop the Bun server
+    if (this.server) {
+      this.server.stop(true); // Force close remaining connections
+      this.server = null;
+    }
+
+    logger.info('Web server stopped gracefully');
   }
 
+  /**
+   * Legacy stop method for compatibility
+   * @deprecated Use close() instead
+   */
   stop(callback?: (err?: Error) => void) {
-    if (this.server) {
-      this.server.close(callback);
-    } else if (callback) {
-      callback();
-    }
+    this.close()
+      .then(() => callback?.())
+      .catch((err) => callback?.(err));
+  }
+
+  /**
+   * Get server instance for health checks
+   */
+  getServer(): Server<WebSocketClientData> | null {
+    return this.server;
+  }
+
+  /**
+   * Check if server is running
+   */
+  isRunning(): boolean {
+    return this.server !== null && !this.isShuttingDown;
   }
 }

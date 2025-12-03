@@ -20,16 +20,19 @@ describe('AuthService', () => {
         FULL_WEBSITE_URL: 'http://localhost:3000',
         SESSION_SECRET: 'test-secret-key-12345',
         NODE_ENV: 'test',
+        REDIS_ENABLED: false,
         DATABASE_URL: 'file:./test.db',
+        WS_MAX_CONNECTIONS_PER_IP: 5,
+        WS_MESSAGE_RATE_LIMIT: 10,
       },
     });
   });
 
   describe('validateTelegramData', () => {
-    it('should reject data with invalid hash', () => {
+    it('should reject data with invalid hash', async () => {
       const currentAuthDate = Math.floor(Date.now() / 1000);
 
-      const result = authService.validateTelegramData({
+      const result = await authService.validateTelegramData({
         id: '123456',
         first_name: 'Test',
         auth_date: currentAuthDate.toString(),
@@ -40,8 +43,8 @@ describe('AuthService', () => {
       expect(result.error).toBe('invalid_hash');
     });
 
-    it('should return isValid false for tampered data', () => {
-      const result = authService.validateTelegramData({
+    it('should return isValid false for tampered data', async () => {
+      const result = await authService.validateTelegramData({
         id: '999',
         first_name: 'Hacker',
         auth_date: Math.floor(Date.now() / 1000).toString(),

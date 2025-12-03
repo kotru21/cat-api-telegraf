@@ -19,5 +19,6 @@ declare module 'hono' {
     session: SessionData;
     sessionId: string;
     cspNonce: string;
+    csrfToken: string;
   }
 }

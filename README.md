@@ -345,7 +345,8 @@ npm test
 ```bash
 # Подготовка
 heroku create your-app-name
-heroku addons:create heroku-postgresql:mini
+# Использовать MongoDB Atlas (или другой MongoDB add-on) и Heroku Redis
+heroku addons:create mongodbatlas    # или другой MongoDB add-on (mongolab/mongoDB Atlas)
 heroku addons:create heroku-redis:mini
 
 # Переменные окружения
@@ -354,6 +355,9 @@ heroku config:set CATAPI_KEY=your-key
 heroku config:set SESSION_SECRET=your-secret
 heroku config:set BOT_TOKEN=your-bot-token
 heroku config:set REDIS_ENABLED=true
+
+# Если Mongo add-on устанавливает MONGODB_URI, можно скопировать его в DATABASE_URL:
+heroku config:set DATABASE_URL=$(heroku config:get MONGODB_URI -a your-app-name)
 
 # Деплой
 git push heroku main

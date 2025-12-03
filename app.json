@@ -3,5 +3,63 @@
   "description": "Telegram bot with Web panel, based on Cat API",
   "repository": "https://github.com/kotru21/cat-api-telegraf",
   "logo": "https://node-js-sample-1234567890ab.herokuapp.com/node.png",
-  "keywords": ["node", "express", "telegram"]
+  "keywords": ["bun", "telegram", "cat-api", "redis", "mongodb"],
+  "buildpacks": [
+    {
+      "url": "https://github.com/jakeg/heroku-buildpack-bun"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "addons": [
+    "heroku-redis",
+    {
+      "plan": "mongodbatlas"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Set to 'production' on Heroku",
+      "value": "production"
+    },
+    "DATABASE_URL": {
+      "description": "Primary database connection string (Postgres or MongoDB). If using MongoDB Atlas-addon, set MONGODB_URI and it will be picked up automatically.",
+      "required": true
+    },
+    "MONGODB_URI": {
+      "description": "MongoDB connection string (set by MongoDB add-on), used as fallback for DATABASE_URL.",
+      "required": false
+    },
+    "REDIS_ENABLED": {
+      "description": "Enable Heroku Redis for caching and session storage",
+      "value": "true"
+    },
+    "REDIS_URL": {
+      "description": "Redis connection string set by Heroku Redis add-on",
+      "required": false
+    },
+    "SESSION_SECRET": {
+      "description": "Secret for session cookies",
+      "generator": "secret",
+      "required": true
+    },
+    "CATAPI_KEY": {
+      "description": "TheCatApi API key for fetching cats",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Telegram bot token (optional if BOT_ENABLED is false)",
+      "required": false
+    }
+  },
+  "scripts": {
+    "postdeploy": "bun run prisma:push || bunx prisma db push"
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "standard-1x"
+    }
+  }
 }

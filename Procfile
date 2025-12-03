@@ -1,2 +1,2 @@
-release: npx prisma migrate deploy
-web: npm start
+release: bunx prisma db push
+web: bun start

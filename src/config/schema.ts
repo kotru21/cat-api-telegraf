@@ -53,12 +53,15 @@ export const EnvSchema = z
     }
 
     if (env.NODE_ENV === 'production') {
-      // in production we must use Postgres
+      // in production we accept Postgres or MongoDB
       const v = env.DATABASE_URL || '';
-      if (!v.startsWith('postgres://') && !v.startsWith('postgresql://')) {
+      const isPostgres = v.startsWith('postgres://') || v.startsWith('postgresql://');
+      const isMongo = v.startsWith('mongodb://') || v.startsWith('mongodb+srv://');
+      if (!isPostgres && !isMongo) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'DATABASE_URL must start with postgres:// or postgresql:// in production',
+          message:
+            'DATABASE_URL must start with postgres://, postgresql://, mongodb:// or mongodb+srv:// in production',
           path: ['DATABASE_URL'],
         });
       }

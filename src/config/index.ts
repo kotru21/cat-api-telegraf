@@ -2,7 +2,13 @@ import { EnvSchema } from './schema.js';
 
 // dotenv.config() is not needed in Bun
 
-const parsed = EnvSchema.safeParse(process.env);
+// Support using MONGODB_URI/MONGODB_URL (Heroku Mongo add-ons) as fallback for DATABASE_URL
+const processedEnv = { ...process.env } as NodeJS.ProcessEnv;
+if (!processedEnv.DATABASE_URL && (processedEnv.MONGODB_URI || processedEnv.MONGODB_URL)) {
+  processedEnv.DATABASE_URL = String(processedEnv.MONGODB_URI || processedEnv.MONGODB_URL);
+}
+
+const parsed = EnvSchema.safeParse(processedEnv);
 if (!parsed.success) {
   console.error('Config validation error:', parsed.error.flatten());
   process.exit(1);
